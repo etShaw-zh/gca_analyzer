@@ -1,12 +1,14 @@
 import numpy as np
 import pandas as pd
-from typing import List, Tuple, Dict, Optional, Any
+from typing import List, Tuple, Dict, Optional, Any, Union
+from .logger import logger
 
 class MetricsCalculator:
     """Class for calculating various GCA metrics."""
     
     def __init__(self):
         """Initialize the metrics calculator."""
+        logger.info("Initializing Metrics Calculator")
         pass
         
     def cosine_similarity(self, vec1: List[Tuple[int, float]], 
@@ -64,7 +66,7 @@ class MetricsCalculator:
     def compute_nct(self, historical_vectors: List[List[Tuple[int, float]]], 
                    current_vector: List[Tuple[int, float]]) -> float:
         """
-        Compute Newness Contribution Trend (NCT) for a vector given historical vectors.
+        Compute Newness Contribution Trend (NCT) using orthogonalization.
         
         Args:
             historical_vectors: List of previous contribution vectors
@@ -76,20 +78,34 @@ class MetricsCalculator:
         if not historical_vectors:
             return 1.0  # First contribution is maximally new
             
-        # Calculate maximum similarity with any historical vector
-        similarities = [
-            self.cosine_similarity(current_vector, hist_vec)
-            for hist_vec in historical_vectors
-        ]
+        # Convert sparse vectors to dense format
+        def to_dense(vec, max_dim):
+            dense = np.zeros(max_dim)
+            for idx, val in vec:
+                if idx < max_dim:
+                    dense[idx] = val
+            return dense
+            
+        # Get maximum dimension
+        max_dim = max(
+            max(idx for vec in historical_vectors for idx, _ in vec),
+            max(idx for idx, _ in current_vector)
+        ) + 1
         
-        # Use maximum similarity (higher means less new)
-        max_similarity = max(similarities)
+        # Convert to dense matrices
+        G = np.array([to_dense(vec, max_dim) for vec in historical_vectors])
+        d = to_dense(current_vector, max_dim)
         
-        # Convert to newness score (1 - similarity)
-        # Scale it to ensure some novelty is maintained
-        newness = 1.0 - (0.8 * max_similarity)  # Scale factor of 0.8 ensures minimum novelty of 0.2
+        # Perform QR decomposition for orthogonalization
+        Q, R = np.linalg.qr(G.T)
         
-        return newness
+        # Project current vector onto orthogonal space
+        d_ortho = d - Q @ (Q.T @ d)
+        
+        # Compute NCT as ratio of orthogonal component
+        nct = np.linalg.norm(d_ortho) / (np.linalg.norm(d_ortho) + np.linalg.norm(Q.T @ d))
+        
+        return nct
 
     def get_cosine_similarity_matrix(self, vectors: List[List[Tuple[Any, float]]], time_list: List[int]) -> pd.DataFrame:
         """
@@ -111,16 +127,106 @@ class MetricsCalculator:
                 
         return matrix
 
-    def compute_Di(self, di: List[float], ci: List[str]) -> float:
+    def compute_Di(self, di: List[float], ci: List[str], time_window: int) -> float:
         """
-        Compute communication density.
+        Compute communication density with temporal weighting.
         
         Args:
             di: Document vector
             ci: List of words
+            time_window: Current time window
             
         Returns:
             float: Communication density value
         """
         word_len = sum(len(t) for t in ci)
-        return np.linalg.norm(di) / word_len if word_len > 0 else 0
+        if word_len == 0:
+            return 0
+            
+        # Add temporal decay factor
+        temporal_weight = np.exp(-0.1 * time_window)  # Exponential decay
+        vector_norm = np.linalg.norm(di)
+        
+        return (vector_norm * temporal_weight) / word_len
+
+    def compute_responsivity_metrics(self, interaction_matrix: pd.DataFrame, 
+                                   similarity_matrix: pd.DataFrame,
+                                   window_size: int) -> Dict[str, float]:
+        """
+        Compute responsivity metrics including internal cohesion and social impact.
+        
+        Args:
+            interaction_matrix: Matrix of interactions
+            similarity_matrix: Matrix of content similarities
+            window_size: Size of sliding window
+            
+        Returns:
+            Dict containing metrics
+        """
+        n_participants = len(interaction_matrix)
+        metrics = {
+            'internal_cohesion': 0.0,
+            'overall_responsivity': 0.0,
+            'social_impact': 0.0
+        }
+        
+        # Calculate weighted interaction strengths
+        for i in range(n_participants):
+            for j in range(n_participants):
+                interaction_strength = 0
+                for t in range(window_size-1):
+                    # Calculate temporal interaction strength
+                    if i == j:  # Internal cohesion
+                        interaction_strength += (
+                            interaction_matrix.iloc[i,t] * 
+                            interaction_matrix.iloc[i,t+1] * 
+                            similarity_matrix.iloc[t,t+1]
+                        )
+                    else:  # Cross-participant interactions
+                        interaction_strength += (
+                            interaction_matrix.iloc[i,t] * 
+                            interaction_matrix.iloc[j,t+1] * 
+                            similarity_matrix.iloc[t,t+1]
+                        )
+                
+                # Normalize by window size
+                interaction_strength /= (window_size - 1)
+                
+                if i == j:
+                    metrics['internal_cohesion'] += interaction_strength
+                else:
+                    metrics['overall_responsivity'] += interaction_strength
+                    metrics['social_impact'] += interaction_strength
+        
+        # Normalize metrics
+        total_interactions = interaction_matrix.sum().sum()
+        if total_interactions > 0:
+            metrics['overall_responsivity'] /= total_interactions
+            metrics['social_impact'] /= total_interactions
+        
+        if n_participants > 0:
+            metrics['internal_cohesion'] /= n_participants
+            
+        return metrics
+
+    def calculate_metrics(self, data: pd.DataFrame) -> Dict[str, Any]:
+        """Calculate all metrics for the given data."""
+        logger.info("Starting metrics calculation")
+        metrics = {}
+        try:
+            # Calculate various metrics
+            metrics.update(self._calculate_basic_metrics(data))
+            metrics.update(self._calculate_advanced_metrics(data))
+            logger.debug(f"Calculated metrics: {list(metrics.keys())}")
+            return metrics
+        except Exception as e:
+            logger.error(f"Error calculating metrics: {str(e)}")
+            raise
+
+    def _calculate_basic_metrics(self, data: pd.DataFrame) -> Dict[str, Any]:
+        # TO DO: implement basic metrics calculation
+        pass
+
+    def _calculate_advanced_metrics(self, data: pd.DataFrame) -> Dict[str, Any]:
+        # TO DO: implement advanced metrics calculation
+        pass
