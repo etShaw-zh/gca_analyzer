@@ -1,3 +1,16 @@
+"""
+GCA (Group Conversation Analysis) Analyzer Module
+
+This module provides functionality for analyzing group conversations,
+including participant interactions, metrics calculation, and visualization.
+
+Author: Jianjun Xiao
+Email: et_shaw@126.com
+Date: 2025-01-12
+License: MIT
+Version: 0.2.0
+"""
+
 import pandas as pd
 from typing import Tuple, List, Dict, Any
 from .text_processor import TextProcessor
@@ -6,6 +19,13 @@ from .logger import logger
 import numpy as np
 
 class GCAAnalyzer:
+    """
+    Main analyzer class for group conversation analysis.
+    
+    This class integrates text processing, metrics calculation, and visualization
+    components to provide comprehensive analysis of group conversations.
+    """
+
     def __init__(self):
         """Initialize the GCA Analyzer with required components."""
         logger.info("Initializing GCA Analyzer")
@@ -22,8 +42,13 @@ class GCAAnalyzer:
             data: DataFrame containing all participant data
             
         Returns:
-            tuple: (current_data, person_list, time_list, k, n, M)
-                  where M is a participation matrix (DataFrame) with shape (k, n)
+            Tuple containing:
+            - Preprocessed DataFrame
+            - List of participant IDs
+            - List of time points
+            - Number of participants
+            - Number of time points
+            - Participation matrix
         """
         # Filter data for current video
         current_data = data[data.video_id == video_id].copy()
@@ -151,19 +176,19 @@ class GCAAnalyzer:
 
     def analyze_video(self, video_id: str, data: pd.DataFrame) -> pd.DataFrame:
         """
-        根据论文公式分析视频对话数据。
+        Analyze video conversation data based on the paper's formulas.
         
         Args:
-            video_id: 视频ID
-            data: 包含对话数据的DataFrame
+            video_id: Video ID
+            data: DataFrame containing conversation data
             
         Returns:
-            pd.DataFrame: 每个参与者的分析结果
+            pd.DataFrame: Analysis results for each participant
         """
-        # 预处理数据
+        # Preprocess data
         current_data, person_list, time_list, k, n, M = self.participant_pre(video_id, data)
         
-        # 初始化结果DataFrame
+        # Initialize result DataFrame
         student = pd.DataFrame(0.0, 
                              index=person_list,
                              columns=['Pa', 'Pa_average', 'Pa_std', 'video_id', 'Pa_hat',
@@ -173,36 +198,36 @@ class GCAAnalyzer:
         
         student['video_id'] = video_id
         
-        # 计算参与度指标 (根据公式4和5)
+        # Calculate participation metrics (based on formulas 4 and 5)
         for person in person_list:
-            # ||Pa|| = Σ pa(t) (公式4)
+            # ||Pa|| = Σ pa(t) (formula 4)
             student.loc[person, 'Pa'] = M.loc[person].sum()
-            # p̄a = (1/n)||Pa|| (公式5)
+            # p̄a = (1/n)||Pa|| (formula 5)
             student.loc[person, 'Pa_average'] = student.loc[person, 'Pa'] / n
             
-        # 计算参与度标准差 (公式6)
+        # Calculate participation standard deviation (formula 6)
         for person in person_list:
             variance = 0
             for t in time_list:
                 variance += (M.loc[person, t] - student.loc[person, 'Pa_average'])**2
             student.loc[person, 'Pa_std'] = np.sqrt(variance / (n-1))
             
-        # 计算相对参与度 (公式9的修正版)
+        # Calculate relative participation (modified formula 9)
         student['Pa_hat'] = (student['Pa_average'] - 1/k) / (1/k)
         
-        # 处理文本并计算向量
+        # Process text and calculate vectors
         vector, dataset = self.text_processor.doc2vector(current_data.text_clean)
         
-        # 计算余弦相似度矩阵
+        # Calculate cosine similarity matrix
         cosine_similarity_matrix = pd.DataFrame(np.zeros((len(time_list), len(time_list)), dtype=float), index=time_list, columns=time_list)
         for i in range(len(vector)):
             for j in range(len(vector)):
                 cosine_similarity_matrix.iloc[i, j] = self.metrics.cosine_similarity(vector[i], vector[j])
         
-        # 获取最佳窗口大小
+        # Get optimal window size
         w = self.get_best_window_num(time_list, M)
         
-        # 计算Cross-cohesion (公式15和16)
+        # Calculate Cross-cohesion (formulas 15 and 16)
         cross_cohesion = pd.DataFrame(0.0, index=person_list, columns=person_list)
         for a in person_list:
             for b in person_list:
@@ -210,17 +235,17 @@ class GCAAnalyzer:
                     Pab_tau = 0
                     Sab_sum = 0
                     for t in range(tau, n):
-                        # ||Pab(τ)|| (公式16)
+                        # ||Pab(τ)|| (formula 16)
                         Pab_tau += M.loc[a, time_list[t-tau]] * M.loc[b, time_list[t]]
                         if Pab_tau > 0:
-                            # ξab(τ) (公式15)
+                            # ξab(τ) (formula 15)
                             Sab_sum += M.loc[a, time_list[t-tau]] * M.loc[b, time_list[t]] * \
                                      cosine_similarity_matrix.iloc[t-tau, t]
                     if Pab_tau > 0:
                         cross_cohesion.loc[a, b] += Sab_sum / Pab_tau
         cross_cohesion = cross_cohesion / w
         
-        # 计算Overall responsivity (公式19)
+        # Calculate Overall responsivity (formula 19)
         for person in person_list:
             responsivity_sum = 0
             for other in person_list:
@@ -228,11 +253,11 @@ class GCAAnalyzer:
                     responsivity_sum += cross_cohesion.loc[person, other]
             student.loc[person, 'Overall_responsivity'] = responsivity_sum / (k-1)
         
-        # 计算Internal cohesion (公式18)
+        # Calculate Internal cohesion (formula 18)
         for person in person_list:
             student.loc[person, 'Internal_cohesion'] = cross_cohesion.loc[person, person]
         
-        # 计算Social impact (公式20)
+        # Calculate Social impact (formula 20)
         for person in person_list:
             impact_sum = 0
             for other in person_list:
@@ -240,17 +265,17 @@ class GCAAnalyzer:
                     impact_sum += cross_cohesion.loc[other, person]
             student.loc[person, 'Social_impact'] = impact_sum / (k-1)
         
-        # 计算Newness (公式25和26)
+        # Calculate Newness (formulas 25 and 26)
         for person in person_list:
             person_messages = current_data[current_data.person_id == person]
             if not person_messages.empty:
                 newness_sum = 0
                 for idx, row in person_messages.iterrows():
-                    # 获取之前的所有消息向量
+                    # Get previous message vectors
                     historical_vectors = [vector[i] for i in range(idx)]
                     if historical_vectors:
                         try:
-                            # 计算正交投影
+                            # Calculate orthogonal projection
                             current_vector = np.array([v[1] for v in vector[idx]])
                             # Ensure all historical vectors have the same length as current vector
                             max_len = len(current_vector)
@@ -266,30 +291,30 @@ class GCAAnalyzer:
                             
                             historical_matrix = np.array(historical_matrix)
                             if historical_matrix.size > 0:  # Check if we have any valid vectors
-                                # 使用QR分解计算正交补空间的投影
+                                # Use QR decomposition to calculate orthogonal complement space projection
                                 Q, R = np.linalg.qr(historical_matrix.T)
                                 proj = current_vector - Q @ (Q.T @ current_vector)
-                                # n(ct) (公式25)
+                                # n(ct) (formula 25)
                                 newness = np.linalg.norm(proj) / (np.linalg.norm(proj) + np.linalg.norm(current_vector))
                                 newness_sum += newness
                         except (ValueError, np.linalg.LinAlgError) as e:
                             # If we encounter any linear algebra errors, skip this vector
                             continue
-                # Na (公式26)
+                # Na (formula 26)
                 student.loc[person, 'Newness'] = newness_sum / student.loc[person, 'Pa']
                 
-        # 计算Communication density (公式27和28)
+        # Calculate Communication density (formulas 27 and 28)
         for person in person_list:
             person_messages = current_data[current_data.person_id == person]
             if not person_messages.empty:
                 density_sum = 0
                 for idx, row in person_messages.iterrows():
-                    # Di (公式27)
+                    # Di (formula 27)
                     vector_norm = np.linalg.norm([v[1] for v in vector[idx]])
                     word_length = len(dataset[idx])
                     if word_length > 0:
                         density_sum += vector_norm / word_length
-                # D̄a (公式28)
+                # D̄a (formula 28)
                 student.loc[person, 'Communication_density'] = density_sum / student.loc[person, 'Pa']
                 
         return student

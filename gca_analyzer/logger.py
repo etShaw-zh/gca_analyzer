@@ -1,3 +1,17 @@
+"""
+Logger Module
+
+This module provides a configured logger for the GCA analyzer package,
+with support for console and file output, colored formatting,
+and different log levels.
+
+Author: Jianjun Xiao
+Email: et_shaw@126.com
+Date: 2025-01-12
+License: MIT
+Version: 0.2.0
+"""
+
 from loguru import logger
 import sys
 import os

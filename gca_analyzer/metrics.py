@@ -1,11 +1,30 @@
+"""
+Metrics Calculator Module
+
+This module provides functionality for calculating various metrics
+used in group conversation analysis, including participation metrics,
+cohesion metrics, and communication metrics.
+
+Author: Jianjun Xiao
+Email: et_shaw@126.com
+Date: 2025-01-12
+License: MIT
+Version: 0.2.0
+"""
+
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict, Optional, Any, Union
 from .logger import logger
 
 class MetricsCalculator:
-    """Class for calculating various GCA metrics."""
+    """
+    Class for calculating various GCA metrics.
     
+    This class implements the calculation of metrics defined in the GCA framework,
+    including participation metrics, cohesion metrics, and communication metrics.
+    """
+
     def __init__(self):
         """Initialize the metrics calculator."""
         logger.info("Initializing Metrics Calculator")

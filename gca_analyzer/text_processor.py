@@ -1,3 +1,17 @@
+"""
+Text Processor Module
+
+This module provides functionality for processing and analyzing text data
+in group conversations, including tokenization, stop word removal,
+and vector representation generation.
+
+Author: Jianjun Xiao
+Email: et_shaw@126.com
+Date: 2025-01-12
+License: MIT
+Version: 0.2.0
+"""
+
 import re
 import jieba.posseg as psg
 import jieba
@@ -8,6 +22,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from .logger import logger
 
 class TextProcessor:
+    """
+    Text processing class for handling multilingual text data.
+    
+    This class provides methods for text preprocessing, tokenization,
+    and vector representation generation, with special support for
+    Chinese-English mixed text processing.
+    """
+
     def __init__(self):
         """Initialize the text processor with stop words and custom dictionaries."""
         logger.info("Initializing Text Processor")
@@ -24,12 +46,19 @@ class TextProcessor:
         logger.debug("Initialized stop words and vectorizer")
 
     def _load_stop_words(self) -> Set[str]:
-        """Load stop words from file or return default set."""
+        """
+        Load stop words from file or return default set.
+        
+        Returns:
+            Set of stop words
+        """
         logger.debug("Loading stop words")
         default_stop_words = {
-            '的', '了', '和', '是', '就', '都', '而', '及', '与', '着',
-            '之', '用', '于', '把', '等', '去', '又', '能', '好', '在',
-            '还', '没', '要', '这', '那', '你', '我', '他', '她', '它'
+            'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have',
+            'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you',
+            'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they',
+            'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my',
+            'one', 'all', 'would', 'there', 'their', 'what'
         }
         try:
             with open('stop_words.txt', 'r', encoding='utf-8') as f:
@@ -40,18 +69,17 @@ class TextProcessor:
 
     def preprocess_text(self, text: str) -> str:
         """
-        Preprocess text by removing unwanted characters and normalizing.
+        Preprocess text by cleaning and normalizing.
         
         Args:
-            text (str): Input text
+            text: Raw text input
             
         Returns:
-            str: Preprocessed text
+            Preprocessed text
         """
-        logger.info("Preprocessing text")
         if not isinstance(text, str):
             return ""
-            
+        
         # Convert to full-width characters
         text = unicodedata.normalize('NFKC', text)
         
@@ -76,12 +104,11 @@ class TextProcessor:
         For English text, simply split on spaces and remove stop words.
         
         Args:
-            text (str): Input text
+            text: Input text
             
         Returns:
-            str: Processed text with words joined by spaces
+            Processed text with words joined by spaces
         """
-        logger.info("Processing Chinese text")
         # Preprocess text first
         text = self.preprocess_text(text)
         if not text:
@@ -122,12 +149,12 @@ class TextProcessor:
         Convert a list of texts into TF-IDF vectors using scikit-learn.
         
         Args:
-            texts (List[str]): List of preprocessed texts
+            texts: List of preprocessed texts
             
         Returns:
-            Tuple[List[List[Tuple[int, float]]], List[List[str]]]: 
-                - TF-IDF vectors
-                - Processed texts as lists of words
+            Tuple containing:
+            - List of TF-IDF vectors
+            - List of processed texts as lists of words
         """
         logger.info("Converting texts to vectors")
         # Handle empty or invalid texts
