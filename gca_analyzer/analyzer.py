@@ -13,7 +13,6 @@ License: MIT
 import pandas as pd
 from typing import Tuple, List, Dict, Any
 from .text_processor import TextProcessor
-from .metrics import MetricsCalculator
 from .logger import logger
 import numpy as np
 
@@ -29,7 +28,6 @@ class GCAAnalyzer:
         """Initialize the GCA Analyzer with required components."""
         logger.info("Initializing GCA Analyzer")
         self.text_processor = TextProcessor()
-        self.metrics = MetricsCalculator()
         logger.debug("Components initialized successfully")
 
     def participant_pre(self, video_id: str, data: pd.DataFrame) -> Tuple[pd.DataFrame, List[str], List[int], int, int, pd.DataFrame]:
@@ -173,6 +171,36 @@ class GCAAnalyzer:
             
         return Ksi_lag * (1/w)
 
+    def cosine_similarity(self, vec1: List[Tuple[int, float]], 
+                         vec2: List[Tuple[int, float]]) -> float:
+        """
+        Calculate cosine similarity between two sparse vectors.
+        
+        Args:
+            vec1: First sparse vector as list of (index, value) tuples
+            vec2: Second sparse vector as list of (index, value) tuples
+            
+        Returns:
+            float: Cosine similarity between the vectors
+        """
+        # Convert sparse vectors to dictionaries for easier lookup
+        dict1 = dict(vec1)
+        dict2 = dict(vec2)
+        
+        # Get all indices
+        indices = set(dict1.keys()) | set(dict2.keys())
+        
+        # Calculate dot product and magnitudes
+        dot_product = sum(dict1.get(i, 0) * dict2.get(i, 0) for i in indices)
+        mag1 = np.sqrt(sum(v * v for v in dict1.values()))
+        mag2 = np.sqrt(sum(v * v for v in dict2.values()))
+        
+        # Avoid division by zero
+        if mag1 == 0 or mag2 == 0:
+            return 0
+            
+        return dot_product / (mag1 * mag2)
+
     def analyze_video(self, video_id: str, data: pd.DataFrame) -> pd.DataFrame:
         """
         Analyze video conversation data based on the paper's formulas.
@@ -221,7 +249,7 @@ class GCAAnalyzer:
         cosine_similarity_matrix = pd.DataFrame(np.zeros((len(time_list), len(time_list)), dtype=float), index=time_list, columns=time_list)
         for i in range(len(vector)):
             for j in range(len(vector)):
-                cosine_similarity_matrix.iloc[i, j] = self.metrics.cosine_similarity(vector[i], vector[j])
+                cosine_similarity_matrix.iloc[i, j] = self.cosine_similarity(vector[i], vector[j])
         
         # Get optimal window size
         w = self.get_best_window_num(time_list, M)

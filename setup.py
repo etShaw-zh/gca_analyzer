@@ -1,8 +1,13 @@
 from setuptools import setup, find_packages
+import os
+
+# 读取版本号
+with open(os.path.join('gca_analyzer', '__version__.py'), 'r', encoding='utf-8') as f:
+    exec(f.read())
 
 setup(
     name="gca_analyzer",
-    version="0.2.0",
+    version=__version__,
     packages=find_packages(),
     install_requires=[
         'pandas>=1.3.0',
