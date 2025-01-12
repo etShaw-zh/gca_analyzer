@@ -42,45 +42,77 @@ These features enable researchers to conduct detailed analyses of group conversa
 The GCA Analyzer implements several key mathematical formulas for analyzing group conversations:
 
 ## Participation Rate
-The participation rate ($P_a$) for each participant is calculated as:
+For a participant $a$, the participation count $\|P_a\|$ and average participation rate $\bar{p_a}$ are calculated as:
 
-$P_a = \frac{\sum_{t} M_{a,t}}{\sum_{i,t} M_{i,t}}$
+$\|P_a\| = \sum_{t=1}^n M_{a,t}$
 
-where $M_{a,t}$ represents participation of person $a$ at time $t$.
+$\bar{p_a} = \frac{1}{n}\|P_a\|$
+
+where $M_{a,t}$ is 1 if person $a$ contributes at time $t$, and 0 otherwise, and $n$ is the total number of contributions.
+
+## Participation Standard Deviation
+The participation standard deviation $\sigma_a$ for participant $a$ is:
+
+$\sigma_a = \sqrt{\frac{1}{n-1}\sum_{t=1}^n (M_{a,t} - \bar{p_a})^2}$
 
 ## Normalized Participation Rate
-The normalized participation rate ($\hat{P_a}$) is computed as:
+The normalized participation rate ($\hat{P_a}$) is computed relative to equal participation:
 
-$\hat{P_a} = \frac{P_a}{\bar{P}}$
+$\hat{P_a} = \frac{\bar{p_a} - \frac{1}{k}}{\frac{1}{k}}$
 
-where $\bar{P}$ is the mean participation rate across all participants.
+where $k$ is the number of participants.
 
-## Interaction Analysis
-The Ksi-lag matrix ($\Xi_{\tau}$) for analyzing temporal interactions is computed as:
+## Cross-Cohesion Matrix
+The cross-cohesion matrix $\Xi$ for analyzing temporal interactions is computed as:
 
-$\Xi_{\tau} = \frac{1}{w} \sum_{\tau=1}^w \frac{S_{ab}(t,u)}{P_{ab}(\tau)}$
+$\Xi_{ab} = \frac{1}{w} \sum_{\tau=1}^w \frac{\sum_{t \geq \tau} M_{a,t-\tau}M_{b,t}S_{t-\tau,t}}{\sum_{t \geq \tau} M_{a,t-\tau}M_{b,t}}$
 
 where:
-- $w$ is the window length
-- $S_{ab}(t,u)$ is the cosine similarity between messages
-- $P_{ab}(\tau)$ is the interaction count at lag $\tau$
+- $w$ is the optimal window length
+- $S_{t-\tau,t}$ is the cosine similarity between messages at times $t-\tau$ and $t$
+- $M_{a,t}$ and $M_{b,t}$ are participation indicators for persons $a$ and $b$ at time $t$
 
 ## Internal Cohesion
-For each participant, internal cohesion ($C_a$) is calculated as:
+For each participant $a$, internal cohesion is their self-interaction:
 
-$C_a = \frac{1}{n^2} \sum_{t,u} cos(v_t, v_u)$
+$C_a = \Xi_{aa}$
 
-where $v_t$ and $v_u$ are message vectors from the same person at different times.
+## Overall Responsivity
+The overall responsivity $R_a$ for participant $a$ is:
 
-## Newness
-The newness metric ($N_m$) for a message is computed as:
+$R_a = \frac{1}{k-1}\sum_{b \neq a} \Xi_{ab}$
 
-$N_m = 1 - \max_{h \in H} cos(v_m, v_h)$
+## Social Impact
+The social impact $I_a$ for participant $a$ is:
+
+$I_a = \frac{1}{k-1}\sum_{b \neq a} \Xi_{ba}$
+
+## Message Newness
+For a message $c_t$ at time $t$, its newness $n(c_t)$ is:
+
+$n(c_t) = \frac{\|\text{proj}_{\perp H_t}(c_t)\|}{\|\text{proj}_{\perp H_t}(c_t)\| + \|c_t\|}$
 
 where:
-- $v_m$ is the vector of the current message
-- $H$ is the set of all historical message vectors
-- $cos$ represents cosine similarity
+- $H_t$ is the space spanned by all previous message vectors
+- $\text{proj}_{\perp H_t}$ is the orthogonal projection onto the complement of $H_t$
+- $\|c_t\|$ is the norm of the current message vector
+
+The overall newness $N_a$ for participant $a$ is:
+
+$N_a = \frac{1}{\|P_a\|}\sum_{t \in T_a} n(c_t)$
+
+where $T_a$ is the set of times when participant $a$ contributed.
+
+## Communication Density
+For a message $c_t$ at time $t$, its density $D_i$ is:
+
+$D_i = \frac{\|c_t\|}{L_t}$
+
+where $L_t$ is the word length of the message.
+
+The average communication density $\bar{D_a}$ for participant $a$ is:
+
+$\bar{D_a} = \frac{1}{\|P_a\|}\sum_{t \in T_a} D_i$
 
 # Implementation
 
@@ -93,17 +125,12 @@ The GCA Analyzer is implemented in Python, utilizing modern data science librari
    - Special character normalization
    - TF-IDF vectorization
 
-2. **Metrics Calculator (`metrics.py`)**
-   - Implementation of all mathematical formulas
-   - Cosine similarity calculations
-   - Temporal analysis functions
-
-3. **Core Analyzer (`analyzer.py`)**
+2. **Core Analyzer (`analyzer.py`)**
    - Participation matrix construction
    - Window-based interaction analysis
    - Integration of all metrics calculations
 
-4. **Visualizer (`visualizer.py`)**
+3. **Visualizer (`visualizer.py`)**
    - Participation heatmaps
    - Interaction networks
    - Metric radar charts

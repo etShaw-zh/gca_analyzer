@@ -15,28 +15,38 @@ A Python package for analyzing group conversation and interaction patterns with 
 
 ### 2. Interaction Metrics
 - **Participation**
-  - Measures each participant's contribution proportion
-  - Considers speaking frequency and content length
+  - Measures each participant's contribution count and average rate
+  - Calculates participation standard deviation and normalized rate
+  - Normalized relative to equal participation (1/k)
+
+- **Cross-Cohesion**
+  - Analyzes temporal interactions between participants
+  - Uses sliding window analysis with optimal window size
+  - Based on message cosine similarities and participation patterns
 
 - **Internal Cohesion**
-  - Analyzes topic consistency of participant utterances
-  - Based on text similarity calculations
+  - Measures self-interaction patterns
+  - Derived from cross-cohesion matrix diagonal
 
 - **Overall Responsivity**
-  - Evaluates response speed to others' utterances
-  - Considers time intervals and content relevance
+  - Evaluates average response patterns to others
+  - Computed from cross-participant interactions
+  - Normalized by number of other participants (k-1)
 
 - **Social Impact**
-  - Measures the discussion level triggered by utterances
-  - Based on subsequent response quantity and quality
+  - Measures how others respond to participant's messages
+  - Based on incoming cross-cohesion values
+  - Normalized by number of other participants (k-1)
 
 - **Newness**
-  - Assesses ability to introduce new topics
-  - Uses text similarity and topic modeling
+  - Calculates orthogonal projection to previous messages
+  - Uses QR decomposition for numerical stability
+  - Normalized by participant's total contributions
 
 - **Communication Density**
-  - Analyzes effective information per unit time
-  - Considers speaking frequency and content richness
+  - Measures vector norm per word length ratio
+  - Averaged over all participant's messages
+  - Normalized by total participation count
 
 ### 3. Visualization Tools
 - Participation heatmaps
@@ -94,6 +104,37 @@ video_id,person_id,time,text,coding
 
 ## Advanced Usage
 
+### Metric Calculation Details
+
+```python
+from gca_analyzer import GCAAnalyzer
+import pandas as pd
+
+# Initialize analyzer
+analyzer = GCAAnalyzer()
+
+# Load and preprocess data
+data = pd.read_csv('your_data.csv')
+current_data, person_list, seq_list, k, n, M = analyzer.participant_pre('video_id', data)
+
+# Get optimal window size
+w = analyzer.get_best_window_num(
+    seq_list=seq_list,
+    M=M,
+    best_window_indices=0.3,  # Target participation threshold
+    min_num=2,  # Minimum window size
+    max_num=10  # Maximum window size
+)
+
+# Calculate cross-cohesion matrix
+vector, dataset = analyzer.text_processor.doc2vector(current_data.text_clean)
+cosine_similarity_matrix = pd.DataFrame(...)  # Calculate similarities
+Ksi_lag = analyzer.get_Ksi_lag(w, person_list, k, seq_list, M, cosine_similarity_matrix)
+
+# Get all metrics
+results = analyzer.analyze_video('video_id', data)
+```
+
 ### Custom Text Processing
 
 ```python
@@ -107,18 +148,6 @@ processor.add_stop_words(['word1', 'word2', 'word3'])
 
 # Process text
 processed_text = processor.chinese_word_cut("your text content")
-```
-
-### Metric Calculation Customization
-
-```python
-# Custom window size analysis
-results = analyzer.analyze_video(
-    video_id='1A',
-    data=your_data,
-    window_size=30,  # 30-second analysis window
-    min_response_time=5  # 5-second minimum response time
-)
 ```
 
 ### Visualization Customization

@@ -15,28 +15,38 @@
 
 ### 2. 互动分析指标
 - **参与度 (Participation)**
-  - 衡量每个参与者在对话中的贡献比例
-  - 考虑发言频率和内容长度
+  - 计算每个参与者的发言次数和平均参与率
+  - 计算参与标准差和归一化参与率
+  - 相对于平均参与度(1/k)进行归一化
+
+- **交叉凝聚力 (Cross-Cohesion)**
+  - 分析参与者之间的时序互动模式
+  - 使用最优窗口大小的滑动窗口分析
+  - 基于消息余弦相似度和参与模式
 
 - **内部凝聚力 (Internal Cohesion)**
-  - 分析参与者发言的主题连贯性
-  - 基于文本相似度计算
+  - 测量参与者的自我互动模式
+  - 从交叉凝聚力矩阵的对角线元素导出
 
 - **整体响应性 (Overall Responsivity)**
-  - 评估参与者对他人发言的回应速度
-  - 考虑时间间隔和内容相关性
+  - 评估对其他参与者的平均响应模式
+  - 基于跨参与者互动计算
+  - 按其他参与者数量(k-1)归一化
 
 - **社会影响力 (Social Impact)**
-  - 衡量参与者发言引发的讨论程度
-  - 基于后续回应数量和质量
+  - 衡量其他人对参与者消息的响应程度
+  - 基于传入的交叉凝聚力值
+  - 按其他参与者数量(k-1)归一化
 
 - **新颖性 (Newness)**
-  - 评估参与者引入新话题的能力
-  - 使用文本相似度和主题建模
+  - 计算与历史消息的正交投影
+  - 使用QR分解确保数值稳定性
+  - 按参与者的总贡献次数归一化
 
 - **通信密度 (Communication Density)**
-  - 分析单位时间内的有效信息量
-  - 考虑发言频率和内容丰富度
+  - 计算向量范数与词长比率
+  - 对参与者所有消息取平均
+  - 按总参与次数归一化
 
 ### 3. 可视化工具
 - 参与度热力图
@@ -94,6 +104,37 @@ video_id,person_id,time,text,编码
 
 ## 高级用法
 
+### 指标计算详解
+
+```python
+from gca_analyzer import GCAAnalyzer
+import pandas as pd
+
+# 初始化分析器
+analyzer = GCAAnalyzer()
+
+# 加载并预处理数据
+data = pd.read_csv('your_data.csv')
+current_data, person_list, seq_list, k, n, M = analyzer.participant_pre('video_id', data)
+
+# 获取最优窗口大小
+w = analyzer.get_best_window_num(
+    seq_list=seq_list,
+    M=M,
+    best_window_indices=0.3,  # 目标参与阈值
+    min_num=2,  # 最小窗口大小
+    max_num=10  # 最大窗口大小
+)
+
+# 计算交叉凝聚力矩阵
+vector, dataset = analyzer.text_processor.doc2vector(current_data.text_clean)
+cosine_similarity_matrix = pd.DataFrame(...)  # 计算相似度矩阵
+Ksi_lag = analyzer.get_Ksi_lag(w, person_list, k, seq_list, M, cosine_similarity_matrix)
+
+# 获取所有指标
+results = analyzer.analyze_video('video_id', data)
+```
+
 ### 自定义文本处理
 
 ```python
@@ -107,18 +148,6 @@ processor.add_stop_words(['词1', '词2', '词3'])
 
 # 处理文本
 processed_text = processor.chinese_word_cut("你的文本内容")
-```
-
-### 指标计算定制
-
-```python
-# 自定义窗口大小的分析
-results = analyzer.analyze_video(
-    video_id='1A',
-    data=your_data,
-    window_size=30,  # 30秒的分析窗口
-    min_response_time=5  # 5秒的最小响应时间
-)
 ```
 
 ### 可视化定制

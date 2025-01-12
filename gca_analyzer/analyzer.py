@@ -42,9 +42,9 @@ class GCAAnalyzer:
             Tuple containing:
             - Preprocessed DataFrame
             - List of participant IDs
-            - List of time points
+            - List of contribution sequence numbers
             - Number of participants
-            - Number of time points
+            - Number of contributions
             - Participation matrix
         """
         # Filter data for current video
@@ -59,30 +59,34 @@ class GCAAnalyzer:
         if missing_columns:
             raise ValueError(f"Missing required columns: {missing_columns}")
             
+        # Sort by time and add contribution sequence number
+        current_data = current_data.sort_values('time').reset_index(drop=True)
+        current_data['seq_num'] = range(1, len(current_data) + 1)
+        
         # Clean text data
         current_data['text_clean'] = current_data.text.apply(self.text_processor.chinese_word_cut)
         
-        # Get unique participants and timestamps
+        # Get unique participants and sequence numbers
         person_list = current_data.person_id.unique().tolist()
-        time_list = sorted(current_data.time.unique().tolist())
+        seq_list = current_data.seq_num.tolist()
         
         # Calculate dimensions
         k = len(person_list)  # Number of participants
-        n = len(time_list)    # Number of time points
+        n = len(seq_list)    # Number of contributions
         
-        # Create participation matrix M
-        M = pd.DataFrame(0, index=person_list, columns=time_list)
+        # Create participation matrix M using sequence numbers
+        M = pd.DataFrame(0, index=person_list, columns=seq_list)
         for _, row in current_data.iterrows():
-            M.loc[row.person_id, row.time] = 1
+            M.loc[row.person_id, row.seq_num] = 1
         
-        return current_data, person_list, time_list, k, n, M
+        return current_data, person_list, seq_list, k, n, M
 
-    def get_best_window_num(self, time_list: List[int], M: pd.DataFrame, best_window_indices: float = 0.3, min_num: int = 2, max_num: int = 10) -> int:
+    def get_best_window_num(self, seq_list: List[int], M: pd.DataFrame, best_window_indices: float = 0.3, min_num: int = 2, max_num: int = 10) -> int:
         """
         Find the optimal window size for analysis.
         
         Args:
-            time_list: List of time points
+            seq_list: List of contribution sequence numbers
             M: Participation matrix
             best_window_indices: Target participation threshold
             min_num: Minimum window size
@@ -104,18 +108,18 @@ class GCAAnalyzer:
         if best_window_indices == 1:
             return max_num
             
-        n = len(time_list)
+        n = len(seq_list)
         for w in range(min_num, max_num):
             found_valid_window = False
-            for t in range(len(time_list)):
+            for t in range(n):
                 window_end = t + w
-                if window_end > len(time_list):
+                if window_end > n:
                     break
                     
-                # Get the actual time values for the window
-                window_times = time_list[t:window_end]
+                # Get the sequence numbers for the window
+                window_seqs = seq_list[t:window_end]
                 current_user_data = pd.DataFrame()
-                current_user_data['temp'] = M[window_times].apply(lambda x: x.sum(), axis=1)
+                current_user_data['temp'] = M[window_seqs].apply(lambda x: x.sum(), axis=1)
                 percen = len(current_user_data[current_user_data['temp'] >= 2]) / len(current_user_data['temp'])
                 
                 if percen >= best_window_indices:
@@ -127,7 +131,7 @@ class GCAAnalyzer:
         return max_num
 
     def get_Ksi_lag(self, best_window_length: int, person_list: List[str], k: int,
-                    time_list: List[int], M: pd.DataFrame, cosine_similarity_matrix: pd.DataFrame) -> pd.DataFrame:
+                    seq_list: List[int], M: pd.DataFrame, cosine_similarity_matrix: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate the Ksi lag matrix for interaction analysis.
         
@@ -135,7 +139,7 @@ class GCAAnalyzer:
             best_window_length: Optimal window size
             person_list: List of participants
             k: Number of participants
-            time_list: List of time points
+            seq_list: List of contribution sequence numbers
             M: Participation matrix
             cosine_similarity_matrix: Matrix of cosine similarities
             
@@ -152,20 +156,26 @@ class GCAAnalyzer:
                 for j in range(k):
                     b = person_list[j]
                     Pab_tao = 0
+                    Sab_sum = 0
                     
-                    for t in time_list:
-                        if t < tao + 1:
-                            continue
-                        if t != time_list[-1]:
-                            Pab_tao += M.loc[a, t-tao] * M.loc[b, t]
-                        else:
-                            if Pab_tao == 0:
-                                _Ksi_lag.loc[a, b] = Pab_tao
-                            else:
-                                Sabtu = sum(M.loc[a, t - tao] * M.loc[b, t] * 
-                                          cosine_similarity_matrix.loc[t - tao, t] 
-                                          for t in time_list if t >= tao + 1)
-                                _Ksi_lag.loc[a, b] = Sabtu / Pab_tao
+                    # Only consider contributions with sequence numbers greater than or equal to tau
+                    valid_seqs = [seq for seq in seq_list if seq >= tao]
+                    for seq in valid_seqs:
+                        # Ensure that seq-tao exists in the sequence list
+                        if (seq-tao) in seq_list:
+                            Pab_tao += M.loc[a, seq-tao] * M.loc[b, seq]
+                            if seq != seq_list[-1]:
+                                continue
+                            
+                            if Pab_tao > 0:
+                                # Calculate the sum of cosine similarities
+                                for s in valid_seqs:
+                                    if (s-tao) in seq_list:
+                                        Sab_sum += M.loc[a, s-tao] * M.loc[b, s] * \
+                                                cosine_similarity_matrix.loc[s-tao, s]
+                    
+                    if Pab_tao > 0:
+                        _Ksi_lag.loc[a, b] = Sab_sum / Pab_tao
                                 
             Ksi_lag += _Ksi_lag
             
@@ -213,7 +223,7 @@ class GCAAnalyzer:
             pd.DataFrame: Analysis results for each participant
         """
         # Preprocess data
-        current_data, person_list, time_list, k, n, M = self.participant_pre(video_id, data)
+        current_data, person_list, seq_list, k, n, M = self.participant_pre(video_id, data)
         
         # Initialize result DataFrame
         student = pd.DataFrame(0.0, 
@@ -235,8 +245,8 @@ class GCAAnalyzer:
         # Calculate participation standard deviation (formula 6)
         for person in person_list:
             variance = 0
-            for t in time_list:
-                variance += (M.loc[person, t] - student.loc[person, 'Pa_average'])**2
+            for seq in seq_list:
+                variance += (M.loc[person, seq] - student.loc[person, 'Pa_average'])**2
             student.loc[person, 'Pa_std'] = np.sqrt(variance / (n-1))
             
         # Calculate relative participation (modified formula 9)
@@ -246,13 +256,14 @@ class GCAAnalyzer:
         vector, dataset = self.text_processor.doc2vector(current_data.text_clean)
         
         # Calculate cosine similarity matrix
-        cosine_similarity_matrix = pd.DataFrame(np.zeros((len(time_list), len(time_list)), dtype=float), index=time_list, columns=time_list)
+        cosine_similarity_matrix = pd.DataFrame(np.zeros((len(seq_list), len(seq_list)), dtype=float), 
+                                              index=seq_list, columns=seq_list)
         for i in range(len(vector)):
             for j in range(len(vector)):
                 cosine_similarity_matrix.iloc[i, j] = self.cosine_similarity(vector[i], vector[j])
         
         # Get optimal window size
-        w = self.get_best_window_num(time_list, M)
+        w = self.get_best_window_num(seq_list, M)
         
         # Calculate Cross-cohesion (formulas 15 and 16)
         cross_cohesion = pd.DataFrame(0.0, index=person_list, columns=person_list)
@@ -261,13 +272,23 @@ class GCAAnalyzer:
                 for tau in range(1, w+1):
                     Pab_tau = 0
                     Sab_sum = 0
-                    for t in range(tau, n):
-                        # ||Pab(τ)|| (formula 16)
-                        Pab_tau += M.loc[a, time_list[t-tau]] * M.loc[b, time_list[t]]
-                        if Pab_tau > 0:
-                            # ξab(τ) (formula 15)
-                            Sab_sum += M.loc[a, time_list[t-tau]] * M.loc[b, time_list[t]] * \
-                                     cosine_similarity_matrix.iloc[t-tau, t]
+                    
+                    # 只考虑序号大于等于tau的贡献
+                    valid_seqs = [seq for seq in seq_list if seq >= tau]
+                    for seq in valid_seqs:
+                        # 确保seq-tau存在于序号列表中
+                        if (seq-tau) in seq_list:
+                            Pab_tau += M.loc[a, seq-tau] * M.loc[b, seq]
+                            if seq != seq_list[-1]:
+                                continue
+                            
+                            if Pab_tau > 0:
+                                # 计算相似度总和
+                                for s in valid_seqs:
+                                    if (s-tau) in seq_list:
+                                        Sab_sum += M.loc[a, s-tau] * M.loc[b, s] * \
+                                                cosine_similarity_matrix.loc[s-tau, s]
+                    
                     if Pab_tau > 0:
                         cross_cohesion.loc[a, b] += Sab_sum / Pab_tau
         cross_cohesion = cross_cohesion / w
