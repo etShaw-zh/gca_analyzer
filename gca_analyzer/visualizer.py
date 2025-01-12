@@ -8,7 +8,6 @@ Author: Jianjun Xiao
 Email: et_shaw@126.com
 Date: 2025-01-12
 License: MIT
-Version: 0.2.0
 """
 
 import matplotlib.pyplot as plt

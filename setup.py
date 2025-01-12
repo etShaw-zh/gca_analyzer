@@ -12,14 +12,15 @@ setup(
         'matplotlib>=3.4.0',
         'seaborn>=0.11.0',
         'networkx>=2.6.0',
-        'plotly>=5.3.0'
+        'plotly>=5.3.0',
+        'loguru>=0.7.0'
     ],
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Jianjun Xiao",
+    author_email="et_shaw@126.com",
     description="A package for Group Conversation Analysis with improved text processing and visualization",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/gca_analyzer",
+    url="https://github.com/etShaw-zh/gca_analyzer",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
