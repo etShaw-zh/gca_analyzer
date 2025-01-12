@@ -4,63 +4,68 @@ A Python package for analyzing group conversation and interaction patterns with 
 
 [中文文档](README_zh.md)
 
-## Features
+## Overview
 
-### 1. Text Processing & Analysis
-- Chinese word segmentation (using jieba)
-- Stop words filtering
-- URL and emoji handling
-- Special character normalization
-- TF-IDF vectorization
+GCA Analyzer is a comprehensive tool for analyzing group conversations, with particular emphasis on Chinese text processing. It implements a series of mathematical metrics to quantify various aspects of group interactions, including participation patterns, response dynamics, and content analysis.
 
-### 2. Interaction Metrics
-- **Participation**
-  - Measures each participant's contribution count and average rate
-  - Calculates participation standard deviation and normalized rate
-  - Normalized relative to equal participation (1/k)
+## Core Components
 
-- **Cross-Cohesion**
-  - Analyzes temporal interactions between participants
-  - Uses sliding window analysis with optimal window size
-  - Based on message cosine similarities and participation patterns
+### 1. Text Processing & Analysis (`llm_processor.py`)
+- **Advanced Language Model Integration**
+  - Multilingual support with transformer-based models
+  - Default model: paraphrase-multilingual-MiniLM-L12-v2
+  - Support for custom models and mirror sources
+- **Text Processing Features**
+  - Semantic similarity computation
+  - Document vectorization
+  - Embedding generation
+  - Multilingual capability (50+ languages)
 
-- **Internal Cohesion**
-  - Measures self-interaction patterns
-  - Derived from cross-cohesion matrix diagonal
+### 2. Interaction Analysis (`analyzer.py`)
+- **Participation Metrics**
+  - Individual contribution count and rate
+  - Participation standard deviation
+  - Normalized participation rate
+  - Temporal participation patterns
 
-- **Overall Responsivity**
-  - Evaluates average response patterns to others
-  - Computed from cross-participant interactions
-  - Normalized by number of other participants (k-1)
+- **Interaction Dynamics**
+  - Cross-cohesion analysis with sliding windows
+  - Internal cohesion measurement
+  - Response pattern analysis
+  - Social impact evaluation
 
-- **Social Impact**
-  - Measures how others respond to participant's messages
-  - Based on incoming cross-cohesion values
-  - Normalized by number of other participants (k-1)
+- **Content Analysis**
+  - Message novelty calculation
+  - Communication density metrics
+  - Semantic similarity analysis
+  - Temporal content evolution
 
-- **Newness**
-  - Calculates orthogonal projection to previous messages
-  - Uses QR decomposition for numerical stability
-  - Normalized by participant's total contributions
+### 3. Visualization Tools (`visualizer.py`)
+- **Interactive Plots**
+  - Participation heatmaps
+  - Interaction network graphs
+  - Metric radar charts
+  - Temporal evolution plots
+- **Customization Options**
+  - Configurable color schemes
+  - Adjustable plot dimensions
+  - Multiple visualization styles
+  - Export capabilities
 
-- **Communication Density**
-  - Measures vector norm per word length ratio
-  - Averaged over all participant's messages
-  - Normalized by total participation count
-
-### 3. Visualization Tools
-- Participation heatmaps
-- Interaction networks
-- Metric radar charts
-- Temporal evolution plots
+### 4. Logging System (`logger.py`)
+- Comprehensive logging with different levels
+- Colored console output
+- File logging support
+- Configurable log rotation
 
 ## Installation
 
 ```bash
-# Using pip
 pip install gca_analyzer
+```
 
-# Or install from source
+For development installation:
+```bash
 git clone https://github.com/etShaw-zh/gca_analyzer.git
 cd gca_analyzer
 pip install -e .
@@ -69,124 +74,81 @@ pip install -e .
 ## Quick Start
 
 ```python
-from gca_analyzer import GCAAnalyzer
+from gca_analyzer import GCAAnalyzer, GCAVisualizer
 import pandas as pd
 
-# Initialize analyzer
+# Initialize analyzer with default settings
 analyzer = GCAAnalyzer()
 
-# Load data
-data = pd.read_csv('your_data.csv')
+# Load your conversation data
+data = pd.read_csv('conversation_data.csv')
 
-# Analyze video conversation
-results = analyzer.analyze_video('video_id', data)
+# Analyze conversations
+results = analyzer.analyze_conversation('1A', data)
 
-# View results
-print(results)
+# Create visualizations
+visualizer = GCAVisualizer()
+heatmap = visualizer.plot_participation_heatmap(data, conversation_id='1A')
+network = visualizer.plot_interaction_network(results, conversation_id='1A')
+metrics = visualizer.plot_metrics_radar(results)
 ```
 
-## Data Format
+## Input Data Format
 
-Input data should be a CSV file with these required columns:
-- `video_id`: Conversation/video identifier
+Required CSV columns:
+- `conversation_id`: Conversation identifier
 - `person_id`: Participant identifier
-- `time`: Timestamp (format: HH:MM:SS or MM:SS)
-- `text`: Text content
-- `coding`: Cognitive coding (optional)
+- `time`: Timestamp (HH:MM:SS or MM:SS)
+- `text`: Message content
 
-Example format:
+Optional columns:
+- `coding`: Cognitive coding
+- Additional metadata columns are preserved
+
+Example:
 ```csv
-video_id,person_id,time,text,coding
-1A,teacher,0:06,Hello everyone!,
-1A,student1,0:08,Hello teacher!,
-...
+conversation_id,person_id,time,text,coding
+1A,teacher,0:06,Hello everyone!,greeting
+1A,student1,0:08,Hello teacher!,response
 ```
 
 ## Advanced Usage
 
-### Metric Calculation Details
-
+### Custom Model Configuration
 ```python
-from gca_analyzer import GCAAnalyzer
-import pandas as pd
-
-# Initialize analyzer
-analyzer = GCAAnalyzer()
-
-# Load and preprocess data
-data = pd.read_csv('your_data.csv')
-current_data, person_list, seq_list, k, n, M = analyzer.participant_pre('video_id', data)
-
-# Get optimal window size
-w = analyzer.get_best_window_num(
-    seq_list=seq_list,
-    M=M,
-    best_window_indices=0.3,  # Target participation threshold
-    min_num=2,  # Minimum window size
-    max_num=10  # Maximum window size
+analyzer = GCAAnalyzer(
+    model_name="your-custom-model",
+    mirror_url="https://your-model-mirror.com"
 )
-
-# Calculate cross-cohesion matrix
-vector, dataset = analyzer.text_processor.doc2vector(current_data.text_clean)
-cosine_similarity_matrix = pd.DataFrame(...)  # Calculate similarities
-Ksi_lag = analyzer.get_Ksi_lag(w, person_list, k, seq_list, M, cosine_similarity_matrix)
-
-# Get all metrics
-results = analyzer.analyze_video('video_id', data)
-```
-
-### Custom Text Processing
-
-```python
-from gca_analyzer.text_processor import TextProcessor
-
-# Create text processor
-processor = TextProcessor()
-
-# Add custom stop words
-processor.add_stop_words(['word1', 'word2', 'word3'])
-
-# Process text
-processed_text = processor.chinese_word_cut("your text content")
 ```
 
 ### Visualization Customization
-
 ```python
-from gca_analyzer.visualizer import GCAVisualizer
-
-# Create visualizer
-viz = GCAVisualizer()
-
-# Plot interaction network
-viz.plot_interaction_network(
-    results,
-    threshold=0.3,  # Set connection threshold
-    node_size_factor=100,  # Adjust node size
-    edge_width_factor=2  # Adjust edge width
-)
-
-# Plot temporal evolution
-viz.plot_temporal_evolution(
-    results,
-    metrics=['participation', 'newness'],
-    window_size='5min'  # 5-minute sliding window
+visualizer = GCAVisualizer()
+visualizer.plot_participation_heatmap(
+    data,
+    title="Custom Title",
+    figsize=(12, 8)
 )
 ```
 
 ## Contributing
 
-Pull requests are welcome! Before submitting, please ensure:
-
-1. Code follows PEP 8 style guide
-2. Appropriate unit tests are added
-3. Documentation is updated
-4. All tests pass
-
-## Issue Reporting
-
-If you find any issues or have suggestions for improvements, please submit an issue on GitHub.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Citation
+
+If you use GCA Analyzer in your research, please cite:
+
+```bibtex
+@software{gca_analyzer2025,
+  author = {Jianjun Xiao},
+  title = {GCA Analyzer: A Python Package for Group Conversation Analysis},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/etShaw-zh/gca_analyzer}
+}

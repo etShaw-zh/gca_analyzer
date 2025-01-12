@@ -296,7 +296,7 @@ class TestGCAAnalyzer(unittest.TestCase):
             print(f"{row['person_id']} - Processed: {row['text_clean']}\n")
     
         # Analyze the video
-        results = self.analyzer.analyze_video('1A', test_data)
+        results = self.analyzer.analyze_ conversation('1A', test_data)
         
         # Print newness scores for debugging
         print("\nNewness scores:")
@@ -307,7 +307,7 @@ class TestGCAAnalyzer(unittest.TestCase):
         self.assertGreater(results.loc['Student2', 'Newness'], 0)  # Should have some newness
         self.assertLess(results.loc['Student2', 'Newness'], 1)  # But less than max since messages are similar
 
-    def test_analyze_video_integration(self):
+    def test_analyze_ conversation_integration(self):
         """Test the complete video analysis pipeline."""
         # Create test data
         test_data = pd.DataFrame({
@@ -329,7 +329,7 @@ class TestGCAAnalyzer(unittest.TestCase):
         })
         
         # Analyze the video
-        results = self.analyzer.analyze_video('1A', test_data)
+        results = self.analyzer.analyze_ conversation('1A', test_data)
         
         # Check results structure
         expected_columns = {
@@ -360,7 +360,7 @@ class TestGCAAnalyzer(unittest.TestCase):
         # Test with empty data
         empty_data = pd.DataFrame(columns=['video_id', 'person_id', 'time', 'text'])
         with self.assertRaises(ValueError):
-            self.analyzer.analyze_video('1A', empty_data)
+            self.analyzer.analyze_ conversation('1A', empty_data)
         
         # Test with missing required columns
         invalid_data = pd.DataFrame({
@@ -370,11 +370,11 @@ class TestGCAAnalyzer(unittest.TestCase):
             # Missing 'time' and 'text' columns
         })
         with self.assertRaises(ValueError):
-            self.analyzer.analyze_video('1A', invalid_data)
+            self.analyzer.analyze_ conversation('1A', invalid_data)
         
         # Test with invalid video_id
         with self.assertRaises(ValueError):
-            self.analyzer.analyze_video('invalid_id', self.test_data)
+            self.analyzer.analyze_ conversation('invalid_id', self.test_data)
         
         # Test with single participant
         single_participant_data = pd.DataFrame({
@@ -383,7 +383,7 @@ class TestGCAAnalyzer(unittest.TestCase):
             'time': range(1, 4),
             'text': ['Message 1', 'Message 2', 'Message 3']
         })
-        results = self.analyzer.analyze_video('1A', single_participant_data)
+        results = self.analyzer.analyze_ conversation('1A', single_participant_data)
         self.assertEqual(len(results), 1)  # Should only have one participant
 
 if __name__ == '__main__':
