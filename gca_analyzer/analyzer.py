@@ -9,16 +9,16 @@ Email: et_shaw@126.com
 Date: 2025-01-12
 License: Apache 2.0
 """
+import os
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from typing import Tuple, List, Optional
-import os
 
-from .llm_processor import LLMTextProcessor
-from .utils import cosine_similarity_matrix
-from .logger import logger
 from .config import Config, default_config
+from .llm_processor import LLMTextProcessor
+from .logger import logger
+from .utils import cosine_similarity_matrix
 
 class GCAAnalyzer:
     """
@@ -133,41 +133,34 @@ class GCAAnalyzer:
         )
         min_num = min_num or self._config.window.min_window_size
         max_num = max_num or self._config.window.max_window_size
-        
+
         if min_num > max_num:
             raise ValueError("min_num cannot be greater than max_num")
-            
-        if not (0 <= best_window_indices <= 1):
+
+        if not 0 <= best_window_indices <= 1:
             raise ValueError("best_window_indices must be between 0 and 1")
-            
-        # Handle extreme thresholds
+
         if best_window_indices == 0:
             return min_num
         if best_window_indices == 1:
             return max_num
-            
+
         n = len(data)
         person_contributions = data.groupby('person_id')
-        
+
         for w in range(min_num, max_num + 1):
-            found_valid_window = False
             for t in range(n - w + 1):
                 window_data = data.iloc[t:t+w]
-                
                 window_counts = window_data.groupby('person_id').size()
                 active_participants = (window_counts >= 2).sum() # at least 2 contributions in the window TODO: use a threshold
                 total_participants = len(person_contributions)
                 participation_rate = active_participants / total_participants
-                
+
                 if participation_rate >= best_window_indices:
-                    found_valid_window = True
                     print(f"=== Found valid window size: {w} (current window threshold: {best_window_indices}) ===")
                     return w
-            
-            if not found_valid_window and w == max_num:
-                print(f"=== No valid window size found between {min_num} and {max_num}, using max_num: {max_num} (current window threshold: {best_window_indices}) ===")
-                return max_num
-        
+
+        print(f"=== No valid window size found between {min_num} and {max_num}, using max_num: {max_num} (current window threshold: {best_window_indices}) ===")
         return max_num
 
     def get_Ksi_lag(
@@ -587,6 +580,7 @@ class GCAAnalyzer:
         """
         all_data = pd.concat(all_metrics.values())
         
+        # Calculate basic statistics
         stats = pd.DataFrame({
             'Minimum': all_data.min(),
             'Median': all_data.median(),
@@ -594,9 +588,24 @@ class GCAAnalyzer:
             'SD': all_data.std(),
             'Maximum': all_data.max(),
             'Count': all_data.count(),
-            'Missing': all_data.isnull().sum(),
-            'CV': all_data.std() / all_data.mean()
-        }).round(2)
+            'Missing': all_data.isnull().sum()
+        })
+        
+        # Calculate CV with handling for division by zero
+        means = all_data.mean()
+        stds = all_data.std()
+        cvs = pd.Series(index=means.index, dtype=float)
+        
+        for col in means.index:
+            mean = means[col]
+            std = stds[col]
+            if mean == 0 or pd.isna(mean) or pd.isna(std):
+                cvs[col] = float('inf')
+            else:
+                cvs[col] = std / abs(mean)  # Use absolute mean for CV
+        
+        stats['CV'] = cvs
+        stats = stats.round(2)
         
         print("=== Descriptive statistics for GCA measures ===")
         print("-" * 80)
@@ -619,6 +628,7 @@ class GCAAnalyzer:
         print("-" * 80)
         
         if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
             output_file = os.path.join(output_dir, 'descriptive_statistics_gca.csv')
             stats.to_csv(output_file)
             print(f"Saved descriptive statistics to: {output_file}")

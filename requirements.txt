@@ -12,3 +12,4 @@ torch>=2.0.0
 transformers>=4.30.0
 sentence-transformers>=2.2.0
 pytest>=6.2.0
+pytest-cov>=6.0.0
