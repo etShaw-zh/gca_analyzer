@@ -92,19 +92,15 @@ class GCAAnalyzer:
         if missing_columns:
             raise ValueError(f"Missing required columns: {missing_columns}")
             
-        # Sort by time and add contribution sequence number
-        current_data = current_data.sort_values('time').reset_index(drop=True)
+        current_data['parsed_time'] = pd.to_datetime(current_data['time'], format='mixed')
+        current_data = current_data.sort_values('parsed_time').reset_index(drop=True)
         current_data['seq_num'] = range(1, len(current_data) + 1)
         
-        # Get unique participants and sequence numbers
         person_list = sorted(current_data.person_id.unique())
         seq_list = sorted(current_data.seq_num.unique())
         
-        # Calculate dimensions
-        k = len(person_list)  # Number of participants
-        n = len(seq_list)     # Number of contributions
-        
-        # Create participation matrix M using sequence numbers
+        k = len(person_list)  
+        n = len(seq_list)     
         M = pd.DataFrame(0, index=person_list, columns=seq_list)
         for _, row in current_data.iterrows():
             M.loc[row.person_id, row.seq_num] = 1
@@ -138,7 +134,6 @@ class GCAAnalyzer:
         min_num = min_num or self._config.window.min_window_size
         max_num = max_num or self._config.window.max_window_size
         
-        # Validate input parameters
         if min_num > max_num:
             raise ValueError("min_num cannot be greater than max_num")
             
@@ -152,18 +147,15 @@ class GCAAnalyzer:
             return max_num
             
         n = len(data)
-        # Group data by person_id to count contributions
         person_contributions = data.groupby('person_id')
         
         for w in range(min_num, max_num + 1):
             found_valid_window = False
-            for t in range(n - w + 1):  # Adjust range to ensure valid windows
+            for t in range(n - w + 1):
                 window_data = data.iloc[t:t+w]
                 
-                # Count contributions per person in the window
                 window_counts = window_data.groupby('person_id').size()
-                # Calculate percentage of participants with >= 2 contributions
-                active_participants = (window_counts >= 2).sum()
+                active_participants = (window_counts >= 2).sum() # at least 2 contributions in the window TODO: use a threshold
                 total_participants = len(person_contributions)
                 participation_rate = active_participants / total_participants
                 
@@ -383,9 +375,9 @@ class GCAAnalyzer:
         texts: List[str],
         current_data: pd.DataFrame
     ) -> Tuple[dict, dict]:
-        n_c_t_dict = {}  # Store newness values for later averaging
-        D_i_dict = {}  # Store density values for later averaging
-        
+        n_c_t_dict = {}
+        D_i_dict = {}
+
         for idx in range(len(vectors)):
             try:
                 n_c_t, D_i = self._calculate_lsa_metrics(vectors, texts, idx)
@@ -495,12 +487,10 @@ class GCAAnalyzer:
             All metrics are calculated based on both message frequency and content analysis
             using language model embeddings for semantic understanding.
         """
-        # Preprocess data and get basic information
         current_data, person_list, seq_list, k, n, M = self.participant_pre(
             conversation_id, data
         )
         
-        # Initialize result DataFrame
         metrics_df = pd.DataFrame(
             0.0,
             index=person_list,
@@ -534,15 +524,12 @@ class GCAAnalyzer:
             metrics_df['Pa_average'] - 1/k
         ) / (1/k)
         
-        # Process text and calculate vectors
         texts = current_data.text.to_list()
         vectors = self.llm_processor.doc2vector(texts)
         
-        # Calculate cross-cohesion and w-spanning responsivity matrix
         w = self.find_best_window_size(current_data)
         logger.info(f"Using window size: {w}")
         
-        # Create cosine similarity matrix for sequential contributions
         cosine_matrix = cosine_similarity_matrix(
             vectors, seq_list, current_data
         )
@@ -571,6 +558,16 @@ class GCAAnalyzer:
             n_c_t_dict=n_c_t_dict,
             D_i_dict=D_i_dict
         )
+        
+        metrics_df = metrics_df.rename(columns={
+            'Pa_hat': 'participation',
+            'Overall_responsivity': 'responsivity',
+            'Internal_cohesion': 'internal_cohesion',
+            'Social_impact': 'social_impact',
+            'Newness': 'newness',
+            'Communication_density': 'comm_density'
+        })
+        
         return metrics_df
 
     def calculate_descriptive_statistics(
@@ -595,24 +592,31 @@ class GCAAnalyzer:
             'Median': all_data.median(),
             'M': all_data.mean(),
             'SD': all_data.std(),
-            'Maximum': all_data.max()
+            'Maximum': all_data.max(),
+            'Count': all_data.count(),
+            'Missing': all_data.isnull().sum(),
+            'CV': all_data.std() / all_data.mean()
         }).round(2)
         
         print("=== Descriptive statistics for GCA measures ===")
-        print("-" * 60)
+        print("-" * 80)
         print("Measure".ljust(20), end='')
-        print("Minimum  Median  M      SD     Maximum")
-        print("-" * 60)
+        print("Minimum  Median  M      SD     Maximum  Count  Missing  CV")
+        print("-" * 80)
         for measure in stats.index:
             row = stats.loc[measure]
+            cv_value = f"{row['CV']:.2f}" if row['CV'] < 10 else 'inf'
             print(f"{measure.replace('_', ' ').title().ljust(20)}"
                 f"{row['Minimum']:7.2f}  "
                 f"{row['Median']:6.2f}  "
                 f"{row['M']:5.2f}  "
                 f"{row['SD']:5.2f}  "
-                f"{row['Maximum']:7.2f}"
+                f"{row['Maximum']:7.2f}  "
+                f"{row['Count']:5.0f}  "
+                f"{row['Missing']:7.0f}  "
+                f"{cv_value:>5}"
             )
-        print("-" * 60)
+        print("-" * 80)
         
         if output_dir:
             output_file = os.path.join(output_dir, 'descriptive_statistics_gca.csv')

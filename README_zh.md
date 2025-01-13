@@ -1,153 +1,169 @@
-# GCA Analyzer (群组对话分析器)
+# GCA Analyzer
 
-一个用于分析群组对话和互动模式的Python包，具有高级文本处理和可视化功能。
+一个基于LLM和定量指标分析群组对话动态的Python包。
 
-[English Documentation](README.md)
+[English](README.md) | 中文 | [日本語](README_ja.md) | [한국어](README_ko.md)
 
-## 概述
+## 功能特点
 
-GCA Analyzer 是一个全面的群组对话分析工具，特别注重中文文本处理。它实现了一系列数学指标来量化群组互动的各个方面，包括参与模式、响应动态和内容分析。
+- **多语言支持**: 通过高级LLM模型内置支持中文等多种语言
+- **全面的指标**: 通过多个维度分析群组互动
+- **自动化分析**: 自动寻找最佳分析窗口并生成详细统计
+- **灵活配置**: 可根据不同分析需求自定义参数
+- **易于集成**: 支持命令行界面和Python API
 
-## 核心组件
+## 快速开始
 
-### 1. 文本处理与分析 (`llm_processor.py`)
-- **高级语言模型集成**
-  - 基于 transformer 的多语言支持
-  - 默认模型：paraphrase-multilingual-MiniLM-L12-v2
-  - 支持自定义模型和镜像源
-- **文本处理功能**
-  - 语义相似度计算
-  - 文档向量化
-  - 嵌入向量生成
-  - 多语言支持（50+种语言）
-
-### 2. 互动分析 (`analyzer.py`)
-- **参与度指标**
-  - 个人贡献计数和比率
-  - 参与标准差
-  - 归一化参与率
-  - 时序参与模式
-
-- **互动动态**
-  - 基于滑动窗口的交叉内聚分析
-  - 内部内聚度测量
-  - 响应模式分析
-  - 社会影响力评估
-
-- **内容分析**
-  - 消息新颖度计算
-  - 通信密度指标
-  - 语义相似度分析
-  - 时序内容演化
-
-### 3. 可视化工具 (`visualizer.py`)
-- **交互式图表**
-  - 参与度热力图
-  - 互动网络图
-  - 指标雷达图
-  - 时序演化图
-- **自定义选项**
-  - 可配置的配色方案
-  - 可调整的图表尺寸
-  - 多种可视化风格
-  - 导出功能
-
-### 4. 日志系统 (`logger.py`)
-- 多级别日志记录
-- 彩色控制台输出
-- 文件日志支持
-- 可配置的日志轮转
-
-## 安装方法
+### 安装
 
 ```bash
+# 从PyPI安装
 pip install gca_analyzer
-```
 
-开发安装：
-```bash
+# 开发安装
 git clone https://github.com/etShaw-zh/gca_analyzer.git
 cd gca_analyzer
 pip install -e .
 ```
 
-## 快速开始
+### 基本用法
 
-```python
-from gca_analyzer import GCAAnalyzer, GCAVisualizer
-import pandas as pd
-
-# 初始化分析器
-analyzer = GCAAnalyzer()
-
-# 加载对话数据
-data = pd.read_csv('conversation_data.csv')
-
-# 分析对话
-results = analyzer.analyze_conversation('1A', data)
-
-# 创建可视化
-visualizer = GCAVisualizer()
-heatmap = visualizer.plot_participation_heatmap(data, conversation_id='1A')
-network = visualizer.plot_interaction_network(results, conversation_id='1A')
-metrics = visualizer.plot_metrics_radar(results)
+1. 准备CSV格式的对话数据（包含必需列）:
+```
+conversation_id,person_id,time,text
+1A,student1,0:08,老师好！
+1A,teacher,0:10,同学们好！
 ```
 
-## 数据格式要求
+2. 运行分析:
+```bash
+python -m gca_analyzer --data your_data.csv
+```
+
+## 详细用法
+
+### 命令行选项
+
+```bash
+python -m gca_analyzer --data <path_to_data.csv> [options]
+```
+
+#### 必需参数
+- `--data`: 对话数据CSV文件路径
+
+#### 可选参数
+- `--output`: 结果输出目录（默认：`gca_results`）
+- `--best-window-indices`: 窗口大小优化阈值（默认：0.3）
+  - 范围：0.0-1.0
+  - 较低的值会产生较小的窗口
+- `--console-level`: 日志级别（默认：INFO）
+  - 选项：DEBUG, INFO, WARNING, ERROR, CRITICAL
+- `--model-name`: 文本处理用的LLM模型
+  - 默认：`iic/nlp_gte_sentence-embedding_chinese-base`
+- `--model-mirror`: 模型下载镜像
+  - 默认：`https://modelscope.cn/models`
+
+### 输入数据格式
 
 必需的CSV列：
-- `conversation_id`: 对话标识符
+- `conversation_id`: 对话唯一标识符
 - `person_id`: 参与者标识符
-- `time`: 时间戳（HH:MM:SS或MM:SS格式）
+- `time`: 消息时间（格式：YYYY-MM-DD HH:MM:SS 或 HH:MM:SS 或 MM:SS）
 - `text`: 消息内容
 
-可选列：
-- `coding`: 认知编码
-- 其他元数据列会被保留
+### 输出指标
 
-示例：
-```csv
-conversation_id,person_id,time,text,coding
-1A,教师,0:06,同学们好！,greeting
-1A,学生1,0:08,老师好！,response
-```
+分析器会生成以下指标的综合统计：
 
-## 高级用法
+1. **参与度**
+   - 衡量相对贡献频率
+   - 负值表示低于平均参与度
+   - 正值表示高于平均参与度
 
-### 自定义模型配置
-```python
-analyzer = GCAAnalyzer(
-    model_name="your-custom-model",
-    mirror_url="https://your-model-mirror.com"
-)
-```
+2. **响应性**
+   - 衡量参与者对他人的响应程度
+   - 较高的值表示更好的响应行为
 
-### 可视化自定义
-```python
-visualizer = GCAVisualizer()
-visualizer.plot_participation_heatmap(
-    data,
-    title="自定义标题",
-    figsize=(12, 8)
-)
-```
+3. **内部凝聚力**
+   - 衡量个人贡献的一致性
+   - 较高的值表示消息更连贯
 
-## 贡献
+4. **社会影响力**
+   - 衡量对群组讨论的影响
+   - 较高的值表示对他人有更强影响力
 
-欢迎提交贡献！请随时提交 Pull Request。对于重大更改，请先创建 issue 讨论您想要更改的内容。
+5. **新颖性**
+   - 衡量新内容的引入
+   - 较高的值表示贡献更具创新性
+
+6. **通信密度**
+   - 衡量每条消息的信息含量
+   - 较高的值表示消息信息更丰富
+
+结果将以CSV文件形式保存在指定的输出目录中。
+
+## 常见问题
+
+1. **问：为什么某些参与度值为负数？**
+   答：参与度值是围绕平均值进行标准化的。负值表示低于平均参与度，正值表示高于平均参与度。
+
+2. **问：最佳窗口大小是多少？**
+   答：分析器会根据`best-window-indices`参数自动寻找最佳窗口大小。较低的值（如0.03）会产生较小的窗口，可能更适合较短的对话。
+
+3. **问：如何处理不同语言？**
+   答：分析器使用LLM模型进行文本处理，默认支持多种语言。对于中文文本，使用中文基础模型。
+
+## 参与贡献
+
+我们欢迎对GCA Analyzer的贡献！以下是参与方式：
+
+### 贡献方式
+- 通过[GitHub Issues](https://github.com/etShaw-zh/gca_analyzer/issues)报告问题和功能需求
+- 提交Pull Request修复bug或添加新功能
+- 改进文档
+- 分享您的使用案例和反馈
+
+### 开发环境设置
+1. Fork项目仓库
+2. 克隆您的Fork:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/gca_analyzer.git
+   cd gca_analyzer
+   ```
+3. 安装开发依赖:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+4. 创建新分支:
+   ```bash
+   git checkout -b feature-or-fix-name
+   ```
+5. 修改并提交:
+   ```bash
+   git add .
+   git commit -m "修改描述"
+   ```
+6. 推送并创建Pull Request
+
+### Pull Request指南
+- 遵循现有的代码风格
+- 为新功能添加测试
+- 及时更新文档
+- 确保所有测试通过
+- 保持每个Pull Request专注于单一更改
 
 ## 许可证
 
-本项目采用 Apache License 2.0 许可证 - 详见 LICENSE 文件。
+Apache 2.0
 
 ## 引用
 
-如果您在研究中使用了 GCA Analyzer，请引用：
+如果您在研究中使用了此工具，请引用：
 
 ```bibtex
 @software{gca_analyzer2025,
-  author = {Jianjun Xiao},
-  title = {GCA Analyzer: A Python Package for Group Conversation Analysis},
+  author = {Xiao, Jianjun},
+  title = {GCA Analyzer: Group Conversation Analysis Tool},
   year = {2025},
   publisher = {GitHub},
   url = {https://github.com/etShaw-zh/gca_analyzer}

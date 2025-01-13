@@ -105,14 +105,6 @@ def main():
         print(f"=== Analyzing Conversation {conversation_id} ===")
         
         metrics_df = analyzer.analyze_conversation(conversation_id, df)
-        metrics_df = metrics_df.rename(columns={
-            'Pa_hat': 'participation',
-            'Overall_responsivity': 'responsivity',
-            'Internal_cohesion': 'internal_cohesion',
-            'Social_impact': 'social_impact',
-            'Newness': 'newness',
-            'Communication_density': 'comm_density'
-        })
         
         metrics_df = metrics_df[metrics]
         
