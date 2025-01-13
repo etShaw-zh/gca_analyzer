@@ -1,8 +1,22 @@
+[English](README.md) | 简体中文
 # GCA Analyzer
 
-一个使用 NLP 技术和定量指标分析群组对话动态的 Python 包。
+<div align="left">
+    <a href="https://pypi.org/project/gca-analyzer">
+        <img src="https://badge.fury.io/py/gca-analyzer.svg" alt="PyPI version">
+    </a>
+    <img src="https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg" alt="Tests">
+    <a href="https://gca-analyzer.readthedocs.io/en/latest/?badge=latest">
+        <img src="https://readthedocs.org/projects/gca-analyzer/badge/?version=latest" alt="Documentation Status">
+    </a>
+    <a href="https://codecov.io/gh/etShaw-zh/gca_analyzer">
+        <img src="https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L" alt="Coverage Status">
+    </a>
+</div>
 
-[English](README.md) | 中文 | [日本語](README_ja.md) | [한국어](README_ko.md)
+## 介绍
+
+一个使用 NLP 技术和定量指标分析群体对话动态的 Python 包。
 
 ## 特性
 
@@ -18,7 +32,7 @@
 
 ```bash
 # 从 PyPI 安装
-pip install gca_analyzer
+pip install gca-analyzer
 
 # 开发安装
 git clone https://github.com/etShaw-zh/gca_analyzer.git

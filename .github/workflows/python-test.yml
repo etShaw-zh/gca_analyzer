@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install pytest pytest-cov
         pip install -r requirements.txt
         pip install -e .
         
@@ -36,13 +36,14 @@ jobs:
       id: test
       run: |
         pytest tests/ --junitxml=pytest.xml -v > pytest-output.txt
-
-    - name: Publish Test Results
-      if: always() && github.event_name == 'pull_request'
-      uses: EnricoMi/publish-unit-test-result-action@v2
+        pytest --cov=gca_analyzer --cov-branch --cov-report=xml:coverage.xml tests/
+          
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        junit_files: "pytest.xml"
-        
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: etShaw-zh/gca_analyzer
+
     - name: Comment PR with Test Results
       if: always() && github.event_name == 'pull_request'
       uses: actions/github-script@v6
