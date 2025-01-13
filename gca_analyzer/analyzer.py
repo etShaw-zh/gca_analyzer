@@ -256,8 +256,6 @@ class GCAAnalyzer:
         self,
         person_list: List[str],
         k: int,
-        seq_list: List[int],
-        M: pd.DataFrame,
         R_w: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
@@ -266,8 +264,7 @@ class GCAAnalyzer:
         Args:
             person_list: List of participants
             k: Number of participants
-            seq_list: List of contribution sequence numbers
-            M: Participation matrix
+            R_w: Responsivity across w
 
         Returns:
             pd.DataFrame: Cohesion and response matrices
@@ -532,7 +529,7 @@ class GCAAnalyzer:
         # Calculate Internal cohesion (Formula 18), Overall responsivity (Formula 19), Social impact (Formula 20) with w-spanning
         metrics_df['Internal_cohesion'], metrics_df['Overall_responsivity'], metrics_df['Social_impact'] = \
             self.calculate_cohesion_response(
-                person_list=person_list, k=k, seq_list=seq_list, M=M, R_w=R_w
+                person_list=person_list, k=k, R_w=R_w
             )
 
         # Calculate newness and communication density (Formula 25 and 27) without w-spanning

@@ -14,9 +14,7 @@ import subprocess
 from typing import List, Optional
 
 import numpy as np
-import torch
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModel, AutoTokenizer
 
 from .config import Config, default_config
 from .logger import logger
@@ -37,7 +35,7 @@ class LLMTextProcessor:
     def __init__(
         self,
         model_name: str = None,
-        mirror_url: str = None,
+        mirror_url: Optional[str] = None,
         config: Config = None
     ):
         """Initialize the LLM text processor.
@@ -96,56 +94,6 @@ class LLMTextProcessor:
         
         self.model = SentenceTransformer(self.model_name)
         logger.info("Successfully loaded the model")
-
-    def get_embeddings(self, texts: List[str]) -> List[np.ndarray]:
-        """Generate embeddings for a list of texts using the loaded model.
-
-        Args:
-            texts: List of input texts
-
-        Returns:
-            List of embedding vectors as numpy arrays
-        """
-        try:
-            # Generate vectors using the model
-            embeddings = self.model.encode(texts, convert_to_numpy=True)
-            # Ensure each vector is a numpy array
-            return [np.array(emb) for emb in embeddings]
-        except Exception as e:
-            logger.error(f"Error generating embeddings: {str(e)}")
-            return [
-                np.zeros(self.model.get_sentence_embedding_dimension())
-                for _ in texts
-            ]
-
-    def compute_similarity(self, text1: str, text2: str) -> float:
-        """Compute semantic similarity between two texts.
-
-        Args:
-            text1: First text
-            text2: Second text
-
-        Returns:
-            Similarity score between 0 and 1
-        """
-        try:
-            embeddings = self.get_embeddings([text1, text2])
-            if len(embeddings) < 2:
-                return 0.0
-            
-            # Convert to torch tensors
-            emb1 = torch.tensor(embeddings[0])
-            emb2 = torch.tensor(embeddings[1])
-            
-            # Compute cosine similarity
-            similarity = torch.nn.functional.cosine_similarity(
-                emb1.unsqueeze(0),
-                emb2.unsqueeze(0)
-            )
-            return float(similarity[0])
-        except Exception as e:
-            logger.error(f"Error computing similarity: {str(e)}")
-            return 0.0
 
     def doc2vector(self, texts: List[str]) -> List[np.ndarray]:
         """Convert texts to vectors using transformer embeddings.

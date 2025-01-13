@@ -101,25 +101,37 @@ def cosine_similarity_matrix(vectors: List[np.ndarray], seq_list: List[int], cur
     Returns:
         pd.DataFrame: Cosine similarity matrix
     """
-    cosine_matrix = pd.DataFrame(0.0, index=seq_list, columns=seq_list, dtype=float)
-    for i in seq_list:
-        for j in seq_list:
-            if i < j:  # Only calculate for sequential messages
-                messages_i = current_data[current_data.seq_num == i]
-                messages_j = current_data[current_data.seq_num == j]
-                if not messages_i.empty and not messages_j.empty:
-                    try:
-                        # Get vectors for messages using the index in vectors_list
-                        i_idx = messages_i.index[0]
-                        j_idx = messages_j.index[0]
-                        if i_idx < len(vectors) and j_idx < len(vectors):
-                            vector_i = vectors[i_idx]
-                            vector_j = vectors[j_idx]
-                            similarity = float(cosine_similarity(vector_i, vector_j))
-                            cosine_matrix.loc[i, j] = similarity
-                            cosine_matrix.loc[j, i] = similarity  # Matrix is symmetric
-                    except Exception as e:
-                        logger.error(f"Error calculating similarity between messages {i} and {j}: {str(e)}")
-                        continue
+    if not vectors or not seq_list or current_data.empty:
+        logger.warning("Empty input provided to cosine_similarity_matrix")
+        return pd.DataFrame()
 
+    cosine_matrix = pd.DataFrame(0.0, index=seq_list, columns=seq_list, dtype=float)
+    
+    seq_to_idx = {
+        seq: current_data[current_data.seq_num == seq].index[0]
+        for seq in seq_list
+        if not current_data[current_data.seq_num == seq].empty
+    }
+    
+    try:
+        valid_vectors = np.array([vectors[seq_to_idx[seq]] for seq in seq_list 
+                                if seq in seq_to_idx and seq_to_idx[seq] < len(vectors)])
+        
+        if len(valid_vectors) > 0:
+            norms = np.linalg.norm(valid_vectors, axis=1, keepdims=True)
+            normalized_vectors = np.divide(valid_vectors, norms, where=norms!=0)
+            
+            similarity_matrix = np.dot(normalized_vectors, normalized_vectors.T)
+            
+            valid_seq_list = [seq for seq in seq_list if seq in seq_to_idx 
+                            and seq_to_idx[seq] < len(vectors)]
+            for i, seq_i in enumerate(valid_seq_list):
+                for j, seq_j in enumerate(valid_seq_list):
+                    if i < j:  # Only fill upper triangle and mirror
+                        similarity = float(similarity_matrix[i, j])
+                        cosine_matrix.loc[seq_i, seq_j] = similarity
+                        cosine_matrix.loc[seq_j, seq_i] = similarity
+    except Exception as e:
+        logger.error(f"Error calculating similarity matrix: {str(e)}")
+        
     return cosine_matrix
