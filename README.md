@@ -1,12 +1,12 @@
 # GCA Analyzer
 
-A Python package for analyzing group conversation dynamics using advanced NLP techniques and quantitative metrics.
+A Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics.
 
 English | [中文](README_zh.md) | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 ## Features
 
-- **Multi-language Support**: Built-in support for Chinese and other languages through advanced LLM models
+- **Multi-language Support**: Built-in support for Chinese and other languages through LLM models
 - **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
 - **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 - **Flexible Configuration**: Customizable parameters for different analysis needs
@@ -39,6 +39,10 @@ conversation_id,person_id,time,text
 ```bash
 python -m gca_analyzer --data your_data.csv
 ```
+
+3. Descriptive statistics for GCA measures:
+
+![Descriptive Statistics](/doc/imgs/gca_results.jpg)
 
 ## Detailed Usage
 
@@ -105,10 +109,10 @@ Results are saved as CSV files in the specified output directory.
 ## FAQ
 
 1. **Q: Why are some participation values negative?**
-   A: Participation values are normalized around the mean. Negative values indicate below-average participation, while positive values indicate above-average participation.
+   A: Participation values are adjusted based on group size and represent deviation from perfectly equal participation. Negative values indicate contributions below the equal-participation amount, while positive values indicate contributions above it. A value of 0 means all participants contributed equally. This measurement allows us to intuitively see each participant's performance relative to equal participation.
 
 2. **Q: What's the optimal window size?**
-   A: The analyzer automatically finds the optimal window size based on the `best-window-indices` parameter. Lower values (e.g., 0.03) result in smaller windows, which may be more suitable for shorter conversations.
+   A: The analyzer automatically finds the optimal window size based on the `best-window-indices` parameter. Lower values (e.g., 0.03) result in smaller windows, which may be more suitable for sparse conversations.
 
 3. **Q: How to handle different languages?**
    A: The analyzer uses LLM models for text processing and supports multiple languages by default. For Chinese text, it uses the Chinese base model.

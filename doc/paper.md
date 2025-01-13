@@ -22,20 +22,19 @@ bibliography: paper.bib
 
 # Summary
 
-Group conversation analysis is crucial for understanding social dynamics, learning behaviors, and communication patterns in various settings, particularly in educational contexts. The GCA Analyzer is a Python package that implements a comprehensive set of metrics and methods for analyzing group conversations, with special emphasis on Chinese text processing capabilities. This tool provides quantitative measures for participation patterns, interaction dynamics, content novelty, and communication density, making it especially valuable for researchers in education, social psychology, and communication studies who work with Chinese language data.
+Group conversation analysis is crucial for understanding social dynamics, learning behaviors, and communication patterns in various settings, particularly in educational contexts. The GCA Analyzer is a Python package that implements a comprehensive set of metrics and methods for analyzing group conversations, with special emphasis on Chinese text processing capabilities. This tool provides quantitative measures for participation patterns, interaction dynamics, content novelty, and communication density, making it especially valuable for researchers in education, social psychology, and communication studies.
 
 # Statement of Need
 
-Understanding group conversation dynamics is essential in various fields, from educational research to organizational behavior studies. While several tools exist for conversation analysis, there is a notable gap in tools that can effectively handle Chinese text while providing comprehensive interaction metrics. The GCA Analyzer addresses this gap by providing:
+Understanding group conversation dynamics is essential in various fields, from educational research to organizational behavior studies. While several tools exist for conversation analysis, there is a notable gap in tools that can effectively handle text while providing comprehensive interaction metrics. The GCA Analyzer addresses this gap by providing:
 
-1. Specialized Chinese text processing with word segmentation and stop word filtering
-2. Robust participation analysis through participation matrices
-3. Temporal interaction analysis using sliding windows
-4. Content similarity and novelty metrics
-5. Social impact and responsivity measurements
-6. Visualization capabilities for interaction patterns
+1. Robust participation analysis through participation matrices
+2. Temporal interaction analysis using sliding windows
+3. Content similarity and novelty metrics
+4. Social impact and responsivity measurements
+5. Visualization capabilities for interaction patterns
 
-These features enable researchers to conduct detailed analyses of group conversations, particularly in Chinese educational and organizational settings, supporting both research and practical applications.
+These features enable researchers to conduct detailed analyses of group conversations, particularly in educational and organizational settings, supporting both research and practical applications.
 
 # Mathematics
 
@@ -113,29 +112,5 @@ where $L_t$ is the word length of the message.
 The average communication density $\bar{D_a}$ for participant $a$ is:
 
 $\bar{D_a} = \frac{1}{\|P_a\|}\sum_{t \in T_a} D_i$
-
-# Implementation
-
-The GCA Analyzer is implemented in Python, utilizing modern data science libraries and specialized Chinese NLP tools. The package is structured around four main components:
-
-1. **Text Processor (`text_processor.py`)**
-   - Chinese word segmentation using jieba
-   - Stop words filtering
-   - URL and emoji handling
-   - Special character normalization
-   - TF-IDF vectorization
-
-2. **Core Analyzer (`analyzer.py`)**
-   - Participation matrix construction
-   - Window-based interaction analysis
-   - Integration of all metrics calculations
-
-3. **Visualizer (`visualizer.py`)**
-   - Participation heatmaps
-   - Interaction networks
-   - Metric radar charts
-   - Temporal evolution plots
-
-The implementation emphasizes efficiency and scalability while maintaining readability and extensibility of the codebase. The package supports both CSV and structured data input formats, making it flexible for various research contexts.
 
 # References

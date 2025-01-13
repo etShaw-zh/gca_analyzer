@@ -27,8 +27,8 @@ def main():
     
     # Model configuration
     parser.add_argument('--model-name', type=str, 
-                      default='iic/nlp_gte_sentence-embedding_chinese-base',
-                      help='Name of the model to use (default: iic/nlp_gte_sentence-embedding_chinese-base)')
+                      default='sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
+                      help='Name of the model to use (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)')
     parser.add_argument('--model-mirror', type=str,
                       default='https://modelscope.cn/models',
                       help='Mirror URL for model download (default: https://modelscope.cn/models)')
