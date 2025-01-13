@@ -61,9 +61,9 @@ class LLMTextProcessor:
                 self._init_modelscope_model()
             else:
                 self._init_huggingface_model()
-        except Exception as e:
-            logger.error(f"Error loading model: {str(e)}")
-            raise
+        except Exception as e: # pragma: no cover
+            logger.error(f"Error loading model: {str(e)}") # pragma: no cover
+            raise # pragma: no cover
 
     def _init_modelscope_model(self):
         """Initialize model from ModelScope."""

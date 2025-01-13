@@ -9,7 +9,7 @@ from gca_analyzer import (
 
 def main(args=None):
     """Main function to run GCA analysis from command line."""
-    if args is None:
+    if args is None: # pragma: no cover
         parser = argparse.ArgumentParser(
             description='GCA (Group Communication Analysis) Analyzer'
         )
@@ -96,8 +96,8 @@ def main(args=None):
 
     try:
         os.makedirs(args.output, exist_ok=True)
-    except OSError as e:
-        raise OSError(f"Failed to create output directory {args.output}: {str(e)}")
+    except OSError as e: # pragma: no cover
+        raise OSError(f"Failed to create output directory {args.output}: {str(e)}") # pragma: no cover
 
     df = pd.read_csv(args.data)
 
@@ -155,8 +155,8 @@ def main(args=None):
             plot_metrics_distribution.write_html(
                 os.path.join(args.output, f'metrics_distribution_{conversation_id}.html')
             )
-        except OSError as e:
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}")
+        except OSError as e: # pragma: no cover
+            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
 
         plot_metrics_radar = visualizer.plot_metrics_radar(
             normalize_metrics(metrics_df, metrics, inplace=False),
@@ -167,16 +167,16 @@ def main(args=None):
             plot_metrics_radar.write_html(
                 os.path.join(args.output, f'metrics_radar_{conversation_id}.html')
             )
-        except OSError as e:
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}")
+        except OSError as e: # pragma: no cover
+            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
 
         try:
             metrics_df.to_csv(os.path.join(args.output, f'metrics_{conversation_id}.csv'))
-        except OSError as e:
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}")
+        except OSError as e: # pragma: no cover
+            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
 
     analyzer.calculate_descriptive_statistics(all_metrics, args.output)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     main()
