@@ -41,7 +41,13 @@ Development Setup
       git add .
       git commit -m "Description of changes"
 
-6. Push and create a pull request
+6. Test your changes:
+
+   .. code-block:: bash
+
+      pytest tests/ --cov=gca_analyzer --cov-report=term-missing
+
+7. Push and create a pull request
 
 Pull Request Guidelines
 ~~~~~~~~~~~~~~~~~~~~~~~~
