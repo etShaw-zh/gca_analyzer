@@ -44,8 +44,17 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: etShaw-zh/gca_analyzer
 
-    - name: Publish Test Results
+    - name: Comment PR with Test Results
       if: always() && github.event_name == 'pull_request'
-      uses: EnricoMi/publish-unit-test-result-action@v2
+      uses: actions/github-script@v6
       with:
-        junit_files: "pytest.xml"
+        script: |
+          const fs = require('fs');
+          const testOutput = fs.readFileSync('pytest-output.txt', 'utf8');
+          const body = `### Test Results \n\n\`\`\`\n${testOutput}\n\`\`\``;
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
