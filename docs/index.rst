@@ -1,5 +1,5 @@
 Welcome to GCA Analyzer
-==================
+========================
 
 GCA Analyzer is a Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics. It provides comprehensive tools for understanding participation patterns, interaction dynamics, content novelty, and communication density in group conversations.
 
@@ -8,7 +8,7 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
 ..    :align: center
 
 Key Features
------------
+-------------
 
 * **Multi-language Support**: Built-in support for multiple languages through LLM models
 * **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
@@ -17,7 +17,7 @@ Key Features
 * **Easy Integration**: Command-line interface and Python API support
 
 Documentation Contents
---------------------
+-----------------------
 
 .. toctree::
    :maxdepth: 2
@@ -58,7 +58,7 @@ If you use GCA Analyzer in your research, please cite:
    }
 
 References
----------
+------------
 
 This package is based on the following papers [Dowell2019]_ [Wang2025]_:
 

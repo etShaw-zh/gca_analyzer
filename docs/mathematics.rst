@@ -1,10 +1,10 @@
 Mathematical Foundation
-=====================
+========================
 
 This section explains the mathematical principles behind GCA Analyzer's metrics.
 
 Core Metrics
------------
+---------------
 
 The GCA Analyzer implements three categories of metrics to provide comprehensive analysis of group conversation dynamics:
 
@@ -119,7 +119,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
    - L_t is the length of the text message  
 
 Window Size Optimization
-----------------------
+-------------------------
 
 The optimal window size w* is determined by:
 

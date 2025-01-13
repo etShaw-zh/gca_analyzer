@@ -4,7 +4,7 @@ Getting Started
 This guide will help you get started with GCA Analyzer quickly.
 
 Prerequisites
-------------
+--------------
 
 Before installing GCA Analyzer, ensure you have:
 
@@ -22,7 +22,7 @@ Install GCA Analyzer using pip:
    pip install gca_analyzer
 
 Quick Start
-----------
+------------
 
 Here's a simple example to analyze a group conversation:
 
@@ -44,7 +44,7 @@ Here's a simple example to analyze a group conversation:
    python -m gca_analyzer --data your_data.csv
 
 Input Data Format
----------------
+------------------
 
 The input data should be a CSV file with the following columns:
 
@@ -54,7 +54,7 @@ The input data should be a CSV file with the following columns:
 - ``time``: Timestamp of the message
 
 Configuration Options
-------------------
+----------------------
 
 Command line arguments:
 
@@ -69,7 +69,7 @@ Command line arguments:
   - Default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 
 Example Results
--------------
+----------------
 
 After running the analysis, you'll get metrics including:
 

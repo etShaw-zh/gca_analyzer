@@ -4,10 +4,10 @@ Frequently Asked Questions
 This section addresses common questions about GCA Analyzer's metrics and functionality.
 
 Participation Values
-------------------
+---------------------
 
 Q: Why are some participation values negative?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Participation values are adjusted based on group size and represent deviation from perfectly equal participation. 
 Negative values indicate contributions below the equal-participation amount, while positive values indicate 
@@ -19,10 +19,10 @@ contributes more than this, they will have a positive participation value, and i
 will have a negative value.
 
 Window Size Configuration
------------------------
+-------------------------
 
 Q: What's the optimal window size?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The analyzer automatically finds the optimal window size based on the ``best-window-indices`` parameter. 
 Lower values (e.g., 0.03) result in smaller windows, which may be more suitable for sparse conversations.
@@ -32,10 +32,10 @@ The window size affects how the analyzer measures interaction patterns:
 - Larger windows: Better for capturing broader conversation dynamics  
 
 Language Support
---------------
+-------------------
 
 Q: How to handle different languages?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The analyzer uses LLM (Large Language Model) models for text processing and supports multiple languages by default. 
 For Chinese text, it uses the Chinese base model. The multilingual support includes:

@@ -4,10 +4,10 @@ Advanced Usage
 This guide covers advanced features and configurations of GCA Analyzer.
 
 Configuration Options
--------------------
+-----------------------
 
 Window Size Optimization
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The analyzer automatically finds the optimal window size for analysis:
 
@@ -24,10 +24,10 @@ The analyzer automatically finds the optimal window size for analysis:
    )
 
 Advanced Analysis Features
-------------------------
+---------------------------
 
 Participation Analysis
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Understanding participation values:
 
@@ -43,7 +43,7 @@ Understanding participation values:
    participation = metrics[['Pa', 'Pa_average', 'Pa_std']]
 
 Interaction Analysis
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Analyze interaction patterns:
 
@@ -67,7 +67,7 @@ Analyze content patterns:
    content_metrics = metrics[['newness', 'comm_density']]
 
 Language Model Configuration
---------------------------
+-----------------------------
 
 .. note::
    Ensure you have the appropriate language model credentials configured before using these features.
@@ -98,14 +98,14 @@ Language Model Configuration
    analyzer = GCAAnalyzer(config=config)
 
 Performance Considerations
-------------------------
+--------------------------
 
 * For large conversations (>1000 messages), consider batch processing
 * Memory usage scales with conversation size and window parameters
 * Use appropriate window sizes for optimal performance
 
 Visualization
-------------
+--------------
 
 Create visualizations of analysis results:
 

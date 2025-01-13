@@ -1,10 +1,10 @@
 Contributing Guide
-=================
+===================
 
 We welcome contributions to GCA Analyzer! Here's how you can help:
 
 Ways to Contribute
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 - Report bugs and feature requests through `GitHub Issues <https://github.com/etShaw-zh/gca_analyzer/issues>`_
 - Submit pull requests for bug fixes and features
@@ -12,7 +12,7 @@ Ways to Contribute
 - Share your use cases and feedback
 
 Development Setup
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 1. Fork the repository
 2. Clone your fork:
@@ -44,7 +44,7 @@ Development Setup
 6. Push and create a pull request
 
 Pull Request Guidelines
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Follow the existing code style
 - Add tests for new features
@@ -53,7 +53,7 @@ Pull Request Guidelines
 - Keep pull requests focused on a single change
 
 Need Help?
-~~~~~~~~~
+~~~~~~~~~~~
 
 If you need help with anything:
 
