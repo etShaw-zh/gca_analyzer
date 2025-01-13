@@ -40,7 +40,6 @@ setup(
         'torch>=2.0.0',
         'transformers>=4.30.0',
         'sentence-transformers>=2.2.0',
-        'rich>=13.0.0',
     ],
     author="Jianjun Xiao",
     author_email="et_shaw@126.com",
@@ -62,7 +61,12 @@ setup(
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Text Processing :: Linguistic",
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.12',
+    entry_points={
+        'console_scripts': [
+            'gca_analyzer = gca_analyzer.__main__:main',
+        ],
+    },
     include_package_data=True,
     package_data={
         'gca_analyzer': ['data/*.txt'],

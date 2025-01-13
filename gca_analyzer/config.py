@@ -67,6 +67,30 @@ class VisualizationConfig:
 
 
 @dataclass
+class LoggerConfig:
+    """Configuration for logging settings.
+
+    Attributes:
+        console_level (str): Logging level for console output. Defaults to "INFO".
+        file_level (str): Logging level for file output. Defaults to "DEBUG".
+        log_file (str | None): Path to log file. If None, only console output is used.
+            Defaults to None.
+        rotation (str): Log file rotation setting. Defaults to "10 MB".
+        compression (str): Log file compression format. Defaults to "zip".
+        console_format (str): Format string for console output.
+        file_format (str): Format string for file output.
+    """
+
+    console_level: str = "INFO"
+    file_level: str = "DEBUG"
+    log_file: str | None = None
+    rotation: str = "10 MB"
+    compression: str = "zip"
+    console_format: str = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>"
+    file_format: str = "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} | {message}"
+
+
+@dataclass
 class Config:
     """Main configuration class for GCA analyzer.
 
@@ -77,6 +101,7 @@ class Config:
         window (WindowConfig): Configuration for window analysis.
         model (ModelConfig): Configuration for language model.
         visualization (VisualizationConfig): Configuration for visualization.
+        logger (LoggerConfig): Configuration for logging.
     """
 
     window: WindowConfig = field(default_factory=WindowConfig)
@@ -84,6 +109,7 @@ class Config:
     visualization: VisualizationConfig = field(
         default_factory=VisualizationConfig
     )
+    logger: LoggerConfig = field(default_factory=LoggerConfig)
 
 
 # Default configuration instance

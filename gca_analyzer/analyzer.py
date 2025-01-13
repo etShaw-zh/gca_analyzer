@@ -13,6 +13,7 @@ License: Apache 2.0
 import numpy as np
 import pandas as pd
 from typing import Tuple, List, Optional
+import os
 
 from .llm_processor import LLMTextProcessor
 from .utils import cosine_similarity_matrix
@@ -168,13 +169,11 @@ class GCAAnalyzer:
                 
                 if participation_rate >= best_window_indices:
                     found_valid_window = True
-                    logger.info(f"Found valid window size: {w}")
+                    print(f"=== Found valid window size: {w} (current window threshold: {best_window_indices}) ===")
                     return w
             
             if not found_valid_window and w == max_num:
-                logger.info(
-                    f"No valid window size found between {min_num} and {max_num}"
-                )
+                print(f"=== No valid window size found between {min_num} and {max_num}, using max_num: {max_num} (current window threshold: {best_window_indices}) ===")
                 return max_num
         
         return max_num
@@ -573,3 +572,51 @@ class GCAAnalyzer:
             D_i_dict=D_i_dict
         )
         return metrics_df
+
+    def calculate_descriptive_statistics(
+        self,
+        all_metrics: dict,
+        output_dir: str = None
+    ) -> pd.DataFrame:
+        """Calculate descriptive statistics for GCA measures.
+
+        Args:
+            all_metrics (dict): Dictionary of DataFrames containing metrics for each conversation.
+            output_dir (str, optional): Directory to save the statistics CSV file.
+                If None, the file will not be saved.
+
+        Returns:
+            pd.DataFrame: DataFrame containing descriptive statistics for each measure.
+        """
+        all_data = pd.concat(all_metrics.values())
+        
+        stats = pd.DataFrame({
+            'Minimum': all_data.min(),
+            'Median': all_data.median(),
+            'M': all_data.mean(),
+            'SD': all_data.std(),
+            'Maximum': all_data.max()
+        }).round(2)
+        
+        print("=== Descriptive statistics for GCA measures ===")
+        print("-" * 60)
+        print("Measure".ljust(20), end='')
+        print("Minimum  Median  M      SD     Maximum")
+        print("-" * 60)
+        for measure in stats.index:
+            row = stats.loc[measure]
+            print(f"{measure.replace('_', ' ').title().ljust(20)}"
+                f"{row['Minimum']:7.2f}  "
+                f"{row['Median']:6.2f}  "
+                f"{row['M']:5.2f}  "
+                f"{row['SD']:5.2f}  "
+                f"{row['Maximum']:7.2f}"
+            )
+        print("-" * 60)
+        
+        if output_dir:
+            output_file = os.path.join(output_dir, 'descriptive_statistics_gca.csv')
+            stats.to_csv(output_file)
+            print(f"Saved descriptive statistics to: {output_file}")
+        
+        return stats

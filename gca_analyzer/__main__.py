@@ -2,7 +2,7 @@ import os
 import argparse
 import pandas as pd
 from gca_analyzer import (
-    Config, WindowConfig, ModelConfig, VisualizationConfig,
+    Config, WindowConfig, ModelConfig, VisualizationConfig, LoggerConfig,
     GCAAnalyzer, GCAVisualizer, normalize_metrics
 )
 
@@ -39,6 +39,20 @@ def main():
     parser.add_argument('--heatmap-figsize', type=float, nargs=2, default=[10, 6],
                       help='Heatmap figure size (width height) (default: 10 6)')
     
+    # Logger configuration
+    parser.add_argument('--log-file', type=str,
+                      help='Path to log file. If not specified, only console output is used')
+    parser.add_argument('--console-level', type=str, default='INFO',
+                      choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                      help='Logging level for console output (default: INFO)')
+    parser.add_argument('--file-level', type=str, default='DEBUG',
+                      choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                      help='Logging level for file output (default: DEBUG)')
+    parser.add_argument('--log-rotation', type=str, default='10 MB',
+                      help='Log file rotation setting (default: 10 MB)')
+    parser.add_argument('--log-compression', type=str, default='zip',
+                      help='Log file compression format (default: zip)')
+    
     args = parser.parse_args()
 
     # Read data
@@ -59,6 +73,17 @@ def main():
         default_figsize=tuple(args.default_figsize),
         heatmap_figsize=tuple(args.heatmap_figsize)
     )
+    config.logger = LoggerConfig(
+        console_level=args.console_level,
+        file_level=args.file_level,
+        log_file=args.log_file,
+        rotation=args.log_rotation,
+        compression=args.log_compression
+    )
+
+    # Initialize logger with configuration
+    from .logger import setup_logger
+    logger = setup_logger(config)
 
     # Initialize analyzer and visualizer
     analyzer = GCAAnalyzer(config=config)
@@ -79,10 +104,7 @@ def main():
     for conversation_id in conversation_ids:
         print(f"=== Analyzing Conversation {conversation_id} ===")
         
-        # Run GCA analysis
         metrics_df = analyzer.analyze_conversation(conversation_id, df)
-        
-        # Rename columns to match required metric names
         metrics_df = metrics_df.rename(columns={
             'Pa_hat': 'participation',
             'Overall_responsivity': 'responsivity',
@@ -92,12 +114,10 @@ def main():
             'Communication_density': 'comm_density'
         })
         
-        # Keep only the required metrics
         metrics_df = metrics_df[metrics]
         
         all_metrics[conversation_id] = metrics_df
 
-        # Generate and save the distribution plot
         plot_metrics_distribution = visualizer.plot_metrics_distribution(
             normalize_metrics(metrics_df, metrics, inplace=False), 
             metrics=metrics,
@@ -105,7 +125,6 @@ def main():
         )
         plot_metrics_distribution.write_html(os.path.join(args.output, f'metrics_distribution_{conversation_id}.html'))
 
-        # Create metrics radar chart
         plot_metrics_radar = visualizer.plot_metrics_radar(
             normalize_metrics(metrics_df, metrics, inplace=False),
             metrics=metrics,
@@ -113,48 +132,9 @@ def main():
         )
         plot_metrics_radar.write_html(os.path.join(args.output, f'metrics_radar_{conversation_id}.html'))
         
-        # Save detailed results to CSV
         metrics_df.to_csv(os.path.join(args.output, f'metrics_{conversation_id}.csv'))
     
-    # Merge data from all conversations
-    all_data = pd.concat(all_metrics.values())
-    
-    # Calculate descriptive statistics
-    stats = pd.DataFrame({
-        'Minimum': all_data.min(),
-        'Median': all_data.median(),
-        'M': all_data.mean(),
-        'SD': all_data.std(),
-        'Maximum': all_data.max()
-    }).round(2)
-    
-    measure_order = [
-        'participation',
-        'social_impact',
-        'responsivity',
-        'internal_cohesion',
-        'newness',
-        'comm_density'
-    ]
-    stats = stats.reindex(measure_order)
-    
-    # Print descriptive statistics
-    print("\n=== Descriptive statistics for GCA measures ===")
-    print("Measure".ljust(20), end='')
-    print("Minimum  Median  M      SD     Maximum")
-    print("-" * 60)
-    
-    for measure in measure_order:
-        row = stats.loc[measure]
-        print(f"{measure.replace('_', ' ').title().ljust(20)}"
-              f"{row['Minimum']:7.2f}  "
-              f"{row['Median']:6.2f}  "
-              f"{row['M']:5.2f}  "
-              f"{row['SD']:5.2f}  "
-              f"{row['Maximum']:7.2f}")
-    
-    # Save summary results
-    stats.to_csv(os.path.join(args.output, 'descriptive_statistics.csv'))
+    analyzer.calculate_descriptive_statistics(all_metrics, args.output)
 
 if __name__ == '__main__':
     main()
