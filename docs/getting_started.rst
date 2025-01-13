@@ -19,7 +19,7 @@ Install GCA Analyzer using pip:
 
 .. code-block:: bash
 
-   pip install gca_analyzer
+   pip install gca-analyzer
 
 Quick Start
 ------------

@@ -1,8 +1,22 @@
+English | [简体中文](README_zh.md)
 # GCA Analyzer
 
-A Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics.
+<div align="left">
+    <a href="https://pypi.org/project/gca-analyzer">
+        <img src="https://badge.fury.io/py/gca-analyzer.svg" alt="PyPI version">
+    </a>
+    <img src="https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg" alt="Tests">
+    <a href="https://gca-analyzer.readthedocs.io/en/latest/?badge=latest">
+        <img src="https://readthedocs.org/projects/gca-analyzer/badge/?version=latest" alt="Documentation Status">
+    </a>
+    <a href="https://codecov.io/gh/etShaw-zh/gca_analyzer">
+        <img src="https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L" alt="Coverage Status">
+    </a>
+</div>
 
-English | [中文](README_zh.md) | [日本語](README_ja.md) | [한국어](README_ko.md)
+## Introduction
+
+GCA Analyzer is a Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics.
 
 ## Features
 
@@ -18,7 +32,7 @@ English | [中文](README_zh.md) | [日本語](README_ja.md) | [한국어](READM
 
 ```bash
 # Install from PyPI
-pip install gca_analyzer
+pip install gca-analyzer
 
 # For development
 git clone https://github.com/etShaw-zh/gca_analyzer.git

@@ -39,13 +39,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 
       \bar{p}_a = \frac{1}{n}||Pa||
 
-   3. Participation Standard Deviation (σa):
-
-   .. math::
-
-      \sigma_a = \sqrt{\frac{1}{n-1}\sum_{t=1}^{n}(M_{a,t} - \bar{p}_a)^2}
-
-   4. Normalized Participation Rate (P̂a):
+   3. Adjusted Participation Rate (P̂a):
 
    .. math::
 
@@ -93,12 +87,12 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 3. **Content Analysis Metrics**
    Evaluates the semantic aspects of contributions using advanced NLP techniques:
 
-   - **Message Newness**: Measures the introduction of novel content to the discussion  
+   - **Content Newness**: Measures the introduction of novel content to the discussion  
    - **Communication Density**: Assesses the information density of contributions  
 
    Content analysis is performed using LSA (Latent Semantic Analysis):
 
-   1. Message Newness (n(ct)):
+   1. Content Newness (n(ct)):
 
    .. math::
 
@@ -114,7 +108,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 
       D_i = \frac{||c_t||}{L_t}
 
-   where:
+   where:  
    - ||c_t|| is the norm of the contribution vector  
    - L_t is the length of the text message  
 
@@ -127,6 +121,6 @@ The optimal window size w* is determined by:
 
    w* = \argmax_{w \in [w_{min}, w_{max}]} P(w)
 
-where:
+where:  
 - P(w) is the proportion of active participants in window w  
 - w_{min} and w_{max} are configurable minimum and maximum window sizes  
