@@ -6,12 +6,16 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  checks: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v3
@@ -29,5 +33,27 @@ jobs:
         pip install -e .
         
     - name: Run tests
+      id: test
       run: |
-        pytest tests/
+        pytest tests/ --junitxml=pytest.xml -v > pytest-output.txt
+
+    - name: Publish Test Results
+      if: always() && github.event_name == 'pull_request'
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        junit_files: "pytest.xml"
+        
+    - name: Comment PR with Test Results
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const testOutput = fs.readFileSync('pytest-output.txt', 'utf8');
+          const body = `### Test Results \n\n\`\`\`\n${testOutput}\n\`\`\``;
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
