@@ -36,7 +36,7 @@ jobs:
       id: test
       run: |
         pytest tests/ --junitxml=pytest.xml -v > pytest-output.txt
-        pytest --cov-branch --cov-report=xml
+        pytest --cov=gca_analyzer --cov-branch --cov-report=xml:coverage.xml tests/
           
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
@@ -49,4 +49,3 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
         junit_files: "pytest.xml"
-
