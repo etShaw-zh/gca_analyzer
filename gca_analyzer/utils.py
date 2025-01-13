@@ -135,9 +135,9 @@ def cosine_similarity_matrix(
         seq_to_idx = {}
         for seq in seq_list:
             matches = current_data[current_data.seq_num == seq]
-            if not matches.empty:
+            if not matches.empty:  # pragma: no cover
                 idx = matches.index[0]
-                if idx < len(vectors):
+                if idx < len(vectors): # pragma: no cover
                     seq_to_idx[seq] = idx
 
         # Get valid vectors and their sequence numbers

@@ -1,18 +1,10 @@
 [English](README.md) | 简体中文
 # GCA Analyzer
 
-<div align="left">
-    <a href="https://pypi.org/project/gca-analyzer">
-        <img src="https://badge.fury.io/py/gca-analyzer.svg" alt="PyPI version">
-    </a>
-    <img src="https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg" alt="Tests">
-    <a href="https://gca-analyzer.readthedocs.io/en/latest/?badge=latest">
-        <img src="https://readthedocs.org/projects/gca-analyzer/badge/?version=latest" alt="Documentation Status">
-    </a>
-    <a href="https://codecov.io/gh/etShaw-zh/gca_analyzer">
-        <img src="https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L" alt="Coverage Status">
-    </a>
-</div>
+[![PyPI version](https://badge.fury.io/py/gca-analyzer.svg)](https://pypi.org/project/gca-analyzer)
+![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
+[![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
+[![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
 
 ## 介绍
 
