@@ -2,20 +2,20 @@
 title: 'GCA Analyzer: A Python Package for Group Conversation Analysis with Focus on Chinese Text'
 tags:
   - Python
-  - conversation analysis
-  - group dynamics
-  - text processing
-  - Chinese NLP
-  - social interaction
-  - educational research
+  - MOOC
+  - Group Conversation Analysis
+  - Group Dynamics
+  - Text Processing
+  - Social Interaction
+  - Educational Research
 authors:
-  - name: [Your Name]
-    orcid: [Your ORCID]
+  - name: [Jianjun Xiao]
+    orcid: [0000-0003-0000-9630]
     affiliation: 1
 affiliations:
- - name: [Your Institution]
+ - name: [Beijing Normal University]
    index: 1
-date: 12 January 2025
+date: 2025-01-12
 bibliography: paper.bib
 
 ---

@@ -6,7 +6,7 @@ including dependency management and package metadata.
 Author: Jianjun Xiao
 Email: et_shaw@126.com
 Date: 2025-01-12
-License: MIT
+License: Apache 2.0
 """
 
 import os
@@ -53,7 +53,7 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

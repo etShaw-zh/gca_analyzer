@@ -7,7 +7,7 @@ including heatmaps, network graphs, and various metrics visualizations.
 Author: Jianjun Xiao
 Email: et_shaw@126.com
 Date: 2025-01-12
-License: MIT
+License: Apache 2.0
 """
 
 from typing import Dict, List, Optional, Any
