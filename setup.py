@@ -58,10 +58,13 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Text Processing :: Linguistic",
     ],
-    python_requires='>=3.12',
+    python_requires='>=3.8',
     entry_points={
         'console_scripts': [
             'gca_analyzer = gca_analyzer.__main__:main',
