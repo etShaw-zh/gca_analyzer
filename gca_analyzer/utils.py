@@ -41,53 +41,27 @@ def normalize_metrics(data: pd.DataFrame, metrics: Union[str, List[str]], inplac
 
     return data
 
-def cosine_similarity(vec1, vec2) -> float:
+def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """
-    Calculate cosine similarity between two vectors.
+    Calculate cosine similarity between two numpy arrays.
     
     Args:
-        vec1: First vector (numpy array, torch tensor, or sparse vector as list of tuples)
-        vec2: Second vector (numpy array, torch tensor, or sparse vector as list of tuples)
+        vec1: First vector (numpy array)
+        vec2: Second vector (numpy array)
         
     Returns:
         float: Cosine similarity between the vectors
     """
-    import numpy as np
-    import torch
-
-    # Convert inputs to numpy arrays if they're not already
-    if isinstance(vec1, list) and len(vec1) > 0 and isinstance(vec1[0], tuple):
-        # Handle sparse vector format (list of tuples)
-        dict1 = dict(vec1)
-        dict2 = dict(vec2)
-        indices = set(dict1.keys()) | set(dict2.keys())
-        vec1_dense = np.array([dict1.get(i, 0) for i in sorted(indices)])
-        vec2_dense = np.array([dict2.get(i, 0) for i in sorted(indices)])
-    elif isinstance(vec1, torch.Tensor):
-        # Handle torch tensors
-        vec1_dense = vec1.detach().cpu().numpy()
-        vec2_dense = vec2.detach().cpu().numpy()
-    elif isinstance(vec1, np.ndarray):
-        # Handle numpy arrays
-        vec1_dense = vec1
-        vec2_dense = vec2
-    else:
-        # Try to convert to numpy array
-        vec1_dense = np.array(vec1)
-        vec2_dense = np.array(vec2)
-
-    # Ensure vectors are 1D
-    vec1_dense = vec1_dense.flatten()
-    vec2_dense = vec2_dense.flatten()
-
-    # Calculate cosine similarity
-    norm1 = np.linalg.norm(vec1_dense)
-    norm2 = np.linalg.norm(vec2_dense)
+    vec1_flat = vec1.flatten()
+    vec2_flat = vec2.flatten()
+    
+    norm1 = np.linalg.norm(vec1_flat)
+    norm2 = np.linalg.norm(vec2_flat)
     
     if norm1 == 0 or norm2 == 0:
         return 0.0
-        
-    return float(np.dot(vec1_dense, vec2_dense) / (norm1 * norm2))
+    
+    return float(np.dot(vec1_flat, vec2_flat) / (norm1 * norm2))
 
 def cosine_similarity_matrix(vectors: List[np.ndarray], seq_list: List[int], current_data: pd.DataFrame) -> pd.DataFrame:
     """

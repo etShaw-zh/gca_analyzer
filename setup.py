@@ -40,6 +40,7 @@ setup(
         'torch>=2.0.0',
         'transformers>=4.30.0',
         'sentence-transformers>=2.2.0',
+        'rich>=13.0.0',
     ],
     author="Jianjun Xiao",
     author_email="et_shaw@126.com",

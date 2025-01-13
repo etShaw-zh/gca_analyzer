@@ -10,14 +10,12 @@ Date: 2025-01-12
 License: Apache 2.0
 """
 
-from typing import Dict, List, Optional, Any
+from typing import List, Optional
 
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import seaborn as sns
 
 from .config import Config, default_config
 from .logger import logger
@@ -48,6 +46,36 @@ class GCAVisualizer:
         self.figsize = self._config.visualization.default_figsize
         plt.style.use('default')
         logger.debug("Style configuration set")
+        
+    def _validate_metrics_data(
+        self,
+        data: pd.DataFrame,
+        metrics: Optional[List[str]] = None,
+        operation: str = "plotting"
+    ) -> List[str]:
+        """Validate input data and metrics for plotting functions.
+
+        Args:
+            data: DataFrame containing metrics data
+            metrics: Optional list of metrics to include
+            operation: Description of the operation being performed (for error messages)
+
+        Returns:
+            List of validated metrics
+
+        Raises:
+            ValueError: If input data is empty or missing required metrics
+        """
+        if data.empty:
+            raise ValueError(f"Input data is empty for {operation}")
+        
+        if metrics is None:
+            return data.select_dtypes(include=[np.number]).columns.tolist()
+        
+        if not all(metric in data.columns for metric in metrics):
+            raise ValueError(f"Data must contain all specified metrics for {operation}: {metrics}")
+        
+        return metrics
 
     def plot_metrics_radar(
         self,
@@ -55,50 +83,23 @@ class GCAVisualizer:
         metrics: List[str],
         title: str = None
     ) -> go.Figure:
-        """Create a radar chart visualization of multiple metrics.
-
-        Args:
-            data: DataFrame containing metrics data
-            metrics: List of metric names to include
-            title: Optional title for the plot
-
-        Returns:
-            Plotly Figure object containing the radar chart
-
-        Raises:
-            ValueError: If input data is empty or missing required metrics
-        """
+        """Create a radar chart visualization of multiple metrics."""
         logger.info("Creating metrics radar chart")
         try:
-            if data.empty:
-                raise ValueError("Input data is empty")
+            metrics = self._validate_metrics_data(data, metrics, "radar chart")
             
-            if not all(metric in data.columns for metric in metrics):
-                raise ValueError(
-                    f"Data must contain all specified metrics: {metrics}"
-                )
-            
-            # Create radar chart
             fig = go.Figure()
             
             for idx, row in data.iterrows():
-                fig.add_trace(
-                    go.Scatterpolar(
-                        r=[row[m] for m in metrics],
-                        theta=metrics,
-                        fill='toself',
-                        name=str(idx)
-                    )
-                )
+                fig.add_trace(go.Scatterpolar(
+                    r=[row[m] for m in metrics],
+                    theta=metrics,
+                    fill='toself',
+                    name=str(idx)
+                ))
             
-            # Update layout
             fig.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True,
-                        range=[0, 1]
-                    )
-                ),
+                polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
                 showlegend=True,
                 title=title or 'Metrics Radar Chart',
                 height=600,
@@ -117,64 +118,33 @@ class GCAVisualizer:
         metrics: List[str] = None,
         title: str = None
     ) -> go.Figure:
-        """Create a violin plot of metrics distributions.
-
-        Args:
-            data: DataFrame containing metrics data
-            metrics: Optional list of metrics to include (defaults to all numeric
-                columns)
-            title: Optional title for the plot
-
-        Returns:
-            Plotly Figure object containing the violin plot
-
-        Raises:
-            ValueError: If input data is empty or missing required metrics
-        """
+        """Create a violin plot of metrics distributions."""
         logger.info("Creating metrics distribution plot")
         try:
-            if data.empty:
-                raise ValueError("Input data is empty")
+            metrics = self._validate_metrics_data(data, metrics, "distribution plot")
             
-            # If metrics not specified, use all numeric columns
-            if metrics is None:
-                metrics = data.select_dtypes(
-                    include=[np.number]
-                ).columns.tolist()
-            else:
-                if not all(metric in data.columns for metric in metrics):
-                    raise ValueError(
-                        f"Data must contain all specified metrics: {metrics}"
-                    )
-            
-            # Create violin plots
             fig = go.Figure()
             
             for metric in metrics:
-                fig.add_trace(
-                    go.Violin(
-                        x=[metric] * len(data),
-                        y=data[metric],
-                        name=metric,
-                        box_visible=True,
-                        meanline_visible=True,
-                        points="all",
-                        jitter=0.05,
-                        pointpos=-0.1,
-                        marker=dict(size=4),
-                        line_color='rgb(70,130,180)',
-                        fillcolor='rgba(70,130,180,0.3)',
-                        opacity=0.6,
-                        side='positive',
-                        width=1.8,
-                        meanline=dict(color="black", width=2),
-                        box=dict(
-                            line=dict(color="black", width=2)
-                        )
-                    )
-                )
+                fig.add_trace(go.Violin(
+                    x=[metric] * len(data),
+                    y=data[metric],
+                    name=metric,
+                    box_visible=True,
+                    meanline_visible=True,
+                    points="all",
+                    jitter=0.05,
+                    pointpos=-0.1,
+                    marker=dict(size=4),
+                    line_color='rgb(70,130,180)',
+                    fillcolor='rgba(70,130,180,0.3)',
+                    opacity=0.6,
+                    side='positive',
+                    width=1.8,
+                    meanline=dict(color="black", width=2),
+                    box=dict(line=dict(color="black", width=2))
+                ))
             
-            # Update layout
             fig.update_layout(
                 title=title or 'Metrics Distribution',
                 showlegend=False,
@@ -184,11 +154,7 @@ class GCAVisualizer:
                 width=1000,
                 template='plotly_white',
                 margin=dict(l=50, r=50, t=50, b=50),
-                xaxis=dict(
-                    showgrid=True,
-                    gridcolor='rgba(0,0,0,0.1)',
-                    tickangle=45
-                ),
+                xaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.1)', tickangle=45),
                 yaxis=dict(
                     showgrid=True,
                     gridcolor='rgba(0,0,0,0.1)',

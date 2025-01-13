@@ -303,54 +303,80 @@ class GCAAnalyzer:
         current_idx: int
     ) -> Tuple[float, float]:
         """
-        Calculate LSA given-new metrics for a contribution.
+        Calculate LSA (Latent Semantic Analysis) given-new metrics for a contribution.
+
+        This method computes two key metrics:
+        1. Proportion of new content (n_c_t): Measures how much new information
+           the current contribution brings compared to previous contributions.
+        2. Communication density (D_i): Measures the information density of
+           the current contribution, normalized by its length.
+
+        The calculation involves projecting the current vector onto the subspace
+        spanned by previous contribution vectors, then comparing the magnitudes
+        of the projected (given) and residual (new) components.
 
         Args:
-            vectors: List of document vectors
-            texts: List of corresponding texts
-            current_idx: Index of current contribution
+            vectors: List of document vectors, each representing a contribution.
+            texts: List of corresponding text content for each contribution.
+            current_idx: Index of the current contribution being analyzed.
 
         Returns:
             Tuple containing:
-            - Proportion of new content
-            - Communication density
+            - float: Proportion of new content (n_c_t), range [0, 1]
+            - float: Communication density (D_i)
+
+        Note:
+            For the first contribution (current_idx == 0), n_c_t is set to 1.0
+            (all content is new) and D_i is simply the norm of the first vector.
         """
         if current_idx == 0:
             return 1.0, np.linalg.norm(vectors[0])
-            
-        # Formula 21: Get previous contribution vectors
+
+        n_c_t = self._calculate_newness_proportion(vectors, current_idx)
+        D_i = self._calculate_communication_density(vectors[current_idx], texts[current_idx])
+
+        return n_c_t, D_i
+
+    def _calculate_newness_proportion(self, vectors: List[np.ndarray], current_idx: int) -> float:
+        """
+        Calculate the proportion of new content in the current contribution.
+
+        Args:
+            vectors: List of document vectors.
+            current_idx: Index of the current contribution.
+
+        Returns:
+            float: Proportion of new content (n_c_t), range [0, 1]
+        """
         prev_vectors = np.array(vectors[:current_idx])
-        
-        # Formula 22: Project onto previous contributions space
+        d_i = vectors[current_idx]
+
         # Calculate projection matrix for the subspace
         U, _, _ = np.linalg.svd(prev_vectors.T, full_matrices=False)
         proj_matrix = U @ U.T
-        
-        # Current vector
-        d_i = vectors[current_idx]
-        
-        # Formula 22: Get given component
+
+        # Get given and new components
         g_i = proj_matrix @ d_i
-        
-        # Formula 23: Get new component
         n_i = d_i - g_i
-        
-        # Formula 25: Calculate newness proportion
+
+        # Calculate newness proportion
         n_norm = np.linalg.norm(n_i)
         g_norm = np.linalg.norm(g_i)
-        if n_norm + g_norm > 0:
-            n_c_t = n_norm / (n_norm + g_norm)
-        else:
-            n_c_t = 0.0
-            
-        # Formula 27: Normalize density by contribution length
-        current_text_length = len(texts[current_idx])
-        if current_text_length > 0:
-            D_i = np.linalg.norm(d_i) / current_text_length
-        else:
-            D_i = 0.0
-        
-        return n_c_t, D_i
+        return n_norm / (n_norm + g_norm) if (n_norm + g_norm) > 0 else 0.0
+
+    def _calculate_communication_density(self, vector: np.ndarray, text: str) -> float:
+        """
+        Calculate the communication density of a contribution.
+
+        Args:
+            vector: Document vector of the contribution.
+            text: Corresponding text content of the contribution.
+
+        Returns:
+            float: Communication density (D_i)
+        """
+        text_length = len(text)
+        return np.linalg.norm(vector) / text_length if text_length > 0 else 0.0
 
     def calculate_given_new_dict(
         self,
