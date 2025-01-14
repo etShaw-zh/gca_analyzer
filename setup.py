@@ -54,13 +54,6 @@ setup(
         "Programming Language :: Python :: 3.13",
         "Topic :: Text Processing :: Linguistic",
         "Topic :: Scientific/Engineering :: Information Analysis",
-        "Topic :: Scientific/Engineering :: Behavioral Science",
-        "Topic :: Scientific/Engineering :: Education",
-        "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Topic :: Scientific/Engineering :: Mathematics",
-        "Topic :: Scientific/Engineering :: Visualization",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Operating System :: OS Independent",
     ],
     python_requires='>=3.12',
     entry_points={
