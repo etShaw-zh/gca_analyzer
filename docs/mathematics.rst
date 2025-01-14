@@ -63,6 +63,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
       \Xi_{ab} = \frac{1}{w}\sum_{\tau=1}^{w}\frac{\sum_{t=\tau+1}^{n}M_{a,t-\tau}M_{b,t}S_{t-\tau,t}}{\sum_{t=\tau+1}^{n}M_{a,t-\tau}M_{b,t}}
 
    where:
+   
    - w is the optimal window size
    - S_{t-τ,t} is the semantic similarity between contributions at t-τ and t
 
@@ -99,6 +100,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
       n(c_t) = \frac{||proj_{\perp H_t}(c_t)||}{||proj_{\perp H_t}(c_t)|| + ||c_t||}
 
    where:
+
    - ct is the current contribution vector  
    - H_t is the subspace spanned by previous contributions  
 
@@ -109,6 +111,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
       D_i = \frac{||c_t||}{L_t}
 
    where:  
+
    - ||c_t|| is the norm of the contribution vector  
    - L_t is the length of the text message  
 
@@ -122,5 +125,6 @@ The optimal window size w* is determined by:
    w* = \argmax_{w \in [w_{min}, w_{max}]} P(w)
 
 where:  
+
 - P(w) is the proportion of active participants in window w  
 - w_{min} and w_{max} are configurable minimum and maximum window sizes  
