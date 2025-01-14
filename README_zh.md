@@ -5,10 +5,12 @@
 ![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
 [![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
 [![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
+[![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer)](https://pepy.tech/projects/gca-analyzer)
+[![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer/month)](https://pepy.tech/projects/gca-analyzer)
 
 ## 介绍
 
-一个使用 NLP 技术和定量指标分析群体对话动态的 Python 包。
+一个使用 NLP 技术和定量指标分析群体对话动态的 Python 包。它提供了全面的工具来理解参与者**参与程度**、**交互动态**、**内容新鲜度**和**沟通密度**。
 
 ## 特性
 

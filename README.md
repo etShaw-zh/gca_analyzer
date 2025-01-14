@@ -5,10 +5,12 @@ English | [简体中文](README_zh.md)
 ![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
 [![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
 [![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
+[![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer)](https://pepy.tech/projects/gca-analyzer)
+[![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer/month)](https://pepy.tech/projects/gca-analyzer)
 
 ## Introduction
 
-GCA Analyzer is a Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics.
+GCA Analyzer is a Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics. It provides comprehensive tools for understanding **participation patterns**, **interaction dynamics**, **content novelty**, and **communication density** in group conversations.
 
 ## Features
 

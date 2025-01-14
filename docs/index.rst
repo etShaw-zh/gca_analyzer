@@ -6,6 +6,29 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
 .. .. image:: _static/gca_results.jpg
 ..    :alt: GCA Analysis Results
 ..    :align: center
+.. image:: https://badge.fury.io/py/gca-analyzer.svg
+   :target: https://pypi.org/project/gca-analyzer
+   :alt: PyPI version
+
+.. image:: https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg
+   :target: https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml
+   :alt: Tests
+
+.. image:: https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L
+   :target: https://codecov.io/gh/etShaw-zh/gca_analyzer
+   :alt: Coverage Status
+
+.. image:: https://readthedocs.org/projects/gca-analyzer/badge/?version=latest
+   :target: https://gca-analyzer.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://static.pepy.tech/badge/gca-analyzer
+   :target: https://pepy.tech/projects/gca-analyzer
+   :alt: PyPI Downloads
+
+.. image:: https://static.pepy.tech/badge/gca-analyzer/month
+   :target: https://pepy.tech/projects/gca-analyzer
+   :alt: PyPI Downloads (monthly)
 
 Key Features
 -------------
