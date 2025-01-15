@@ -26,7 +26,7 @@ bibliography: paper.bib
 # Summary
 
 Group conversation analysis is crucial for understanding social dynamics, learning behaviors, and communication patterns in various settings, particularly in educational contexts. The GCA Analyzer is a Python package that implements a comprehensive set of metrics and methods for analyzing group conversations, with special emphasis on Chinese text processing capabilities. This tool provides quantitative measures for participation patterns, interaction dynamics, content novelty, and communication density, making it especially valuable for researchers in education, social psychology, and communication studies.   
-The GCA Analyzer builds upon foundational work in group cognition analysis and computational approaches to group communication [@dowell2019group, @wang2025role]. These works provide essential frameworks for understanding how participants interact and contribute in group discussions.
+The GCA Analyzer builds upon foundational work in group cognition analysis and computational approaches to group communication [@dowell2019group] [@wang2025role]. These works provide essential frameworks for understanding how participants interact and contribute in group discussions.
 
 # Statement of Need
 
@@ -74,6 +74,7 @@ python -m gca_analyzer --data your_data.csv
 # Input Data Format
 
 The input data should be a CSV file with the following columns:
+
 - `conversation_id`: Identifier for the conversation
 - `person_id`: Identifier for each participant
 - `text`: The actual message content
@@ -82,6 +83,7 @@ The input data should be a CSV file with the following columns:
 # Configuration Options
 
 Command line arguments:
+
 - `--data`: Path to input data file (required)
 - `--output`: Output directory for results (default: `gca_results`)
 - `--best-window-indices`: Window size optimization threshold (default: 0.3)
@@ -95,6 +97,7 @@ Command line arguments:
 # Example Results
 
 After running the analysis, you'll get metrics including:
+
 - Participation patterns
 - Internal cohesion
 - Overall responsivity
@@ -144,6 +147,7 @@ The cross-cohesion matrix $\Xi$ for analyzing temporal interactions is computed 
 $\Xi_{ab} = \frac{1}{w} \sum_{\tau=1}^w \frac{\sum_{t \geq \tau} M_{a,t-\tau}M_{b,t}S_{t-\tau,t}}{\sum_{t \geq \tau} M_{a,t-\tau}M_{b,t}}$
 
 where:
+
 - $w$ is the optimal window length
 - $S_{t-\tau,t}$ is the cosine similarity between messages at times $t-\tau$ and $t$
 - $M_{a,t}$ and $M_{b,t}$ are participation indicators for persons $a$ and $b$ at time $t$
@@ -169,6 +173,7 @@ For a message $c_t$ at time $t$, its newness $n(c_t)$ is:
 $n(c_t) = \frac{\|\text{proj}_{\perp H_t}(c_t)\|}{\|\text{proj}_{\perp H_t}(c_t)\| + \|c_t\|}$
 
 where:
+
 - $H_t$ is the space spanned by all previous message vectors
 - $\text{proj}_{\perp H_t}$ is the orthogonal projection onto the complement of $H_t$
 - $\|c_t\|$ is the norm of the current message vector
