@@ -12,8 +12,11 @@ authors:
   - name: Jianjun Xiao
     orcid: 0000-0003-0000-9630
     affiliation: 1
+  - name: Cixiao Wang 
+    orcid: 0000-0002-6053-8991
+    affiliation: 1
 affiliations:
- - name: Beijing Normal University
+ - name: Research Centre of Distance Education, Beijing Normal University, Beijing, People's Republic of China
    index: 1
 date: 2025-01-12
 bibliography: paper.bib
@@ -23,7 +26,7 @@ bibliography: paper.bib
 # Summary
 
 Group conversation analysis is crucial for understanding social dynamics, learning behaviors, and communication patterns in various settings, particularly in educational contexts. The GCA Analyzer is a Python package that implements a comprehensive set of metrics and methods for analyzing group conversations, with special emphasis on Chinese text processing capabilities. This tool provides quantitative measures for participation patterns, interaction dynamics, content novelty, and communication density, making it especially valuable for researchers in education, social psychology, and communication studies.   
-The GCA Analyzer builds upon foundational work in group cognition analysis and computational approaches to group communication (Dowell et al., 2019; Wang & Xiao, 2025). These works provide essential frameworks for understanding how participants interact and contribute in group discussions.
+The GCA Analyzer builds upon foundational work in group cognition analysis and computational approaches to group communication [@dowell2019group, @wang2025role]. These works provide essential frameworks for understanding how participants interact and contribute in group discussions.
 
 # Statement of Need
 
@@ -99,11 +102,11 @@ After running the analysis, you'll get metrics including:
 - Content newness
 - Communication density
 
-![Example Results](../docs/_static/gca_results.jpg)
+![Descriptive Statistics for GCA Measures](../docs/_static/gca_results.jpg)
 
 You'll get interactive and informative visualizations for key GCA measures:
 
-![GCA Analysis Results](../docs/_static/vizs.png)
+![Visualizations for GCA Measures](../docs/_static/vizs.png)
 
 - **Radar Plots**: Compare multiple measures across participants
 - **Distribution Plots**: Visualize the distribution of measures
@@ -188,8 +191,3 @@ The average communication density $\bar{D_a}$ for participant $a$ is:
 $\bar{D_a} = \frac{1}{\|P_a\|}\sum_{t \in T_a} D_i$
 
 # References
-
-Dowell, N. M. M., Nixon, T. M., & Graesser, A. C. (2019). Group communication analysis: A computational linguistics approach for detecting sociocognitive roles in multiparty interactions. Behavior Research Methods, 51(3), 1007–1041. https://doi.org/10.3758/s13428-018-1102-z  
-Pennebaker, J. W., Booth, R. J., & Francis, M. E. (2015). Linguistic inquiry and word count: LIWC2015. Pennebaker Conglomerates.  
-Pennebaker, J. W. (2001). Linguistic inquiry and word count: LIWC 2001.
-Wang, C., & Xiao, J. (2025). A role recognition model based on students’ social-behavioural–cognitive-emotional features during collaborative learning. Interactive Learning Environments, 0(0), 1–20. https://doi.org/10.1080/10494820.2024.2442706  
