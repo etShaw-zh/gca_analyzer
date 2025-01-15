@@ -51,36 +51,47 @@ python -m gca_analyzer --data your_data.csv
 
 3. Descriptive statistics for GCA measures:
 
-The analyzer generates comprehensive statistics for the following measures:
+   The analyzer generates comprehensive statistics for the following measures:
 
-![Descriptive Statistics](/docs/_static/gca_results.jpg)
+   ![Descriptive Statistics](/docs/_static/gca_results.jpg)
 
-- **Participation**
-   - Measures relative contribution frequency
-   - Negative values indicate below-average participation
-   - Positive values indicate above-average participation
+   - **Participation**
+      - Measures relative contribution frequency
+      - Negative values indicate below-average participation
+      - Positive values indicate above-average participation
 
-- **Responsivity**
-   - Measures how well participants respond to others
-   - Higher values indicate better response behavior
+   - **Responsivity**
+      - Measures how well participants respond to others
+      - Higher values indicate better response behavior
 
-- **Internal Cohesion**
-   - Measures consistency in individual contributions
-   - Higher values indicate more coherent messaging
+   - **Internal Cohesion**
+      - Measures consistency in individual contributions
+      - Higher values indicate more coherent messaging
 
-- **Social Impact**
-   - Measures influence on group discussion
-   - Higher values indicate stronger impact on others
+   - **Social Impact**
+      - Measures influence on group discussion
+      - Higher values indicate stronger impact on others
 
-- **Newness**
-   - Measures introduction of new content
-   - Higher values indicate more novel contributions
+   - **Newness**
+      - Measures introduction of new content
+      - Higher values indicate more novel contributions
 
-- **Communication Density**
-   - Measures information content per message
-   - Higher values indicate more information-rich messages
+   - **Communication Density**
+      - Measures information content per message
+      - Higher values indicate more information-rich messages
 
-Results are saved as CSV files in the specified output directory.
+   Results are saved as CSV files in the specified output directory.
+
+4. Visualizations for GCA measures:
+
+   The analyzer provides interactive and informative visualizations for the following measures:
+
+   ![GCA Analysis Results](/docs/_static/vizs.png)
+
+   - **Radar Plots**: Compare measures across participants
+   - **Distribution Plots**: Visualize measure distributions
+
+   Results are saved as interactive HTML files in the specified output directory.
 
 ## Citation
 
