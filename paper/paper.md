@@ -9,11 +9,11 @@ tags:
   - Social Interaction
   - Educational Research
 authors:
-  - name: [Jianjun Xiao]
-    orcid: [0000-0003-0000-9630]
+  - name: Jianjun Xiao
+    orcid: 0000-0003-0000-9630
     affiliation: 1
 affiliations:
- - name: [Beijing Normal University]
+ - name: Beijing Normal University
    index: 1
 date: 2025-01-12
 bibliography: paper.bib
