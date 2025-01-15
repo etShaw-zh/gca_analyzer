@@ -30,6 +30,10 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
    :target: https://pepy.tech/projects/gca-analyzer
    :alt: PyPI Downloads (monthly)
 
+.. image:: https://zenodo.org/badge/915395583.svg
+   :target: https://doi.org/10.5281/zenodo.14647250
+   :alt: DOI
+
 Key Features
 -------------
 
