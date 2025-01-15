@@ -84,4 +84,15 @@ After running the analysis, you'll get metrics including:
    :alt: Example Results
    :align: center
 
+you'll get interactive and informative visualizations for key GCA measures:
+
+.. image:: _static/vizs.png
+   :alt: GCA Analysis Results
+   :align: center
+
+- **Radar Plots**: Compare multiple measures across participants
+- **Distribution Plots**: Visualize the distribution of measures
+
+Results are saved as interactive HTML files in the specified output directory, allowing for easy exploration and sharing of analysis outcomes.
+
 Metrics information can be found in the :doc:`mathematics` section.
