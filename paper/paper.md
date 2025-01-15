@@ -1,5 +1,5 @@
 ---
-title: 'GCA Analyzer: A Python Package for Group Conversation Analysis with Focus on Chinese Text'
+title: 'GCA Analyzer: A Python Package for Group Conversation Analysis'
 tags:
   - Python
   - MOOC
@@ -27,7 +27,9 @@ The GCA Analyzer builds upon foundational work in group cognition analysis and c
 
 # Statement of Need
 
-Understanding group conversation dynamics is essential in various fields, from educational research to organizational behavior studies. While several tools exist for conversation analysis, there is a notable gap in tools that can effectively handle text while providing comprehensive interaction metrics. The GCA Analyzer addresses this gap by providing:
+The analysis of group conversations is crucial in various fields, particularly in educational research, organizational behavior studies, and online learning environments. While several tools exist for conversation analysis, there is a significant gap in tools that can effectively handle multilingual text and provide comprehensive interaction metrics. Existing tools like ...
+
+The GCA Analyzer addresses these gaps by providing:
 
 1. Robust participation analysis through participation matrices
 2. Temporal interaction analysis using sliding windows
@@ -35,7 +37,78 @@ Understanding group conversation dynamics is essential in various fields, from e
 4. Social impact and responsivity measurements
 5. Visualization capabilities for interaction patterns
 
-These features enable researchers to conduct detailed analyses of group conversations, particularly in educational and organizational settings, supporting both research and practical applications.
+These features enable researchers to conduct detailed analyses of group conversations, MOOC interactions, and cross-cultural communication patterns, supporting both research and practical applications in various educational and social contexts. By providing a comprehensive toolkit for quantitative analysis of group dynamics, the GCA Analyzer facilitates deeper insights into collaborative learning processes, team communication effectiveness, and the evolution of ideas within group discussions.
+
+# Installation
+
+Install GCA Analyzer using pip:
+
+```bash
+pip install gca-analyzer
+```
+
+# Quick Start
+
+Here's a simple example to analyze a group conversation:
+
+```python
+from gca_analyzer import GCAAnalyzer
+
+# Initialize the analyzer
+analyzer = GCAAnalyzer()
+
+# Load and analyze data
+metrics = analyzer.analyze_conversation('conversation_1', data)
+print(metrics)
+```
+
+# Command Line Usage
+
+```bash
+python -m gca_analyzer --data your_data.csv
+```
+
+# Input Data Format
+
+The input data should be a CSV file with the following columns:
+- `conversation_id`: Identifier for the conversation
+- `person_id`: Identifier for each participant
+- `text`: The actual message content
+- `time`: Timestamp of the message
+
+# Configuration Options
+
+Command line arguments:
+- `--data`: Path to input data file (required)
+- `--output`: Output directory for results (default: `gca_results`)
+- `--best-window-indices`: Window size optimization threshold (default: 0.3)
+  - Range: 0.0-1.0
+  - Sparse conversations may benefit from smaller thresholds
+- `--console-level`: Logging level (default: INFO)
+  - Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- `--model-name`: LLM model for text processing
+  - Default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+
+# Example Results
+
+After running the analysis, you'll get metrics including:
+- Participation patterns
+- Internal cohesion
+- Overall responsivity
+- Social impact
+- Content newness
+- Communication density
+
+![Example Results](../docs/_static/gca_results.jpg)
+
+You'll get interactive and informative visualizations for key GCA measures:
+
+![GCA Analysis Results](../docs/_static/vizs.png)
+
+- **Radar Plots**: Compare multiple measures across participants
+- **Distribution Plots**: Visualize the distribution of measures
+
+Results are saved as interactive HTML files in the specified output directory, allowing for easy exploration and sharing of analysis outcomes.
 
 # Mathematics
 
@@ -117,4 +190,6 @@ $\bar{D_a} = \frac{1}{\|P_a\|}\sum_{t \in T_a} D_i$
 # References
 
 Dowell, N. M. M., Nixon, T. M., & Graesser, A. C. (2019). Group communication analysis: A computational linguistics approach for detecting sociocognitive roles in multiparty interactions. Behavior Research Methods, 51(3), 1007–1041. https://doi.org/10.3758/s13428-018-1102-z  
+Pennebaker, J. W., Booth, R. J., & Francis, M. E. (2015). Linguistic inquiry and word count: LIWC2015. Pennebaker Conglomerates.  
+Pennebaker, J. W. (2001). Linguistic inquiry and word count: LIWC 2001.
 Wang, C., & Xiao, J. (2025). A role recognition model based on students’ social-behavioural–cognitive-emotional features during collaborative learning. Interactive Learning Environments, 0(0), 1–20. https://doi.org/10.1080/10494820.2024.2442706  
