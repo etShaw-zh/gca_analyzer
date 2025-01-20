@@ -4,6 +4,7 @@
 /example
 /example/.DS_Store
 /analysis_results
+result.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
