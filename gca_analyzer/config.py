@@ -9,7 +9,8 @@ License: Apache 2.0
 """
 
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import Optional, Tuple
+from typing_extensions import Union
 
 
 @dataclass
@@ -19,13 +20,17 @@ class WindowConfig:
     Attributes:
         best_window_indices (float): Target participation threshold for window
             selection (0-1). Defaults to 0.3.
+        act_participant_indices (int): Number of contributions from each participant in a window
+            that is greater than or equal to the active participants threshold (e.g., at least two
+            contributions). Defaults to 2.
         min_window_size (int): Minimum size of sliding window. Defaults to 2.
-        max_window_size (int): Maximum size of sliding window. Defaults to 10.
+        max_window_size (int | None): Maximum size of sliding window. Defaults to None.
     """
 
     best_window_indices: float = 0.3
+    act_participant_indices: int = 2
     min_window_size: int = 2
-    max_window_size: int = 10
+    max_window_size: Union[int, None] = None
 
 
 @dataclass
@@ -83,10 +88,10 @@ class LoggerConfig:
 
     console_level: str = "INFO"
     file_level: str = "DEBUG"
-    log_file: str | None = None
+    log_file: Optional[str] = None
     rotation: str = "10 MB"
     compression: str = "zip"
-    console_format: str = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>"
+    console_format: str = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | <cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>"
     file_format: str = "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} | {message}"
 
 

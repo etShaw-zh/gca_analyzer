@@ -2,6 +2,9 @@ English | [简体中文](README_zh.md)
 # GCA Analyzer
 
 [![PyPI version](https://badge.fury.io/py/gca-analyzer.svg)](https://pypi.org/project/gca-analyzer)
+[![support-version](https://img.shields.io/pypi/pyversions/gca-analyzer)](https://img.shields.io/pypi/pyversions/gca-analyzer)
+[![license](https://img.shields.io/github/license/etShaw-zh/gca_analyzer)](https://github.com/etShaw-zh/gca_analyzer/blob/master/LICENSE)
+[![commit](https://img.shields.io/github/last-commit/etShaw-zh/gca_analyzer)](https://github.com/etShaw-zh/gca_analyzer/commits/master)
 ![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
 [![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
 [![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
@@ -20,6 +23,17 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
 - **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 - **Flexible Configuration**: Customizable parameters for different analysis needs
 - **Easy Integration**: Command-line interface and Python API support
+
+> [!tip]  
+> 👁 Watch this repo so that you can be notified whenever there are fixes & updates.  
+> 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) has been released!
+
+> [!warning]  
+> 🚨 Please note that the current version of GCA Analyzer is in beta and is still under development, not suitable for production use.  
+
+> [!note]  
+> 📝 If you have any questions or suggestions, please [open an issue](https://github.com/etShaw-zh/gca_analyzer/issues) or contact [etShaw-zh](https://github.com/etShaw-zh).  
+> 📝 You can find more information about GCA Analyzer in our [documentation](https://gca-analyzer.readthedocs.io/en/latest/).  
 
 ## Quick Start
 

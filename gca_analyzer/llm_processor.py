@@ -18,6 +18,7 @@ from sentence_transformers import SentenceTransformer
 
 from .config import Config, default_config
 from .logger import logger
+from .utils import measure_time
 
 
 class LLMTextProcessor:
@@ -94,7 +95,8 @@ class LLMTextProcessor:
         
         self.model = SentenceTransformer(self.model_name)
         logger.info("Successfully loaded the model")
-
+    
+    @measure_time("doc2vector")
     def doc2vector(self, texts: List[str]) -> List[np.ndarray]:
         """Convert texts to vectors using transformer embeddings.
 

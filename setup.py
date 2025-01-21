@@ -27,6 +27,7 @@ setup(
     name="gca_analyzer",
     version=__version__,  # noqa: F821
     packages=find_packages(),
+    python_requires='>=3.9',
     install_requires=[
         'pandas>=1.3.0',
         'numpy>=1.20.0',
@@ -35,6 +36,7 @@ setup(
         'loguru>=0.7.0',
         'transformers>=4.30.0',
         'sentence-transformers>=2.2.0',
+        'typing-extensions>=4.0.0',  # For Python 3.9 compatibility
     ],
     author="Jianjun Xiao",
     author_email="et_shaw@126.com",
@@ -50,12 +52,14 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Topic :: Text Processing :: Linguistic",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],
-    python_requires='>=3.12',
     entry_points={
         'console_scripts': [
             'gca_analyzer = gca_analyzer.__main__:main',
