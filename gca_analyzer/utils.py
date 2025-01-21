@@ -50,6 +50,31 @@ def normalize_metrics(
     return data
 
 
+def measure_time(func_name: str) -> None:
+    """
+    Decorator to measure and log execution time of functions.
+
+    Args:
+        func_name (str): Name of the function or operation being timed
+
+    Returns:
+        None: Logs the execution time using the logger
+    """
+    import time
+    from functools import wraps
+    
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            elapsed_time = time.time() - start_time
+            logger.info(f"{func_name} took {elapsed_time:.2f} seconds")
+            return result
+        return wrapper
+    return decorator
+
+
 def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """
     Calculate cosine similarity between two numpy arrays.

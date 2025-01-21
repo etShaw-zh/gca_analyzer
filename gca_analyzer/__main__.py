@@ -29,12 +29,18 @@ def main(args=None):
             help='Proportion of best window indices (default: 0.3)'
         )
         parser.add_argument(
+            '--act-participant-indices', type=int, default=2,
+            help='Number of contributions from each participant in a window that \
+                is greater than or equal to the active participants threshold \
+                (e.g., at least two contributions). Defaults to 2.'
+        )
+        parser.add_argument(
             '--min-window-size', type=int, default=2,
             help='Minimum window size (default: 2)'
         )
         parser.add_argument(
-            '--max-window-size', type=int, default=10,
-            help='Maximum window size (default: 10)'
+            '--max-window-size', type=int, default=None,
+            help='Maximum window size (default: None | if None, max_window_size = len(data))'
         )
 
         # Model configuration
@@ -104,6 +110,7 @@ def main(args=None):
     config = Config()
     config.window = WindowConfig(
         best_window_indices=args.best_window_indices,
+        act_participant_indices=args.act_participant_indices,
         min_window_size=args.min_window_size,
         max_window_size=args.max_window_size
     )
