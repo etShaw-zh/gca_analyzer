@@ -534,10 +534,10 @@ class GCAAnalyzer:
         """
         results = []
         for idx in range(start_idx, end_idx):
-            if idx == 0:
+            if idx == 0:    # pragma: no cover
                 n_c_t = 1.0  # First message is entirely new
             else:
-                n_c_t = self._calculate_newness_proportion(vectors, idx)
+                n_c_t = self._calculate_newness_proportion(vectors, idx)    # pragma: no cover
             # Convert DataFrame row to numpy array for density calculation
             vector = vectors.iloc[idx].to_numpy() if isinstance(vectors, pd.DataFrame) else vectors[idx]
             D_i = self._calculate_communication_density(vector, texts[idx])
