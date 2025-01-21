@@ -8,7 +8,7 @@ Prerequisites
 
 Before installing GCA Analyzer, ensure you have:
 
-* Python 3.12 or higher
+* Python 3.9 or higher
 * pip package manager
 * Basic understanding of conversation analysis concepts
 
