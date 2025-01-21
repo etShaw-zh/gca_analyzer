@@ -50,7 +50,6 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
@@ -58,7 +57,7 @@ setup(
         "Topic :: Text Processing :: Linguistic",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],
-    python_requires='>=3.9',
+    python_requires='>=3.10',
     entry_points={
         'console_scripts': [
             'gca_analyzer = gca_analyzer.__main__:main',
