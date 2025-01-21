@@ -26,10 +26,8 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
 
 > [!tip]  
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.  
+> 📰 2025-01-22 GCA Analyzer v0.4.4 (beta) has been released!  
 > 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) has been released!
-
-> [!warning]  
-> 🚨 Please note that the current version of GCA Analyzer is in beta and is still under development, not suitable for production use.  
 
 > [!note]  
 > 📝 If you have any questions or suggestions, please [open an issue](https://github.com/etShaw-zh/gca_analyzer/issues) or contact [etShaw-zh](https://github.com/etShaw-zh).  
