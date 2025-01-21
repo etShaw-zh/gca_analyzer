@@ -168,21 +168,28 @@ The social impact $I_a$ for participant $a$ is:
 $I_a = \frac{1}{k-1}\sum_{b \neq a} \Xi_{ba}$
 
 ## Message Newness
-For a message $c_t$ at time $t$, its newness $n(c_t)$ is:
+Message newness measures how much new semantic content a message contributes compared to all previous messages in the conversation. For a message vector $\vec{d_i}$, we decompose it into two orthogonal components: new content and given (previously discussed) content.
 
-$n(c_t) = \frac{\|\text{proj}_{\perp H_t}(c_t)\|}{\|\text{proj}_{\perp H_t}(c_t)\| + \|c_t\|}$
+The message vector $\vec{d_i}$ is first projected onto two complementary subspaces:
 
-where:
+1. The subspace $G_i$ spanned by all previous message vectors $\{\vec{d_1}, \vec{d_2}, ..., \vec{d_{i-1}}\}$, representing the semantic space of previous discussion
+2. Its orthogonal complement $G_i^\perp$, representing potential new semantic content
 
-- $H_t$ is the space spanned by all previous message vectors
-- $\text{proj}_{\perp H_t}$ is the orthogonal projection onto the complement of $H_t$
-- $\|c_t\|$ is the norm of the current message vector
+The projection results in:
+- Given content: $\vec{g_i} = \text{Proj}_{G_i}(\vec{d_i})$
+- New content: $\vec{n_i} = \text{Proj}_{G_i^\perp}(\vec{d_i})$
 
-The overall newness $N_a$ for participant $a$ is:
+The newness score $n(c_i)$ is then calculated as the ratio of new content magnitude to total content magnitude:
 
-$N_a = \frac{1}{\|P_a\|}\sum_{t \in T_a} n(c_t)$
+$n(c_i) = \frac{\|\vec{n_i}\|}{\|\vec{n_i}\| + \|\vec{g_i}\|}$
 
-where $T_a$ is the set of times when participant $a$ contributed.
+This score ranges from 0 (completely redundant with previous messages) to 1 (entirely new content). A higher score indicates the message contributes more novel semantic content to the discussion.
+
+The overall newness $N_a$ for participant $a$ is the average newness across all their messages:
+
+$N_a = \frac{1}{|P_a|}\sum_{i \in P_a} n(c_i)$
+
+where $P_a$ is the set of all contributions by participant $a$. This metric reflects how consistently a participant contributes new ideas to the conversation.
 
 ## Communication Density
 For a message $c_t$ at time $t$, its density $D_i$ is:
