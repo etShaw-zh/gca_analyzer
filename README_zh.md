@@ -2,6 +2,9 @@
 # GCA Analyzer
 
 [![PyPI version](https://badge.fury.io/py/gca-analyzer.svg)](https://pypi.org/project/gca-analyzer)
+[![support-version](https://img.shields.io/pypi/pyversions/gca-analyzer)](https://img.shields.io/pypi/pyversions/gca-analyzer)
+[![license](https://img.shields.io/github/license/etShaw-zh/gca_analyzer)](https://github.com/etShaw-zh/gca_analyzer/blob/master/LICENSE)
+[![commit](https://img.shields.io/github/last-commit/etShaw-zh/gca_analyzer)](https://github.com/etShaw-zh/gca_analyzer/commits/master)
 ![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
 [![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
 [![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
@@ -11,7 +14,7 @@
 
 ## 介绍
 
-一个使用 NLP 技术和定量指标分析群体对话动态的 Python 包。它提供了全面的工具来理解参与者**参与程度**、**交互动态**、**内容新鲜度**和**沟通密度**。
+一个使用 NLP 技术和定量指标分析群体对话动态的 Python 包。它提供了全面的工具来理解参与者**参与程度**、**交互动态**、**内容新颖性**和**沟通密度**。
 
 ## 特性
 
@@ -20,6 +23,17 @@
 - **自动化分析**：自动寻找最优分析窗口并生成详细统计
 - **灵活配置**：可根据不同分析需求自定义参数
 - **易于集成**：支持命令行界面和 Python API
+
+> [!tip]  
+> 👁 关注此仓库以获取最新的修复和更新通知。  
+> 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) 已发布！  
+
+> [!warning]  
+> 🚨 请注意，当前版本的 GCA Analyzer 处于测试阶段，仍在开发中，不适合用于生产环境。  
+
+> [!note]  
+> 📝 如果您有任何问题或建议，请[提交 issue](https://github.com/etShaw-zh/gca_analyzer/issues) 或联系 [etShaw-zh](https://github.com/etShaw-zh)。  
+> 📝 您可以在[文档](https://gca-analyzer.readthedocs.io/en/latest/)中找到更多关于 GCA Analyzer 的信息。  
 
 ## 快速开始
 
