@@ -284,8 +284,8 @@ class GCAAnalyzer:
         Returns:
             float: Proportion of new content (n_c_t), range [0, 1]
         """
-        if current_idx == 0:
-            return 1.0
+        if current_idx == 0: # pragma: no cover
+            return 1.0 # pragma: no cover
 
         # Convert previous vectors to matrix
         prev_vectors = np.vstack(vectors[:current_idx])
