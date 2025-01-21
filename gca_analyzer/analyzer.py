@@ -14,6 +14,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import time
 
 from .config import Config, default_config
 from .llm_processor import LLMTextProcessor
@@ -186,53 +187,45 @@ class GCAAnalyzer:
         Returns:
             pd.DataFrame: Ksi lag matrix
         """
-        # Formula 15: Cross-cohesion function
-        def calculate_ksi_ab_tau(
-            a: str,
-            b: str,
-            tau: int,
-            M: pd.DataFrame,
-            cosine_similarity_matrix: pd.DataFrame,
-            seq_list: List[int]
-        ) -> float:
-            """Calculate cross-cohesion for participants a and b at lag tau."""
-            Pab_tau = 0.0
-            Sab_sum = 0.0
-            
-            # Convert seq_list to sorted list to ensure proper indexing
-            sorted_seqs = sorted(seq_list)
-            
-            for i, t in enumerate(sorted_seqs):
-                if i >= tau:  # Check if we have enough previous messages
-                    prev_t = sorted_seqs[i - tau]  # Get the lagged sequence number
-                    Pab_tau += float(M.loc[a, prev_t]) * float(M.loc[b, t])
-            
-            if Pab_tau == 0:
-                return 0.0
-                
-            for i, t in enumerate(sorted_seqs):
-                if i >= tau:
-                    prev_t = sorted_seqs[i - tau]
-                    Sab_sum += float(M.loc[a, prev_t]) * float(M.loc[b, t]) * \
-                              float(cosine_similarity_matrix.loc[prev_t, t])
-            
-            return Sab_sum / Pab_tau
-
         # Initialize w-spanning cross-cohesion matrix with float dtype
         X_tau = pd.DataFrame(0.0, index=person_list, columns=person_list, dtype=float)
         w = best_window_length
         
+        # Convert seq_list to sorted numpy array for faster operations
+        sorted_seqs = np.array(sorted(seq_list))
+        
+        # Pre-compute all possible lagged indices for each tau
+        lag_indices = {}
+        for tau in range(1, w + 1):
+            lag_indices[tau] = np.arange(tau, len(sorted_seqs))
+            
+        # Convert M to numpy array for faster operations
+        M_np = M.loc[:, sorted_seqs].to_numpy()
+        cos_sim_np = cosine_similarity_matrix.loc[sorted_seqs, sorted_seqs].to_numpy()
+        
         # Calculate cross-cohesion for each tau and accumulate
         for tau in range(1, w + 1):
-            for a in person_list:
-                for b in person_list:
-                    result = calculate_ksi_ab_tau(
-                        a, b, tau, M, cosine_similarity_matrix, seq_list
+            indices = lag_indices[tau]
+            lagged_indices = indices - tau
+            
+            for a_idx, a in enumerate(person_list):
+                for b_idx, b in enumerate(person_list):
+                    # Vectorized calculation of Pab_tau
+                    Pab_tau = np.sum(
+                        M_np[a_idx, lagged_indices] * M_np[b_idx, indices]
                     )
-                    X_tau.loc[a, b] = X_tau.loc[a, b] + result
+                    
+                    if Pab_tau > 0:
+                        # Vectorized calculation of Sab_sum
+                        Sab_sum = np.sum(
+                            M_np[a_idx, lagged_indices] * 
+                            M_np[b_idx, indices] * 
+                            cos_sim_np[lagged_indices, indices]
+                        )
+                        X_tau.loc[a, b] += Sab_sum / Pab_tau
         
         # Formula 17: Responsivity across w
-        R_w = X_tau.multiply(1.0/w)
+        R_w = X_tau.multiply(1.0/w) # pragma: no cover
         
         return R_w
 
@@ -280,47 +273,6 @@ class GCAAnalyzer:
             metrics_df['Social_impact']
         )
 
-    def _calculate_lsa_metrics(
-        self,
-        vectors: List[np.ndarray],
-        texts: List[str],
-        current_idx: int
-    ) -> Tuple[float, float]:
-        """
-        Calculate LSA (Latent Semantic Analysis) given-new metrics for a contribution.
-
-        This method computes two key metrics:
-        1. Proportion of new content (n_c_t): Measures how much new information
-           the current contribution brings compared to previous contributions.
-        2. Communication density (D_i): Measures the information density of
-           the current contribution, normalized by its length.
-
-        The calculation involves projecting the current vector onto the subspace
-        spanned by previous contribution vectors, then comparing the magnitudes
-        of the projected (given) and residual (new) components.
-
-        Args:
-            vectors: List of document vectors, each representing a contribution.
-            texts: List of corresponding text content for each contribution.
-            current_idx: Index of the current contribution being analyzed.
-
-        Returns:
-            Tuple containing:
-            - float: Proportion of new content (n_c_t), range [0, 1]
-            - float: Communication density (D_i)
-
-        Note:
-            For the first contribution (current_idx == 0), n_c_t is set to 1.0
-            (all content is new) and D_i is simply the norm of the first vector.
-        """
-        if current_idx == 0:
-            return 1.0, np.linalg.norm(vectors[0])
-
-        n_c_t = self._calculate_newness_proportion(vectors, current_idx)
-        D_i = self._calculate_communication_density(vectors[current_idx], texts[current_idx])
-
-        return n_c_t, D_i
-
     def _calculate_newness_proportion(self, vectors: List[np.ndarray], current_idx: int) -> float:
         """
         Calculate the proportion of new content in the current contribution.
@@ -332,15 +284,16 @@ class GCAAnalyzer:
         Returns:
             float: Proportion of new content (n_c_t), range [0, 1]
         """
-        prev_vectors = np.array(vectors[:current_idx])
+        if current_idx == 0: # pragma: no cover
+            return 1.0 # pragma: no cover
+
+        # Convert previous vectors to matrix
+        prev_vectors = np.vstack(vectors[:current_idx])
         d_i = vectors[current_idx]
 
-        # Calculate projection matrix for the subspace
+        # Calculate projection matrix efficiently
         U, _, _ = np.linalg.svd(prev_vectors.T, full_matrices=False)
-        proj_matrix = U @ U.T
-
-        # Get given and new components
-        g_i = proj_matrix @ d_i
+        g_i = U @ (U.T @ d_i)  # Optimized projection calculation
         n_i = d_i - g_i
 
         # Calculate newness proportion
@@ -362,31 +315,87 @@ class GCAAnalyzer:
         text_length = len(text)
         return np.linalg.norm(vector) / text_length if text_length > 0 else 0.0
 
+    def _calculate_batch_lsa_metrics(
+        self,
+        vectors: List[np.ndarray],
+        texts: List[str],
+        start_idx: int,
+        end_idx: int
+    ) -> List[Tuple[float, float]]:
+        """
+        Calculate LSA metrics for a batch of contributions.
+        
+        Args:
+            vectors: List of document vectors
+            texts: List of corresponding texts
+            start_idx: Start index of the batch
+            end_idx: End index of the batch
+            
+        Returns:
+            List of tuples containing (newness, density) for each contribution
+        """
+        results = []
+        for idx in range(start_idx, end_idx):
+            if idx == 0:
+                n_c_t = 1.0
+            else:
+                n_c_t = self._calculate_newness_proportion(vectors, idx)
+            D_i = self._calculate_communication_density(vectors[idx], texts[idx])
+            results.append((n_c_t, D_i))
+        return results
+
     def calculate_given_new_dict(
         self,
         vectors: List[np.ndarray],
         texts: List[str],
         current_data: pd.DataFrame
     ) -> Tuple[dict, dict]:
+        """
+        Calculate LSA metrics for all contributions using batch processing.
+        
+        Args:
+            vectors: List of document vectors
+            texts: List of corresponding texts
+            current_data: DataFrame containing person_id information
+            
+        Returns:
+            Tuple of dictionaries containing newness and density values per person
+        """
         n_c_t_dict = {}
         D_i_dict = {}
-
-        for idx in range(len(vectors)):
+        
+        # Convert vectors to numpy array for faster operations
+        vectors = [np.array(v) for v in vectors]
+        
+        # Process in batches for better memory efficiency
+        batch_size = 100
+        n_samples = len(vectors)
+        n_batches = (n_samples + batch_size - 1) // batch_size
+        
+        for batch_idx in range(n_batches):
+            start_idx = batch_idx * batch_size
+            end_idx = min(start_idx + batch_size, n_samples)
+            
             try:
-                n_c_t, D_i = self._calculate_lsa_metrics(vectors, texts, idx)
-                current_person = current_data.iloc[idx].person_id
+                # Calculate metrics for current batch
+                batch_results = self._calculate_batch_lsa_metrics(
+                    vectors, texts, start_idx, end_idx
+                )
+                
+                # Distribute results to person-specific dictionaries
+                for idx, (n_c_t, D_i) in enumerate(batch_results, start=start_idx):
+                    current_person = current_data.iloc[idx].person_id
                     
-                if current_person not in n_c_t_dict:
-                    n_c_t_dict[current_person] = []
-                if current_person not in D_i_dict:
-                    D_i_dict[current_person] = []
-                        
-                n_c_t_dict[current_person].append(n_c_t)
-                D_i_dict[current_person].append(D_i)
+                    if current_person not in n_c_t_dict:
+                        n_c_t_dict[current_person] = []
+                        D_i_dict[current_person] = []
+                    
+                    n_c_t_dict[current_person].append(n_c_t)
+                    D_i_dict[current_person].append(D_i)
                     
             except Exception as e:
                 logger.error(
-                    f"Error calculating LSA metrics for contribution {idx}: {str(e)}"
+                    f"Error calculating LSA metrics for batch {batch_idx}: {str(e)}"
                 )
                 continue
         
@@ -480,10 +489,13 @@ class GCAAnalyzer:
             All metrics are calculated based on both message frequency and content analysis
             using language model embeddings for semantic understanding.
         """
+        start_time = time.time()
         current_data, person_list, seq_list, k, n, M = self.participant_pre(
             conversation_id, data
         )
-        
+        logger.info(f"participant_pre took {time.time() - start_time} seconds")
+        start_time = time.time()
+
         metrics_df = pd.DataFrame(
             0.0,
             index=person_list,
@@ -496,6 +508,9 @@ class GCAAnalyzer:
         )
         metrics_df['conversation_id'] = conversation_id
         
+        logger.info(f"creating metrics_df took {time.time() - start_time} seconds")
+        start_time = time.time()
+        
         # Calculate participation metrics (Formula 4 and 5)
         for person in person_list:
             # Pa = sum(M_a) (Formula 4)
@@ -503,6 +518,9 @@ class GCAAnalyzer:
             # p̄a = (1/n)||Pa|| (Formula 5)
             metrics_df.loc[person, 'Pa_average'] = metrics_df.loc[person, 'Pa'] / n
             
+        logger.info(f"calculating Pa and Pa_average took {time.time() - start_time} seconds")
+        start_time = time.time()
+        
         # Calculate participation standard deviation (Formula 6)
         for person in person_list:
             variance = 0
@@ -512,10 +530,16 @@ class GCAAnalyzer:
                 )**2
             metrics_df.loc[person, 'Pa_std'] = np.sqrt(variance / (n-1))
             
+        logger.info(f"calculating Pa_std took {time.time() - start_time} seconds")
+        start_time = time.time()
+        
         # Calculate relative participation (Formula 9)
         metrics_df['Pa_hat'] = (
             metrics_df['Pa_average'] - 1/k
         ) / (1/k)
+            
+        logger.info(f"calculating Pa_hat took {time.time() - start_time} seconds")
+        start_time = time.time()
         
         texts = current_data.text.to_list()
         vectors = self.llm_processor.doc2vector(texts)
@@ -537,13 +561,19 @@ class GCAAnalyzer:
                 person_list=person_list, k=k, R_w=R_w
             )
 
+        logger.info(f"calculating cohesion and response metrics took {time.time() - start_time} seconds")
+        start_time = time.time()
+        
         # Calculate newness and communication density (Formula 25 and 27) without w-spanning
         n_c_t_dict, D_i_dict = self.calculate_given_new_dict(
             vectors=vectors,
             texts=texts,
             current_data=current_data
         )
-
+        
+        logger.info(f"calculating newness and density took {time.time() - start_time} seconds")
+        start_time = time.time()
+        
         # Calculate average metrics per person (Formula 26 and 28)
         metrics_df['Newness'], \
         metrics_df['Communication_density'] = self.calculate_given_new_averages(
@@ -551,6 +581,9 @@ class GCAAnalyzer:
             n_c_t_dict=n_c_t_dict,
             D_i_dict=D_i_dict
         )
+        
+        logger.info(f"calculating average newness and density took {time.time() - start_time} seconds")
+        start_time = time.time()
         
         metrics_df = metrics_df.rename(columns={
             'Pa_hat': 'participation',
@@ -560,6 +593,8 @@ class GCAAnalyzer:
             'Newness': 'newness',
             'Communication_density': 'comm_density'
         })
+        
+        logger.info(f"renaming columns took {time.time() - start_time} seconds")
         
         return metrics_df
 
