@@ -201,3 +201,74 @@ def cosine_similarity_matrix(
         return pd.DataFrame()  # pragma: no cover
 
     return cosine_matrix
+
+def calculate_huffman_length(text: str) -> float:
+    """Calculate the length of text using Huffman encoding.
+
+    This function calculates the theoretical minimum number of bits needed
+    to encode the text using Huffman encoding. It considers character
+    frequencies to determine the optimal encoding length.
+
+    Args:
+        text: Input text to calculate Huffman encoding length for.
+
+    Returns:
+        float: Theoretical minimum number of bits needed to encode the text.
+        Returns 0.0 for empty text.
+    """
+    if not text:
+        return 0.0
+
+    # Calculate character frequencies
+    freq: dict[str, int] = {}
+    for char in text:
+        freq[char] = freq.get(char, 0) + 1
+
+    # If there's only one unique character
+    if len(freq) == 1:
+        return float(len(text))
+
+    # Node type: [weight: int, pairs: list[list[str]]]
+    # where pairs is a list of [char, code] pairs
+    Node = tuple[int, list[list[str]]]
+
+    # Create a priority queue to store nodes
+    heap: list[Node] = []
+    for char, weight in freq.items():
+        heap.append((weight, [[char, ""]]))
+
+    from heapq import heapify, heappop, heappush
+
+    heapify(heap)
+
+    # Build Huffman tree
+    while len(heap) > 1:
+        lo = heappop(heap)
+        hi = heappop(heap)
+
+        lo_weight, lo_pairs = lo
+        hi_weight, hi_pairs = hi
+
+        # Update codes
+        for pair in lo_pairs:
+            pair[1] = "0" + pair[1]
+        for pair in hi_pairs:
+            pair[1] = "1" + pair[1]
+
+        # Combine nodes
+        combined_weight = lo_weight + hi_weight
+        combined_pairs = lo_pairs + hi_pairs
+        heappush(heap, (combined_weight, combined_pairs))
+
+    # Calculate total length
+    total_length = 0.0
+    root = heap[0]
+    pairs = root[1]
+
+    # Sort by character to ensure consistent ordering
+    sorted_pairs = sorted(pairs, key=lambda x: x[0])
+
+    for char, code in sorted_pairs:
+        total_length += float(len(code)) * float(freq[char])
+
+    return total_length

@@ -6,7 +6,8 @@ import pytest
 from gca_analyzer.utils import (
     normalize_metrics,
     cosine_similarity,
-    cosine_similarity_matrix
+    cosine_similarity_matrix,
+    calculate_huffman_length
 )
 
 
@@ -128,3 +129,20 @@ def test_cosine_similarity_matrix_error_handling():
     result = cosine_similarity_matrix(vectors, seq_list, current_data)
     assert isinstance(result, pd.DataFrame)
     assert result.empty  # Should return empty DataFrame on error
+
+
+def test_calculate_huffman_length():
+    """Test calculation of Huffman encoding length."""
+    # Test empty text
+    assert calculate_huffman_length("") == 0.0
+
+    # Test single character text
+    assert calculate_huffman_length("aaa") == 3.0
+
+    # Test text with equal frequencies
+    text = "abcd"  # Each character appears once, so each needs 2 bits
+    assert calculate_huffman_length(text) == 8.0  # 4 chars * 2 bits
+
+    # Test text with varying frequencies
+    text = "aaabbc"  # 'a' should get shorter code than 'b' and 'c'
+    assert calculate_huffman_length(text) == 9.0  # (3*1 + 2*2 + 1*2) bits

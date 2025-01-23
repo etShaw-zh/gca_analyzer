@@ -17,15 +17,22 @@ License: Apache 2.0
 """
 
 import os
+import warnings
 from typing import List, Optional, Tuple
 
+import hdbscan
 import numpy as np
 import pandas as pd
+import umap
 
 from .config import Config, default_config
 from .llm_processor import LLMTextProcessor
 from .logger import logger
-from .utils import cosine_similarity_matrix, measure_time
+from .utils import (calculate_huffman_length, cosine_similarity_matrix,
+                    measure_time)
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class GCAAnalyzer:
@@ -59,6 +66,13 @@ class GCAAnalyzer:
             model_name=self._config.model.model_name,
             mirror_url=self._config.model.mirror_url,
         )
+        self.reducer = umap.UMAP(
+            n_neighbors=self._config.umap.n_neighbors,
+            min_dist=self._config.umap.min_dist,
+            n_components=self._config.umap.n_components,
+            random_state=self._config.umap.random_state,
+        )
+        self.clusterer = hdbscan.HDBSCAN()
         logger.info("Initializing GCA Analyzer")
         logger.info("Using LLM-based text processor for multi-language support")
         logger.debug("Components initialized successfully")
@@ -369,81 +383,144 @@ class GCAAnalyzer:
 
     @measure_time("calculate_personal_given_new_dict")
     def calculate_personal_given_new_dict(
-        self, vectors: List[np.ndarray], texts: List[str], current_data: pd.DataFrame
-    ) -> Tuple[dict, dict]:
+        self, current_data: pd.DataFrame
+    ) -> Tuple[dict, dict, dict, dict]:
         """Calculate LSA metrics for all contributions and aggregate by participant.
 
         Processes each contribution to compute:
         - Newness (n_c_t): Proportion of new content (Formula 25)
         - Communication density (D_i): Information density (Formula 27)
+        - Weighted newness (w_n_c_t): Cluster-weighted newness
+        - Weighted density (w_D_i): Cluster-weighted density
 
         The metrics are first calculated for each contribution, then grouped
         by participant for further analysis.
 
         Args:
-            vectors: List of document vectors from LSA processing.
-            texts: List of corresponding message texts.
             current_data: DataFrame containing participant and message data.
 
         Returns:
-            Tuple containing two dictionaries:
+            Tuple containing four dictionaries:
             - n_c_t_dict: Mapping of participant ID to list of newness values
             - D_i_dict: Mapping of participant ID to list of density values
+            - weighted_n_c_t_dict: Mapping of participant ID to list of weighted newness values
+            - weighted_D_i_dict: Mapping of participant ID to list of weighted density values
         """
-        # First calculate metrics for each text
-        current_data = self.calculate_text_given_new_df(vectors, texts, current_data)
-
         # Group by person_id and convert to dictionaries
         grouped = current_data.groupby("person_id")
         n_c_t_dict = {person: list(group["n_c_t"]) for person, group in grouped}
         D_i_dict = {person: list(group["D_i"]) for person, group in grouped}
+        weighted_n_c_t_dict = {
+            person: list(group["weighted_n_c_t"]) for person, group in grouped
+        }
+        weighted_D_i_dict = {
+            person: list(group["weighted_D_i"]) for person, group in grouped
+        }
 
-        return n_c_t_dict, D_i_dict
+        return n_c_t_dict, D_i_dict, weighted_n_c_t_dict, weighted_D_i_dict
 
     @measure_time("calculate_personal_given_new_averages")
     def calculate_personal_given_new_averages(
-        self, person_list: List[str], n_c_t_dict: dict, D_i_dict: dict
-    ) -> Tuple[pd.Series, pd.Series]:
+        self,
+        person_list: List[str],
+        n_c_t_dict: dict,
+        D_i_dict: dict,
+        weighted_n_c_t_dict: dict,
+        weighted_D_i_dict: dict,
+    ) -> Tuple[pd.Series, pd.Series, pd.Series, pd.Series]:
         """Calculate average LSA metrics for each participant.
 
         Computes the average newness (Formula 26) and communication density
         (Formula 28) for each participant based on their individual message
-        metrics.
+        metrics, as well as their cluster-weighted versions.
 
         Args:
             person_list: List of participant IDs.
             n_c_t_dict: Dictionary mapping participant IDs to newness values.
             D_i_dict: Dictionary mapping participant IDs to density values.
+            weighted_n_c_t_dict: Dictionary mapping participant IDs to weighted newness values.
+            weighted_D_i_dict: Dictionary mapping participant IDs to weighted density values.
 
         Returns:
-            Tuple containing two pd.Series:
+            Tuple containing four pd.Series:
             - Average newness values for each participant
             - Average communication density values for each participant
+            - Average weighted newness values for each participant
+            - Average weighted communication density values for each participant
         """
-        metrics_df = pd.DataFrame(
-            0.0,
-            index=person_list,
-            columns=["Newness", "Communication_density"],
-            dtype=float,
-        )
+        metrics_df = pd.DataFrame(index=person_list)
 
         for person in person_list:
-            if person in n_c_t_dict and len(n_c_t_dict[person]) > 0:
-                # Formula 26: Average newness
-                metrics_df.loc[person, "Newness"] = (
-                    np.nanmean(n_c_t_dict[person])
-                    if len(n_c_t_dict[person]) > 0
-                    else 0.0
+            if (
+                person in n_c_t_dict
+                and person in D_i_dict
+                and person in weighted_n_c_t_dict
+                and person in weighted_D_i_dict
+            ):
+                metrics_df.loc[person, "Newness"] = np.mean(n_c_t_dict[person])
+                metrics_df.loc[person, "Communication_density"] = np.mean(
+                    D_i_dict[person]
                 )
-                # Formula 28: Average communication density
-                metrics_df.loc[person, "Communication_density"] = (
-                    np.nanmean(D_i_dict[person]) if len(D_i_dict[person]) > 0 else 0.0
+                metrics_df.loc[person, "Weighted_newness"] = np.mean(
+                    weighted_n_c_t_dict[person]
                 )
-            else:
+                metrics_df.loc[person, "Weighted_communication_density"] = np.mean(
+                    weighted_D_i_dict[person]
+                )
+            else:  # pragma: no cover
                 metrics_df.loc[person, "Newness"] = 0.0
                 metrics_df.loc[person, "Communication_density"] = 0.0
+                metrics_df.loc[person, "Weighted_newness"] = 0.0
+                metrics_df.loc[person, "Weighted_communication_density"] = 0.0
 
-        return (metrics_df["Newness"], metrics_df["Communication_density"])
+        return (
+            metrics_df["Newness"],
+            metrics_df["Communication_density"],
+            metrics_df["Weighted_newness"],
+            metrics_df["Weighted_communication_density"],
+        )
+
+    def _apply_umap_and_clustering_weighted(
+        self, vectors: List[np.ndarray], current_data: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Apply UMAP dimensionality reduction and HDBSCAN clustering to create weighted metrics.
+
+        This method performs the following steps:
+        1. Applies UMAP to reduce vector dimensions to 2D for visualization
+        2. Uses HDBSCAN to cluster the reduced vectors
+        3. Creates cluster-probability-weighted versions of newness and density metrics
+
+        Args:
+            vectors: List of document vectors from LSA processing.
+            current_data: DataFrame containing conversation data with n_c_t and D_i columns.
+
+        Returns:
+            DataFrame with additional columns:
+            - umap_x: First UMAP dimension
+            - umap_y: Second UMAP dimension
+            - cluster: Cluster labels
+            - cluster_probabilities: Cluster membership probabilities
+            - weighted_n_c_t: Newness weighted by cluster probability
+            - weighted_D_i: Density weighted by cluster probability
+        """
+        embeddings = self.reducer.fit_transform(vectors)
+        self.clusterer.fit(embeddings)
+        data = pd.DataFrame(
+            {
+                "umap_x": embeddings[:, 0],
+                "umap_y": embeddings[:, 1],
+                "cluster": self.clusterer.labels_,
+                "cluster_probabilities": self.clusterer.probabilities_,
+            }
+        )
+        current_data = pd.concat([current_data, data], axis=1)
+        current_data["weighted_n_c_t"] = (
+            current_data["n_c_t"] * current_data["cluster_probabilities"]
+        )
+        current_data["weighted_D_i"] = (
+            current_data["D_i"] * current_data["cluster_probabilities"]
+        )
+        return current_data
 
     @measure_time("calculate_text_given_new_df")
     def calculate_text_given_new_df(
@@ -465,6 +542,16 @@ class GCAAnalyzer:
             - n_c_t: Newness values for each message
             - D_i: Communication density values for each message
         """
+        # Convert numpy array to list if necessary
+        if isinstance(vectors, np.ndarray):
+            vectors = [vectors[i] for i in range(len(vectors))]
+
+        if not vectors or not texts:
+            # Return current data with empty n_c_t and D_i columns
+            current_data["n_c_t"] = pd.Series(dtype=float)
+            current_data["D_i"] = pd.Series(dtype=float)
+            return current_data
+
         results = []
         for idx in range(len(vectors)):
             n_c_t = self._calculate_newness_proportion(
@@ -479,9 +566,14 @@ class GCAAnalyzer:
             D_i = self._calculate_communication_density(vector, texts[idx])
             results.append((n_c_t, D_i))
 
-        return pd.concat(
+        current_data = pd.concat(
             [current_data, pd.DataFrame(results, columns=["n_c_t", "D_i"])], axis=1
         )
+        if len(vectors) > 1:
+            current_data = self._apply_umap_and_clustering_weighted(
+                vectors, current_data
+            )
+        return current_data
 
     @measure_time("calculate_batch_lsa_metrics")
     def _calculate_batch_lsa_metrics(
@@ -545,17 +637,17 @@ class GCAAnalyzer:
 
         # Convert previous vectors to numpy arrays if needed
         if isinstance(vectors, pd.DataFrame):
-            prev_vectors_list = [
+            prev_vectors_list = [  # pragma: no cover
                 v.to_numpy() if isinstance(v, pd.Series) else np.asarray(v)
                 for v in vectors.iloc[:current_idx].values
             ]
-            prev_vectors = np.vstack(prev_vectors_list)
-            curr_vec = vectors.iloc[current_idx]
+            prev_vectors = np.vstack(prev_vectors_list)  # pragma: no cover
+            curr_vec = vectors.iloc[current_idx]  # pragma: no cover
             d_i = (
                 curr_vec.to_numpy()
                 if isinstance(curr_vec, pd.Series)
                 else np.asarray(curr_vec)
-            )
+            )  # pragma: no cover
         else:
             prev_vectors_list = []
             for v in vectors[:current_idx]:
@@ -591,7 +683,7 @@ class GCAAnalyzer:
 
         Implements Formula 27 from the GCA framework to compute the density
         of information in a message. This is calculated as the magnitude of
-        the message's vector representation divided by its text length.
+        the message's vector representation divided by its Huffman encoding length.
 
         Args:
             vector: Document vector representation of the message.
@@ -599,18 +691,19 @@ class GCAAnalyzer:
 
         Returns:
             float: Communication density (D_i).
-                Higher values indicate more information per character.
+                Higher values indicate more information per bit.
                 Returns 0.0 for empty messages.
         """
-        text_length = len(text)
-        if text_length == 0:
+        # Calculate Huffman encoding length
+        huffman_length = calculate_huffman_length(text)
+        if huffman_length == 0.0:
             return 0.0
 
         # Convert vector to numpy array if it's a pandas Series
         if isinstance(vector, pd.Series):
             vector = vector.to_numpy()
 
-        density: float = float(np.linalg.norm(vector) / text_length)
+        density: float = float(np.linalg.norm(vector) / huffman_length)
         return density
 
     @measure_time("analyze_conversation")
@@ -638,6 +731,8 @@ class GCAAnalyzer:
         Content Metrics:
         - n(ct): Message newness (Formula 25)
         - Di: Communication density (Formula 27)
+        - w_n(ct): Cluster-weighted message newness
+        - w_Di: Cluster-weighted communication density
 
         Args:
             conversation_id: Unique identifier for the conversation.
@@ -657,6 +752,8 @@ class GCAAnalyzer:
                 - social_impact: Impact on others' responses
                 - newness: Average message novelty
                 - comm_density: Average message information density
+                - weighted_newness: Cluster-weighted average message novelty
+                - weighted_comm_density: Cluster-weighted average information density
         """
         # Preprocess conversation data
         current_data, person_list, seq_list, k, n, M = self.participant_pre(
@@ -678,6 +775,8 @@ class GCAAnalyzer:
                 "Social_impact",
                 "Newness",
                 "Communication_density",
+                "Weighted_newness",
+                "Weighted_communication_density",
             ],
             dtype=float,
         )
@@ -722,15 +821,23 @@ class GCAAnalyzer:
         ) = self.calculate_cohesion_response(person_list=person_list, k=k, R_w=R_w)
 
         # Calculate content metrics
-        n_c_t_dict, D_i_dict = self.calculate_personal_given_new_dict(
-            vectors=vectors, texts=texts, current_data=current_data
+        current_data = self.calculate_text_given_new_df(vectors, texts, current_data)
+        n_c_t_dict, D_i_dict, weighted_n_c_t_dict, weighted_D_i_dict = (
+            self.calculate_personal_given_new_dict(current_data=current_data)
         )
 
         # Calculate average content metrics
-        metrics_df["Newness"], metrics_df["Communication_density"] = (
-            self.calculate_personal_given_new_averages(
-                person_list=person_list, n_c_t_dict=n_c_t_dict, D_i_dict=D_i_dict
-            )
+        (
+            metrics_df["Newness"],
+            metrics_df["Communication_density"],
+            metrics_df["Weighted_newness"],
+            metrics_df["Weighted_communication_density"],
+        ) = self.calculate_personal_given_new_averages(
+            person_list=person_list,
+            n_c_t_dict=n_c_t_dict,
+            D_i_dict=D_i_dict,
+            weighted_n_c_t_dict=weighted_n_c_t_dict,
+            weighted_D_i_dict=weighted_D_i_dict,
         )
 
         # Rename columns to match paper terminology
@@ -742,6 +849,8 @@ class GCAAnalyzer:
                 "Social_impact": "social_impact",
                 "Newness": "newness",
                 "Communication_density": "comm_density",
+                "Weighted_newness": "weighted_newness",
+                "Weighted_communication_density": "weighted_comm_density",
             }
         )
 
@@ -749,7 +858,7 @@ class GCAAnalyzer:
 
     @measure_time("calculate_descriptive_statistics")
     def calculate_descriptive_statistics(
-        self, all_metrics: dict, output_dir: Optional[str] = None
+        self, conversation_id: str, all_metrics: dict, output_dir: Optional[str] = None
     ) -> pd.DataFrame:
         """Calculate descriptive statistics for GCA measures.
 
@@ -760,6 +869,7 @@ class GCAAnalyzer:
         - Data quality indicators (missing values count)
 
         Args:
+            conversation_id: ID of the conversation for which statistics are calculated.
             all_metrics: Dictionary mapping conversation IDs to DataFrames
                 containing GCA metrics for each participant.
             output_dir: Optional directory path to save statistics CSV file.
@@ -838,10 +948,12 @@ class GCAAnalyzer:
         print("-" * 80)
 
         # Save statistics to file if output directory provided
-        if output_dir:  # pragma: no cover
+        if output_dir:
             os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, "descriptive_statistics_gca.csv")
+            output_file = os.path.join(
+                output_dir, f"descriptive_statistics_{conversation_id}.csv"
+            )
             stats.to_csv(output_file)
-            print(f"=== Saved descriptive statistics to: {output_file} ===")
+            print(f"=== Descriptive Statistics saved to: {output_file} ===")
 
         return stats

@@ -87,6 +87,29 @@ def main(args=None):
             help="Heatmap figure size (width height) (default: 10 6)",
         )
 
+        # UMAP configuration
+        umap_group = parser.add_argument_group("UMAP Configuration")
+        umap_group.add_argument(
+            "--umap-n-neighbors",
+            type=int,
+            help="Number of neighbors to consider for UMAP (default: 15)",
+        )
+        umap_group.add_argument(
+            "--umap-min-dist",
+            type=float,
+            help="Minimum distance between points in UMAP embedding (default: 0.1)",
+        )
+        umap_group.add_argument(
+            "--umap-n-components",
+            type=int,
+            help="Number of dimensions in UMAP output (default: 2)",
+        )
+        umap_group.add_argument(
+            "--umap-random-state",
+            type=int,
+            help="Random seed for UMAP (default: 42)",
+        )
+
         # Logger configuration
         parser.add_argument(
             "--log-file",
@@ -158,6 +181,22 @@ def main(args=None):
         compression=args.log_compression,
     )
 
+    # Configure UMAP parameters
+    if args.umap_n_neighbors:
+        config.umap.n_neighbors = args.umap_n_neighbors
+    if args.umap_min_dist:
+        config.umap.min_dist = args.umap_min_dist
+    if args.umap_n_components:
+        config.umap.n_components = args.umap_n_components
+    if args.umap_random_state:
+        config.umap.random_state = args.umap_random_state
+
+    # Validate figure size
+    if args.default_figsize:
+        width, height = args.default_figsize
+        if width <= 0 or height <= 0:
+            raise ValueError("Figure size must be positive")
+
     from .logger import setup_logger
 
     setup_logger(config)
@@ -172,6 +211,8 @@ def main(args=None):
         "social_impact",
         "newness",
         "comm_density",
+        "weighted_newness",
+        "weighted_comm_density",
     ]
 
     conversation_ids = df["conversation_id"].unique()
@@ -217,15 +258,15 @@ def main(args=None):
             )  # pragma: no cover
 
         try:
-            metrics_df.to_csv(
-                os.path.join(args.output, f"metrics_{conversation_id}.csv")
-            )
+            output_path = os.path.join(args.output, f"metrics_{conversation_id}.csv")
+            metrics_df.to_csv(output_path)
+            print(f"=== Statistics saved to: {output_path} ===")
         except OSError as e:  # pragma: no cover
             raise OSError(
                 f"Failed to save output files in {args.output}: {str(e)}"
             )  # pragma: no cover
 
-    analyzer.calculate_descriptive_statistics(all_metrics, args.output)
+    analyzer.calculate_descriptive_statistics(conversation_id, all_metrics, args.output)
 
 
 if __name__ == "__main__":  # pragma: no cover
