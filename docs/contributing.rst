@@ -45,6 +45,9 @@ Development Setup
 
    .. code-block:: bash
 
+      black gca_analyzer/ && isort gca_analyzer/
+      flake8 gca_analyzer/ --exclude "gca_analyzer/tests/*" --count --ignore=E203,W503 --max-line-length=127 --statistics
+      mypy gca_analyzer/ --exclude gca_analyzer/tests/ --ignore-missing-imports
       pytest tests/ --cov=gca_analyzer --cov-report=term-missing
 
 7. Push and create a pull request

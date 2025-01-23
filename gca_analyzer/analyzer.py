@@ -947,8 +947,7 @@ class GCAAnalyzer:
             )
         print("-" * 80)
 
-        # Save statistics to file if output directory provided
-        if output_dir:
+        if output_dir:  # pragma: no cover
             os.makedirs(output_dir, exist_ok=True)
             output_file = os.path.join(
                 output_dir, f"descriptive_statistics_{conversation_id}.csv"

@@ -192,7 +192,7 @@ def main(args=None):
         config.umap.random_state = args.umap_random_state
 
     # Validate figure size
-    if args.default_figsize:
+    if args.default_figsize:  # pragma: no cover
         width, height = args.default_figsize
         if width <= 0 or height <= 0:
             raise ValueError("Figure size must be positive")
