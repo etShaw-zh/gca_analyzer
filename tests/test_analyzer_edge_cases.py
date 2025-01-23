@@ -75,3 +75,39 @@ def test_calculate_descriptive_statistics_edge_cases(analyzer):
     # Access by index since DataFrame is transposed
     assert stats.loc['Newness', 'CV'] == float('inf')  # CV should be inf when mean is 0
     assert stats.loc['Communication_density', 'CV'] == float('inf')  # CV should be inf when mean is 0
+
+def test_calculate_newness_proportion_input_types(analyzer):
+    """Test _calculate_newness_proportion with different input types"""
+    # Test with list of numpy arrays
+    vectors = [np.array([1.0, 0.0]), np.array([0.0, 1.0]), np.array([1.0, 1.0])]
+    result_list = analyzer._calculate_newness_proportion(vectors, 2)
+    assert isinstance(result_list, float)
+    assert 0 <= result_list <= 1
+
+    # Test with list of pandas Series
+    series_list = [pd.Series([1.0, 0.0]), pd.Series([0.0, 1.0]), pd.Series([1.0, 1.0])]
+    result_series = analyzer._calculate_newness_proportion(series_list, 2)
+    assert isinstance(result_series, float)
+    assert 0 <= result_series <= 1
+
+    # Test with numpy array
+    array_vectors = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    result_array = analyzer._calculate_newness_proportion(array_vectors, 2)
+    assert isinstance(result_array, float)
+    assert 0 <= result_array <= 1
+
+    # Test with mixed types
+    mixed_vectors = [
+        [1.0, 0.0],  # Regular list
+        pd.Series([0.0, 1.0]),  # pandas Series
+        np.array([1.0, 1.0])  # numpy array
+    ]
+    result_mixed = analyzer._calculate_newness_proportion(mixed_vectors, 2)
+    assert isinstance(result_mixed, float)
+    assert 0 <= result_mixed <= 1
+
+    # Test with regular Python lists
+    list_vectors = [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]  # All regular Python lists
+    result_list_only = analyzer._calculate_newness_proportion(list_vectors, 2)
+    assert isinstance(result_list_only, float)
+    assert 0 <= result_list_only <= 1

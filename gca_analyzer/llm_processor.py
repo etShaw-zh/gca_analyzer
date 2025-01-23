@@ -35,9 +35,9 @@ class LLMTextProcessor:
 
     def __init__(
         self,
-        model_name: str = None,
+        model_name: Optional[str] = None,
         mirror_url: Optional[str] = None,
-        config: Config = None
+        config: Optional[Config] = None,
     ):
         """Initialize the LLM text processor.
 
@@ -53,49 +53,46 @@ class LLMTextProcessor:
         self._config = config or default_config
         self.model_name = model_name or self._config.model.model_name
         self.mirror_url = mirror_url or self._config.model.mirror_url
-        
-        logger.info(
-            f"Initializing LLM Text Processor with model: {self.model_name}"
-        )
+
+        logger.info(f"Initializing LLM Text Processor with model: {self.model_name}")
         try:
             if self.mirror_url and "modelscope.cn" in self.mirror_url:
                 self._init_modelscope_model()
             else:
                 self._init_huggingface_model()
-        except Exception as e: # pragma: no cover
-            logger.error(f"Error loading model: {str(e)}") # pragma: no cover
-            raise # pragma: no cover
+        except Exception as e:  # pragma: no cover
+            logger.error(f"Error loading model: {str(e)}")  # pragma: no cover
+            raise  # pragma: no cover
 
     def _init_modelscope_model(self):
         """Initialize model from ModelScope."""
         try:
             from modelscope import snapshot_download
+
             # Download model to local cache
             model_dir = snapshot_download(self.model_name)
             self.model = SentenceTransformer(model_dir)
-            logger.info(
-                f"Successfully loaded model from ModelScope: {self.model_name}"
-            )
+            logger.info(f"Successfully loaded model from ModelScope: {self.model_name}")
         except ImportError:
             logger.warning("ModelScope not installed. Installing packages...")
             subprocess.check_call(["pip", "install", "modelscope"])
             from modelscope import snapshot_download
+
             model_dir = snapshot_download(self.model_name)
             self.model = SentenceTransformer(model_dir)
-            logger.info(
-                f"Successfully loaded model from ModelScope: {self.model_name}"
-            )
+            logger.info(f"Successfully loaded model from ModelScope: {self.model_name}")
 
     def _init_huggingface_model(self):
         """Initialize model from Hugging Face."""
         if self.mirror_url:
             import os
-            os.environ['HF_ENDPOINT'] = self.mirror_url
+
+            os.environ["HF_ENDPOINT"] = self.mirror_url
             logger.info(f"Using custom mirror: {self.mirror_url}")
-        
+
         self.model = SentenceTransformer(self.model_name)
         logger.info("Successfully loaded the model")
-    
+
     @measure_time("doc2vector")
     def doc2vector(self, texts: List[str]) -> List[np.ndarray]:
         """Convert texts to vectors using transformer embeddings.
@@ -111,14 +108,16 @@ class LLMTextProcessor:
             # Get embeddings and ensure they are flattened numpy arrays
             embeddings = self.model.encode(texts, convert_to_numpy=True)
             vectors = [
-                np.array(emb).flatten() if emb is not None
-                else np.zeros(self.model.get_sentence_embedding_dimension())
+                (
+                    np.array(emb).flatten()
+                    if emb is not None
+                    else np.zeros(self.model.get_sentence_embedding_dimension())
+                )
                 for emb in embeddings
             ]
             return vectors
         except Exception as e:
             logger.error(f"Error in doc2vector: {str(e)}")
             return [
-                np.zeros(self.model.get_sentence_embedding_dimension())
-                for _ in texts
+                np.zeros(self.model.get_sentence_embedding_dimension()) for _ in texts
             ]
