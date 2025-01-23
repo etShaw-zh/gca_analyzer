@@ -1,94 +1,123 @@
-import os
 import argparse
+import os
+
 import pandas as pd
-from gca_analyzer import (
-    Config, WindowConfig, ModelConfig, VisualizationConfig, LoggerConfig,
-    GCAAnalyzer, GCAVisualizer, normalize_metrics
-)
+
+from gca_analyzer import (Config, GCAAnalyzer, GCAVisualizer, LoggerConfig,
+                          ModelConfig, VisualizationConfig, WindowConfig,
+                          normalize_metrics)
 
 
 def main(args=None):
     """Main function to run GCA analysis from command line."""
-    if args is None: # pragma: no cover
+    if args is None:  # pragma: no cover
         parser = argparse.ArgumentParser(
-            description='GCA (Group Communication Analysis) Analyzer'
+            description="GCA (Group Communication Analysis) Analyzer"
         )
         # Data arguments
         parser.add_argument(
-            '--data', type=str, required=True,
-            help='Path to the CSV file containing interaction data'
+            "--data",
+            type=str,
+            required=True,
+            help="Path to the CSV file containing interaction data",
         )
         parser.add_argument(
-            '--output', type=str, default='gca_results',
-            help='Directory to save analysis results (default: gca_results)'
+            "--output",
+            type=str,
+            default="gca_results",
+            help="Directory to save analysis results (default: gca_results)",
         )
 
         # Window configuration
         parser.add_argument(
-            '--best-window-indices', type=float, default=0.3,
-            help='Proportion of best window indices (default: 0.3)'
+            "--best-window-indices",
+            type=float,
+            default=0.3,
+            help="Proportion of best window indices (default: 0.3)",
         )
         parser.add_argument(
-            '--act-participant-indices', type=int, default=2,
-            help='Number of contributions from each participant in a window that \
+            "--act-participant-indices",
+            type=int,
+            default=2,
+            help="Number of contributions from each participant in a window that \
                 is greater than or equal to the active participants threshold \
-                (e.g., at least two contributions). Defaults to 2.'
+                (e.g., at least two contributions). Defaults to 2.",
         )
         parser.add_argument(
-            '--min-window-size', type=int, default=2,
-            help='Minimum window size (default: 2)'
+            "--min-window-size",
+            type=int,
+            default=2,
+            help="Minimum window size (default: 2)",
         )
         parser.add_argument(
-            '--max-window-size', type=int, default=None,
-            help='Maximum window size (default: None | if None, max_window_size = len(data))'
+            "--max-window-size",
+            type=int,
+            default=None,
+            help="Maximum window size (default: None | if None, max_window_size = len(data))",
         )
 
         # Model configuration
         parser.add_argument(
-            '--model-name', type=str,
-            default='sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
-            help='Name of the model to use (default: sentence-transformers/'
-                 'paraphrase-multilingual-MiniLM-L12-v2)'
+            "--model-name",
+            type=str,
+            default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            help="Name of the model to use (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)",
         )
         parser.add_argument(
-            '--model-mirror', type=str,
-            default='https://modelscope.cn/models',
-            help='Mirror URL for model download '
-                 '(default: https://modelscope.cn/models)'
+            "--model-mirror",
+            type=str,
+            default="https://modelscope.cn/models",
+            help="Mirror URL for model download "
+            "(default: https://modelscope.cn/models)",
         )
 
         # Visualization configuration
         parser.add_argument(
-            '--default-figsize', type=float, nargs=2, default=[10, 8],
-            help='Default figure size (width height) (default: 10 8)'
+            "--default-figsize",
+            type=float,
+            nargs=2,
+            default=[10, 8],
+            help="Default figure size (width height) (default: 10 8)",
         )
         parser.add_argument(
-            '--heatmap-figsize', type=float, nargs=2, default=[10, 6],
-            help='Heatmap figure size (width height) (default: 10 6)'
+            "--heatmap-figsize",
+            type=float,
+            nargs=2,
+            default=[10, 6],
+            help="Heatmap figure size (width height) (default: 10 6)",
         )
 
         # Logger configuration
         parser.add_argument(
-            '--log-file', type=str,
-            help='Path to log file. If not specified, only console output is used'
+            "--log-file",
+            type=str,
+            help="Path to log file. If not specified, only console output is used",
         )
         parser.add_argument(
-            '--console-level', type=str, default='INFO',
-            choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-            help='Logging level for console output (default: INFO)'
+            "--console-level",
+            type=str,
+            default="INFO",
+            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+            help="Logging level for console output (default: INFO)",
         )
         parser.add_argument(
-            '--file-level', type=str, default='DEBUG',
-            choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-            help='Logging level for file output (default: DEBUG)'
+            "--file-level",
+            type=str,
+            default="DEBUG",
+            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+            help="Logging level for file output (default: DEBUG)",
         )
         parser.add_argument(
-            '--log-rotation', type=str, default='10 MB',
-            help='Log file rotation setting (default: 10 MB)'
+            "--log-rotation",
+            type=str,
+            default="10 MB",
+            help="Log file rotation setting (default: 10 MB)",
         )
         parser.add_argument(
-            '--log-compression', type=str, default='zip',
-            help='Log file compression format (default: zip)'
+            "--log-compression",
+            type=str,
+            default="zip",
+            help="Log file compression format (default: zip)",
         )
 
         args = parser.parse_args()
@@ -102,8 +131,10 @@ def main(args=None):
 
     try:
         os.makedirs(args.output, exist_ok=True)
-    except OSError as e: # pragma: no cover
-        raise OSError(f"Failed to create output directory {args.output}: {str(e)}") # pragma: no cover
+    except OSError as e:  # pragma: no cover
+        raise OSError(
+            f"Failed to create output directory {args.output}: {str(e)}"
+        )  # pragma: no cover
 
     df = pd.read_csv(args.data)
 
@@ -112,36 +143,38 @@ def main(args=None):
         best_window_indices=args.best_window_indices,
         act_participant_indices=args.act_participant_indices,
         min_window_size=args.min_window_size,
-        max_window_size=args.max_window_size
+        max_window_size=args.max_window_size,
     )
-    config.model = ModelConfig(
-        model_name=args.model_name,
-        mirror_url=args.model_mirror
-    )
+    config.model = ModelConfig(model_name=args.model_name, mirror_url=args.model_mirror)
     config.visualization = VisualizationConfig(
         default_figsize=tuple(args.default_figsize),
-        heatmap_figsize=tuple(args.heatmap_figsize)
+        heatmap_figsize=tuple(args.heatmap_figsize),
     )
     config.logger = LoggerConfig(
         console_level=args.console_level,
         file_level=args.file_level,
         log_file=args.log_file,
         rotation=args.log_rotation,
-        compression=args.log_compression
+        compression=args.log_compression,
     )
 
     from .logger import setup_logger
-    logger = setup_logger(config)
+
+    setup_logger(config)
 
     analyzer = GCAAnalyzer(config=config)
     visualizer = GCAVisualizer(config=config)
 
     metrics = [
-        'participation', 'responsivity', 'internal_cohesion',
-        'social_impact', 'newness', 'comm_density'
+        "participation",
+        "responsivity",
+        "internal_cohesion",
+        "social_impact",
+        "newness",
+        "comm_density",
     ]
 
-    conversation_ids = df['conversation_id'].unique()
+    conversation_ids = df["conversation_id"].unique()
 
     all_metrics = {}
     for conversation_id in conversation_ids:
@@ -156,34 +189,44 @@ def main(args=None):
         plot_metrics_distribution = visualizer.plot_metrics_distribution(
             normalize_metrics(metrics_df, metrics, inplace=False),
             metrics=metrics,
-            title='Distribution of Normalized Interaction Metrics'
+            title="Distribution of Normalized Interaction Metrics",
         )
         try:
             plot_metrics_distribution.write_html(
-                os.path.join(args.output, f'metrics_distribution_{conversation_id}.html')
+                os.path.join(
+                    args.output, f"metrics_distribution_{conversation_id}.html"
+                )
             )
-        except OSError as e: # pragma: no cover
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
+        except OSError as e:  # pragma: no cover
+            raise OSError(
+                f"Failed to save output files in {args.output}: {str(e)}"
+            )  # pragma: no cover
 
         plot_metrics_radar = visualizer.plot_metrics_radar(
             normalize_metrics(metrics_df, metrics, inplace=False),
             metrics=metrics,
-            title='Metrics Radar Chart'
+            title="Metrics Radar Chart",
         )
         try:
             plot_metrics_radar.write_html(
-                os.path.join(args.output, f'metrics_radar_{conversation_id}.html')
+                os.path.join(args.output, f"metrics_radar_{conversation_id}.html")
             )
-        except OSError as e: # pragma: no cover
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
+        except OSError as e:  # pragma: no cover
+            raise OSError(
+                f"Failed to save output files in {args.output}: {str(e)}"
+            )  # pragma: no cover
 
         try:
-            metrics_df.to_csv(os.path.join(args.output, f'metrics_{conversation_id}.csv'))
-        except OSError as e: # pragma: no cover
-            raise OSError(f"Failed to save output files in {args.output}: {str(e)}") # pragma: no cover
+            metrics_df.to_csv(
+                os.path.join(args.output, f"metrics_{conversation_id}.csv")
+            )
+        except OSError as e:  # pragma: no cover
+            raise OSError(
+                f"Failed to save output files in {args.output}: {str(e)}"
+            )  # pragma: no cover
 
     analyzer.calculate_descriptive_statistics(all_metrics, args.output)
 
 
-if __name__ == '__main__': # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     main()

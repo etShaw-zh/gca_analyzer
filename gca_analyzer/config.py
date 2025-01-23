@@ -10,6 +10,7 @@ License: Apache 2.0
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
+
 from typing_extensions import Union
 
 
@@ -46,11 +47,9 @@ class ModelConfig:
             'https://modelscope.cn/models'.
     """
 
-    model_name: str = (
-        'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
-    )
+    model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     embedding_dimension: int = 384
-    mirror_url: str = 'https://modelscope.cn/models'
+    mirror_url: str = "https://modelscope.cn/models"
 
 
 @dataclass
@@ -91,8 +90,15 @@ class LoggerConfig:
     log_file: Optional[str] = None
     rotation: str = "10 MB"
     compression: str = "zip"
-    console_format: str = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | <cyan>{name}:{function}:{line}</cyan> | <level>{message}</level>"
-    file_format: str = "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} | {message}"
+    console_format: str = (
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+        "<level>{level: <4}</level> | "
+        "<cyan>{name}:{function}:{line}</cyan> | "
+        "<level>{message}</level>"
+    )
+    file_format: str = (
+        "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} | {message}"
+    )
 
 
 @dataclass
@@ -111,9 +117,7 @@ class Config:
 
     window: WindowConfig = field(default_factory=WindowConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
-    visualization: VisualizationConfig = field(
-        default_factory=VisualizationConfig
-    )
+    visualization: VisualizationConfig = field(default_factory=VisualizationConfig)
     logger: LoggerConfig = field(default_factory=LoggerConfig)
 
 

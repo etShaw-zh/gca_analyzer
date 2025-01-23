@@ -10,41 +10,42 @@ License: Apache 2.0
 """
 
 import sys
-from typing import Optional
-from loguru import logger
+from typing import Any, Optional
+
+from loguru import logger as _logger
 
 from .config import Config, default_config
 
 
-def setup_logger(config: Optional[Config] = None) -> logger:
+def setup_logger(config: Optional[Config] = None) -> Any:
     """Setup loguru logger with console output and optional file output.
 
     Args:
         config: Optional configuration instance. If None, uses default_config.
 
     Returns:
-        logger: Configured loguru logger instance
+        Any: Configured loguru logger instance
     """
     config = config or default_config
-    logger.remove()
+    _logger.remove()
 
-    logger.add(
+    _logger.add(
         sys.stdout,
         colorize=True,
         format=config.logger.console_format,
-        level=config.logger.console_level
+        level=config.logger.console_level,
     )
 
     if config.logger.log_file:
-        logger.add(
+        _logger.add(
             config.logger.log_file,
             format=config.logger.file_format,
             level=config.logger.file_level,
             rotation=config.logger.rotation,
-            compression=config.logger.compression
+            compression=config.logger.compression,
         )
 
-    return logger
+    return _logger
 
 
-logger = setup_logger()
+logger = _logger

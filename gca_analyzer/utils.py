@@ -9,7 +9,7 @@ Date: 2025-01-12
 License: Apache 2.0
 """
 
-from typing import List, Union
+from typing import Callable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -18,9 +18,7 @@ from .logger import logger
 
 
 def normalize_metrics(
-    data: pd.DataFrame,
-    metrics: Union[str, List[str]],
-    inplace: bool = False
+    data: pd.DataFrame, metrics: Union[str, List[str]], inplace: bool = False
 ) -> pd.DataFrame:
     """
     Normalize metrics in a DataFrame to the range [0, 1] using min-max normalization.
@@ -50,7 +48,7 @@ def normalize_metrics(
     return data
 
 
-def measure_time(func_name: str) -> None:
+def measure_time(func_name: str) -> Callable:
     """
     Decorator to measure and log execution time of functions.
 
@@ -58,11 +56,11 @@ def measure_time(func_name: str) -> None:
         func_name (str): Name of the function or operation being timed
 
     Returns:
-        None: Logs the execution time using the logger
+        Callable: A decorator function that wraps the original function
     """
     import time
     from functools import wraps
-    
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -71,7 +69,9 @@ def measure_time(func_name: str) -> None:
             elapsed_time = time.time() - start_time
             logger.info(f"{func_name} took {elapsed_time:.2f} seconds")
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -96,8 +96,10 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     if vec2.ndim > 1:
         vec2 = vec2.reshape(-1)
 
-    if vec1.shape != vec2.shape: # pragma: no cover
-        raise ValueError("Input vectors must have the same number of elements") # pragma: no cover
+    if vec1.shape != vec2.shape:  # pragma: no cover
+        raise ValueError(
+            "Input vectors must have the same number of elements"
+        )  # pragma: no cover
 
     # Calculate norms
     norm1 = np.linalg.norm(vec1)
@@ -120,7 +122,7 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
 def cosine_similarity_matrix(
     vectors: Union[List[np.ndarray], pd.DataFrame],
     seq_list: List[int],
-    current_data: pd.DataFrame
+    current_data: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Calculate cosine similarity matrix for a list of vectors.
@@ -143,9 +145,11 @@ def cosine_similarity_matrix(
         vectors = [np.array(vectors.iloc[i]) for i in range(len(vectors))]
 
     # Validate vectors
-    if len(vectors) == 0: # pragma: no cover
-        logger.warning("Empty vectors provided to cosine_similarity_matrix") # pragma: no cover
-        return pd.DataFrame() # pragma: no cover
+    if len(vectors) == 0:  # pragma: no cover
+        logger.warning(
+            "Empty vectors provided to cosine_similarity_matrix"
+        )  # pragma: no cover
+        return pd.DataFrame()  # pragma: no cover
 
     # Check if we have enough vectors for all sequences
     if len(vectors) < len(seq_list):
@@ -162,14 +166,14 @@ def cosine_similarity_matrix(
             matches = current_data[current_data.seq_num == seq]
             if not matches.empty:  # pragma: no cover
                 idx = matches.index[0]
-                if idx < len(vectors): # pragma: no cover
+                if idx < len(vectors):  # pragma: no cover
                     seq_to_idx[seq] = idx
 
         # Get valid vectors and their sequence numbers
         valid_seqs = list(seq_to_idx.keys())
-        if not valid_seqs: # pragma: no cover
-            logger.error("No valid sequences found") # pragma: no cover
-            return pd.DataFrame() # pragma: no cover
+        if not valid_seqs:  # pragma: no cover
+            logger.error("No valid sequences found")  # pragma: no cover
+            return pd.DataFrame()  # pragma: no cover
 
         valid_vectors = [vectors[seq_to_idx[seq]] for seq in valid_seqs]
 
@@ -178,16 +182,22 @@ def cosine_similarity_matrix(
             for j, seq_j in enumerate(valid_seqs):
                 if i <= j:  # Calculate upper triangle and diagonal
                     try:
-                        similarity = cosine_similarity(valid_vectors[i], valid_vectors[j])
+                        similarity = cosine_similarity(
+                            valid_vectors[i], valid_vectors[j]
+                        )
                         cosine_matrix.loc[seq_i, seq_j] = similarity
                         if i != j:  # Mirror for lower triangle
                             cosine_matrix.loc[seq_j, seq_i] = similarity
-                    except Exception as e: # pragma: no cover
-                        logger.error(f"Error calculating similarity for vectors {i} and {j}: {str(e)}") # pragma: no cover
-                        return pd.DataFrame() # pragma: no cover
+                    except Exception as e:  # pragma: no cover
+                        logger.error(
+                            f"Error calculating similarity for vectors {i} and {j}: {str(e)}"
+                        )  # pragma: no cover
+                        return pd.DataFrame()  # pragma: no cover
 
-    except Exception as e: # pragma: no cover
-        logger.error(f"Error calculating similarity matrix: {str(e)}") # pragma: no cover
-        return pd.DataFrame() # pragma: no cover
+    except Exception as e:  # pragma: no cover
+        logger.error(
+            f"Error calculating similarity matrix: {str(e)}"
+        )  # pragma: no cover
+        return pd.DataFrame()  # pragma: no cover
 
     return cosine_matrix

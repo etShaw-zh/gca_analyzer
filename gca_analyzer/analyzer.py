@@ -17,7 +17,7 @@ License: Apache 2.0
 """
 
 import os
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ class GCAAnalyzer:
     def __init__(
         self,
         llm_processor: Optional[LLMTextProcessor] = None,
-        config: Optional[Config] = None
+        config: Optional[Config] = None,
     ) -> None:
         """Initialize the GCA Analyzer with required components.
 
@@ -57,7 +57,7 @@ class GCAAnalyzer:
         self._config = config or default_config
         self.llm_processor = llm_processor or LLMTextProcessor(
             model_name=self._config.model.model_name,
-            mirror_url=self._config.model.mirror_url
+            mirror_url=self._config.model.mirror_url,
         )
         logger.info("Initializing GCA Analyzer")
         logger.info("Using LLM-based text processor for multi-language support")
@@ -65,9 +65,7 @@ class GCAAnalyzer:
 
     @measure_time("participant_pre")
     def participant_pre(
-        self,
-        conversation_id: str,
-        data: pd.DataFrame
+        self, conversation_id: str, data: pd.DataFrame
     ) -> Tuple[pd.DataFrame, List[str], List[int], int, int, pd.DataFrame]:
         """Preprocess participant data for analysis.
 
@@ -96,37 +94,37 @@ class GCAAnalyzer:
         """
         # Filter data for current conversation
         current_data = data[data.conversation_id == conversation_id].copy()
-        
+
         if current_data.empty:  # pragma: no cover
             raise ValueError(f"No data found for conversation_id: {conversation_id}")
-            
+
         # Validate required columns
-        required_columns = ['conversation_id', 'person_id', 'time', 'text']
+        required_columns = ["conversation_id", "person_id", "time", "text"]
         missing_columns = [
             col for col in required_columns if col not in current_data.columns
         ]
         if missing_columns:  # pragma: no cover
             raise ValueError(f"Missing required columns: {missing_columns}")
-            
+
         # Sort by timestamp and assign sequence numbers
-        current_data['parsed_time'] = pd.to_datetime(
-            current_data['time'], format='mixed'
+        current_data["parsed_time"] = pd.to_datetime(
+            current_data["time"], format="mixed"
         )
-        current_data = current_data.sort_values('parsed_time').reset_index(drop=True)
-        current_data['seq_num'] = range(1, len(current_data) + 1)
-        
+        current_data = current_data.sort_values("parsed_time").reset_index(drop=True)
+        current_data["seq_num"] = range(1, len(current_data) + 1)
+
         # Extract unique participants and sequences
         person_list = sorted(current_data.person_id.unique())
         seq_list = sorted(current_data.seq_num.unique())
-        
+
         k = len(person_list)  # Number of participants
-        n = len(seq_list)     # Number of messages
-        
+        n = len(seq_list)  # Number of messages
+
         # Create participation matrix
         M = pd.DataFrame(0, index=person_list, columns=seq_list)
         for _, row in current_data.iterrows():
             M.loc[row.person_id, row.seq_num] = 1
-        
+
         return current_data, person_list, seq_list, k, n, M
 
     @measure_time("find_best_window_size")
@@ -135,7 +133,7 @@ class GCAAnalyzer:
         data: pd.DataFrame,
         best_window_indices: Optional[float] = None,
         min_num: Optional[int] = None,
-        max_num: Optional[int] = None
+        max_num: Optional[int] = None,
     ) -> int:
         """Find the optimal window size for conversation analysis.
 
@@ -177,13 +175,13 @@ class GCAAnalyzer:
             return max_num
 
         n = len(data)
-        person_contributions = data.groupby('person_id')
+        person_contributions = data.groupby("person_id")
 
         # Test each window size
         for w in range(min_num, max_num + 1):
             for t in range(n - w + 1):
-                window_data = data.iloc[t:t+w]
-                window_counts = window_data.groupby('person_id').size()
+                window_data = data.iloc[t : t + w]
+                window_counts = window_data.groupby("person_id").size()
                 active_participants = (
                     window_counts >= self._config.window.act_participant_indices
                 ).sum()
@@ -201,7 +199,7 @@ class GCAAnalyzer:
         logger.warning(
             f"No valid window size found between {min_num} and {max_num}, "
             f"using max_num: {max_num} (threshold: {best_window_indices})"
-        )   # pragma: no cover
+        )  # pragma: no cover
         return max_num  # pragma: no cover
 
     @measure_time("calculate_participation_metrics")
@@ -212,7 +210,7 @@ class GCAAnalyzer:
         person_list: List[str],
         seq_list: List[int],
         n: int,
-        k: int
+        k: int,
     ) -> pd.DataFrame:
         """Calculate participation-related metrics for each participant.
 
@@ -236,23 +234,21 @@ class GCAAnalyzer:
         # Calculate participation metrics (Formula 4 and 5)
         for person in person_list:
             # Pa = sum(M_a) (Formula 4)
-            metrics_df.loc[person, 'Pa'] = M.loc[person].sum()
+            metrics_df.loc[person, "Pa"] = M.loc[person].sum()
             # p̄a = (1/n)||Pa|| (Formula 5)
-            metrics_df.loc[person, 'Pa_average'] = metrics_df.loc[person, 'Pa'] / n
-            
+            metrics_df.loc[person, "Pa_average"] = metrics_df.loc[person, "Pa"] / n
+
         # Calculate participation standard deviation (Formula 6)
         for person in person_list:
             variance = sum(
-                (M.loc[person, seq] - metrics_df.loc[person, 'Pa_average'])**2
+                (M.loc[person, seq] - metrics_df.loc[person, "Pa_average"]) ** 2
                 for seq in seq_list
             )
-            metrics_df.loc[person, 'Pa_std'] = np.sqrt(variance / (n-1))
-            
+            metrics_df.loc[person, "Pa_std"] = np.sqrt(variance / (n - 1))
+
         # Calculate relative participation (Formula 9)
-        metrics_df['Pa_hat'] = (
-            metrics_df['Pa_average'] - 1/k
-        ) / (1/k)
-            
+        metrics_df["Pa_hat"] = (metrics_df["Pa_average"] - 1 / k) / (1 / k)
+
         return metrics_df
 
     @measure_time("get_Ksi_lag")
@@ -263,7 +259,7 @@ class GCAAnalyzer:
         k: int,
         seq_list: List[int],
         M: pd.DataFrame,
-        cosine_similarity_matrix: pd.DataFrame
+        cosine_similarity_matrix: pd.DataFrame,
     ) -> pd.DataFrame:
         """Calculate the Ksi lag matrix for interaction analysis.
 
@@ -286,52 +282,46 @@ class GCAAnalyzer:
         # Initialize w-spanning cross-cohesion matrix with float dtype
         X_tau = pd.DataFrame(0.0, index=person_list, columns=person_list, dtype=float)
         w = best_window_length
-        
+
         # Convert seq_list to sorted numpy array for faster operations
         sorted_seqs = np.array(sorted(seq_list))
-        
+
         # Pre-compute all possible lagged indices for each tau
-        lag_indices = {
-            tau: np.arange(tau, len(sorted_seqs))
-            for tau in range(1, w + 1)
-        }
-            
+        lag_indices = {tau: np.arange(tau, len(sorted_seqs)) for tau in range(1, w + 1)}
+
         # Convert matrices to numpy arrays for faster operations
         M_np = M.loc[:, sorted_seqs].to_numpy()
         cos_sim_np = cosine_similarity_matrix.loc[sorted_seqs, sorted_seqs].to_numpy()
-        
+
         # Calculate cross-cohesion for each tau and accumulate
         for tau in range(1, w + 1):
             indices = lag_indices[tau]
             lagged_indices = indices - tau
-            
+
             for a_idx, a in enumerate(person_list):
                 for b_idx, b in enumerate(person_list):
                     # Vectorized calculation of Pab_tau
-                    Pab_tau = np.sum(
-                        M_np[a_idx, lagged_indices] * M_np[b_idx, indices]
-                    )
-                    
+                    Pab_tau = np.sum(M_np[a_idx, lagged_indices] * M_np[b_idx, indices])
+
                     if Pab_tau > 0:
                         # Vectorized calculation of Sab_sum
                         Sab_sum = np.sum(
-                            M_np[a_idx, lagged_indices] * 
-                            M_np[b_idx, indices] * 
-                            cos_sim_np[lagged_indices, indices]
+                            M_np[a_idx, lagged_indices]
+                            * M_np[b_idx, indices]
+                            * cos_sim_np[lagged_indices, indices]
                         )
-                        X_tau.loc[a, b] += Sab_sum / Pab_tau    # TODO: Add copresence and directly reply two modes use 'person_id, to_person_id'
-        
+                        X_tau.loc[a, b] += (
+                            Sab_sum / Pab_tau
+                        )  # TODO: Add copresence and directly reply two modes use 'person_id, to_person_id'
+
         # Formula 17: Responsivity across w
-        R_w = X_tau.multiply(1.0/w)
-        
+        R_w = X_tau.multiply(1.0 / w)
+
         return R_w
 
     @measure_time("calculate_cohesion_response")
     def calculate_cohesion_response(
-        self,
-        person_list: List[str],
-        k: int,
-        R_w: pd.DataFrame
+        self, person_list: List[str], k: int, R_w: pd.DataFrame
     ) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Calculate cohesion and response metrics for each participant.
 
@@ -353,36 +343,33 @@ class GCAAnalyzer:
         """
         metrics_df = pd.DataFrame(
             index=person_list,
-            columns=['Internal_cohesion', 'Overall_responsivity', 'Social_impact'],
-            dtype=float
+            columns=["Internal_cohesion", "Overall_responsivity", "Social_impact"],
+            dtype=float,
         )
 
         for person in person_list:
             # Calculate Internal cohesion with w-spanning (Formula 18)
-            metrics_df.loc[person, 'Internal_cohesion'] = R_w.loc[person, person]
-        
+            metrics_df.loc[person, "Internal_cohesion"] = R_w.loc[person, person]
+
             # Calculate Overall responsivity with w-spanning (Formula 19)
-            metrics_df.loc[person, 'Overall_responsivity'] = sum(
+            metrics_df.loc[person, "Overall_responsivity"] = sum(
                 R_w.loc[person, other] for other in person_list if other != person
-            ) / (k-1)
-        
+            ) / (k - 1)
+
             # Calculate Social impact with w-spanning (Formula 20)
-            metrics_df.loc[person, 'Social_impact'] = sum(
+            metrics_df.loc[person, "Social_impact"] = sum(
                 R_w.loc[other, person] for other in person_list if other != person
-            ) / (k-1)
+            ) / (k - 1)
 
         return (
-            metrics_df['Internal_cohesion'],
-            metrics_df['Overall_responsivity'],
-            metrics_df['Social_impact']
+            metrics_df["Internal_cohesion"],
+            metrics_df["Overall_responsivity"],
+            metrics_df["Social_impact"],
         )
 
     @measure_time("calculate_personal_given_new_dict")
     def calculate_personal_given_new_dict(
-        self,
-        vectors: List[np.ndarray],
-        texts: List[str],
-        current_data: pd.DataFrame
+        self, vectors: List[np.ndarray], texts: List[str], current_data: pd.DataFrame
     ) -> Tuple[dict, dict]:
         """Calculate LSA metrics for all contributions and aggregate by participant.
 
@@ -405,26 +392,17 @@ class GCAAnalyzer:
         """
         # First calculate metrics for each text
         current_data = self.calculate_text_given_new_df(vectors, texts, current_data)
-        
+
         # Group by person_id and convert to dictionaries
-        grouped = current_data.groupby('person_id')
-        n_c_t_dict = {
-            person: list(group['n_c_t'])
-            for person, group in grouped
-        }
-        D_i_dict = {
-            person: list(group['D_i'])
-            for person, group in grouped
-        }
-        
+        grouped = current_data.groupby("person_id")
+        n_c_t_dict = {person: list(group["n_c_t"]) for person, group in grouped}
+        D_i_dict = {person: list(group["D_i"]) for person, group in grouped}
+
         return n_c_t_dict, D_i_dict
 
     @measure_time("calculate_personal_given_new_averages")
     def calculate_personal_given_new_averages(
-        self,
-        person_list: List[str],
-        n_c_t_dict: dict,
-        D_i_dict: dict
+        self, person_list: List[str], n_c_t_dict: dict, D_i_dict: dict
     ) -> Tuple[pd.Series, pd.Series]:
         """Calculate average LSA metrics for each participant.
 
@@ -445,35 +423,31 @@ class GCAAnalyzer:
         metrics_df = pd.DataFrame(
             0.0,
             index=person_list,
-            columns=['Newness', 'Communication_density'],
-            dtype=float
+            columns=["Newness", "Communication_density"],
+            dtype=float,
         )
 
         for person in person_list:
             if person in n_c_t_dict and len(n_c_t_dict[person]) > 0:
                 # Formula 26: Average newness
-                metrics_df.loc[person, 'Newness'] = np.nanmean(
-                    n_c_t_dict[person]
-                ) if len(n_c_t_dict[person]) > 0 else 0.0
+                metrics_df.loc[person, "Newness"] = (
+                    np.nanmean(n_c_t_dict[person])
+                    if len(n_c_t_dict[person]) > 0
+                    else 0.0
+                )
                 # Formula 28: Average communication density
-                metrics_df.loc[person, 'Communication_density'] = np.nanmean(
-                    D_i_dict[person]
-                ) if len(D_i_dict[person]) > 0 else 0.0
+                metrics_df.loc[person, "Communication_density"] = (
+                    np.nanmean(D_i_dict[person]) if len(D_i_dict[person]) > 0 else 0.0
+                )
             else:
-                metrics_df.loc[person, 'Newness'] = 0.0
-                metrics_df.loc[person, 'Communication_density'] = 0.0
-                
-        return (
-            metrics_df['Newness'],
-            metrics_df['Communication_density']
-        )
+                metrics_df.loc[person, "Newness"] = 0.0
+                metrics_df.loc[person, "Communication_density"] = 0.0
+
+        return (metrics_df["Newness"], metrics_df["Communication_density"])
 
     @measure_time("calculate_text_given_new_df")
     def calculate_text_given_new_df(
-        self,
-        vectors: List[np.ndarray],
-        texts: List[str],
-        current_data: pd.DataFrame
+        self, vectors: List[np.ndarray], texts: List[str], current_data: pd.DataFrame
     ) -> pd.DataFrame:
         """Calculate LSA metrics for all contributions using batch processing.
 
@@ -493,27 +467,25 @@ class GCAAnalyzer:
         """
         results = []
         for idx in range(len(vectors)):
-            if idx == 0:
-                n_c_t = 1.0  # First message is entirely new
-            else:
-                n_c_t = self._calculate_newness_proportion(vectors, idx)    # TODO: Add topic clustering to weight newness
+            n_c_t = self._calculate_newness_proportion(
+                vectors, idx
+            )  # TODO: Add topic clustering to weight newness
             # Convert DataFrame row to numpy array for density calculation
-            vector = vectors.iloc[idx].to_numpy() if isinstance(vectors, pd.DataFrame) else vectors[idx]
+            vector = (
+                vectors.iloc[idx].to_numpy()
+                if isinstance(vectors, pd.DataFrame)
+                else vectors[idx]
+            )
             D_i = self._calculate_communication_density(vector, texts[idx])
             results.append((n_c_t, D_i))
-        
-        return pd.concat([
-            current_data,
-            pd.DataFrame(results, columns=['n_c_t', 'D_i'])
-        ], axis=1)
+
+        return pd.concat(
+            [current_data, pd.DataFrame(results, columns=["n_c_t", "D_i"])], axis=1
+        )
 
     @measure_time("calculate_batch_lsa_metrics")
     def _calculate_batch_lsa_metrics(
-        self,
-        vectors: List[np.ndarray],
-        texts: List[str],
-        start_idx: int,
-        end_idx: int
+        self, vectors: List[np.ndarray], texts: List[str], start_idx: int, end_idx: int
     ) -> List[Tuple[float, float]]:
         """Calculate LSA metrics for a batch of contributions.
 
@@ -534,20 +506,24 @@ class GCAAnalyzer:
         """
         results = []
         for idx in range(start_idx, end_idx):
-            if idx == 0:    # pragma: no cover
+            if idx == 0:  # pragma: no cover
                 n_c_t = 1.0  # First message is entirely new
             else:
-                n_c_t = self._calculate_newness_proportion(vectors, idx)    # pragma: no cover
+                n_c_t = self._calculate_newness_proportion(
+                    vectors, idx
+                )  # pragma: no cover
             # Convert DataFrame row to numpy array for density calculation
-            vector = vectors.iloc[idx].to_numpy() if isinstance(vectors, pd.DataFrame) else vectors[idx]
+            vector = (
+                vectors.iloc[idx].to_numpy()
+                if isinstance(vectors, pd.DataFrame)
+                else vectors[idx]
+            )
             D_i = self._calculate_communication_density(vector, texts[idx])
             results.append((n_c_t, D_i))
         return results
 
     def _calculate_newness_proportion(
-        self,
-        vectors: List[np.ndarray],
-        current_idx: int
+        self, vectors: List[np.ndarray], current_idx: int
     ) -> float:
         """Calculate the proportion of new content in the current contribution.
 
@@ -564,34 +540,53 @@ class GCAAnalyzer:
                 1.0 indicates entirely new content,
                 0.0 indicates no new content.
         """
-        if current_idx == 0:  # pragma: no cover
+        if current_idx == 0:
             return 1.0  # First message is entirely new
 
         # Convert previous vectors to numpy arrays if needed
         if isinstance(vectors, pd.DataFrame):
-            prev_vectors = vectors.iloc[:current_idx].to_numpy()
-            d_i = vectors.iloc[current_idx].to_numpy()
+            prev_vectors_list = [
+                v.to_numpy() if isinstance(v, pd.Series) else np.asarray(v)
+                for v in vectors.iloc[:current_idx].values
+            ]
+            prev_vectors = np.vstack(prev_vectors_list)
+            curr_vec = vectors.iloc[current_idx]
+            d_i = (
+                curr_vec.to_numpy()
+                if isinstance(curr_vec, pd.Series)
+                else np.asarray(curr_vec)
+            )
         else:
-            prev_vectors = [v.values if isinstance(v, pd.Series) else v for v in vectors[:current_idx]]
-            prev_vectors = np.vstack(prev_vectors)
-            d_i = vectors[current_idx].values if isinstance(vectors[current_idx], pd.Series) else vectors[current_idx]
+            prev_vectors_list = []
+            for v in vectors[:current_idx]:
+                if isinstance(v, pd.Series):
+                    prev_vectors_list.append(v.to_numpy())
+                elif isinstance(v, np.ndarray):
+                    prev_vectors_list.append(v)
+                else:
+                    prev_vectors_list.append(np.asarray(v))
+            prev_vectors = np.vstack(prev_vectors_list)
+            curr_vec = vectors[current_idx]
+            if isinstance(curr_vec, pd.Series):
+                d_i = curr_vec.to_numpy()
+            elif isinstance(curr_vec, np.ndarray):
+                d_i = curr_vec
+            else:
+                d_i = np.asarray(curr_vec)
 
         # Calculate projection matrix efficiently using SVD
         U, _, _ = np.linalg.svd(prev_vectors.T, full_matrices=False)
         g_i = U @ (U.T @ d_i)  # Project onto previous content space
-        n_i = d_i - g_i        # Extract new content component
+        n_i = d_i - g_i  # Extract new content component
 
         # Calculate proportion of new content
-        n_norm = np.linalg.norm(n_i)
-        g_norm = np.linalg.norm(g_i)
-        
-        return n_norm / (n_norm + g_norm) if (n_norm + g_norm) > 0 else 0.0
+        n_norm = float(np.linalg.norm(n_i))
+        g_norm = float(np.linalg.norm(g_i))
 
-    def _calculate_communication_density(
-        self,
-        vector: np.ndarray,
-        text: str
-    ) -> float:
+        result: float = n_norm / (n_norm + g_norm) if (n_norm + g_norm) > 0 else 0.0
+        return result
+
+    def _calculate_communication_density(self, vector: np.ndarray, text: str) -> float:
         """Calculate the communication density of a contribution.
 
         Implements Formula 27 from the GCA framework to compute the density
@@ -610,18 +605,17 @@ class GCAAnalyzer:
         text_length = len(text)
         if text_length == 0:
             return 0.0
-            
+
         # Convert vector to numpy array if it's a pandas Series
         if isinstance(vector, pd.Series):
-            vector = vector.values
-            
-        return np.linalg.norm(vector) / text_length
+            vector = vector.to_numpy()
+
+        density: float = float(np.linalg.norm(vector) / text_length)
+        return density
 
     @measure_time("analyze_conversation")
     def analyze_conversation(
-        self,
-        conversation_id: str,
-        data: pd.DataFrame
+        self, conversation_id: str, data: pd.DataFrame
     ) -> pd.DataFrame:
         """Analyze a conversation's dynamics using GCA metrics.
 
@@ -674,14 +668,21 @@ class GCAAnalyzer:
             0.0,
             index=person_list,
             columns=[
-                'conversation_id', 'Pa', 'Pa_average', 'Pa_std', 'Pa_hat',
-                'Internal_cohesion', 'Overall_responsivity',
-                'Social_impact', 'Newness', 'Communication_density'
+                "conversation_id",
+                "Pa",
+                "Pa_average",
+                "Pa_std",
+                "Pa_hat",
+                "Internal_cohesion",
+                "Overall_responsivity",
+                "Social_impact",
+                "Newness",
+                "Communication_density",
             ],
-            dtype=float
+            dtype=float,
         )
-        metrics_df['conversation_id'] = conversation_id
-        
+        metrics_df["conversation_id"] = conversation_id
+
         # Calculate participation metrics
         metrics_df = self.calculate_participation_metrics(
             metrics_df=metrics_df,
@@ -689,69 +690,66 @@ class GCAAnalyzer:
             person_list=person_list,
             seq_list=seq_list,
             n=n,
-            k=k
+            k=k,
         )
-        
+
         # Process text content
         texts = current_data.text.to_list()
         vectors = self.llm_processor.doc2vector(texts)
-        
+
         # Find optimal window size
         w = self.find_best_window_size(current_data)
         print(f"=== Found valid window size: {w} ===")
-        print(f"=== (best window threshold: {self._config.window.best_window_indices}) ===")
-        print(f"=== (each participant in a window that is greater than or equal to: {self._config.window.act_participant_indices}) ===")
-        
+        print(
+            f"=== (best window threshold: {self._config.window.best_window_indices}) ==="
+        )
+        print(
+            f"=== (each participant in a window that is greater than or equal to: "
+            f"{self._config.window.act_participant_indices}) ==="
+        )
+
         # Calculate semantic similarity
-        cosine_matrix = cosine_similarity_matrix(
-            vectors, seq_list, current_data
-        )
-        
+        cosine_matrix = cosine_similarity_matrix(vectors, seq_list, current_data)
+
         # Calculate interaction metrics
-        R_w = self.get_Ksi_lag(
-            w, person_list, k, seq_list, M, cosine_matrix
-        )
-        
+        R_w = self.get_Ksi_lag(w, person_list, k, seq_list, M, cosine_matrix)
+
         # Calculate cohesion and response metrics
-        metrics_df['Internal_cohesion'], metrics_df['Overall_responsivity'], metrics_df['Social_impact'] = \
-            self.calculate_cohesion_response(
-                person_list=person_list,
-                k=k,
-                R_w=R_w
-            )
-        
+        (
+            metrics_df["Internal_cohesion"],
+            metrics_df["Overall_responsivity"],
+            metrics_df["Social_impact"],
+        ) = self.calculate_cohesion_response(person_list=person_list, k=k, R_w=R_w)
+
         # Calculate content metrics
         n_c_t_dict, D_i_dict = self.calculate_personal_given_new_dict(
-            vectors=vectors,
-            texts=texts,
-            current_data=current_data
+            vectors=vectors, texts=texts, current_data=current_data
         )
-        
+
         # Calculate average content metrics
-        metrics_df['Newness'], metrics_df['Communication_density'] = \
+        metrics_df["Newness"], metrics_df["Communication_density"] = (
             self.calculate_personal_given_new_averages(
-                person_list=person_list,
-                n_c_t_dict=n_c_t_dict,
-                D_i_dict=D_i_dict
+                person_list=person_list, n_c_t_dict=n_c_t_dict, D_i_dict=D_i_dict
             )
-        
+        )
+
         # Rename columns to match paper terminology
-        metrics_df = metrics_df.rename(columns={
-            'Pa_hat': 'participation',
-            'Overall_responsivity': 'responsivity',
-            'Internal_cohesion': 'internal_cohesion',
-            'Social_impact': 'social_impact',
-            'Newness': 'newness',
-            'Communication_density': 'comm_density'
-        })
-        
+        metrics_df = metrics_df.rename(
+            columns={
+                "Pa_hat": "participation",
+                "Overall_responsivity": "responsivity",
+                "Internal_cohesion": "internal_cohesion",
+                "Social_impact": "social_impact",
+                "Newness": "newness",
+                "Communication_density": "comm_density",
+            }
+        )
+
         return metrics_df
 
     @measure_time("calculate_descriptive_statistics")
     def calculate_descriptive_statistics(
-        self,
-        all_metrics: dict,
-        output_dir: Optional[str] = None
+        self, all_metrics: dict, output_dir: Optional[str] = None
     ) -> pd.DataFrame:
         """Calculate descriptive statistics for GCA measures.
 
@@ -771,7 +769,7 @@ class GCAAnalyzer:
             DataFrame containing the following statistics for each measure:
                 - Minimum: Minimum value
                 - Median: Median value
-                - Mean: Mean value 
+                - Mean: Mean value
                 - SD: Standard deviation
                 - Maximum: Maximum value
                 - Count: Number of non-null values
@@ -784,46 +782,48 @@ class GCAAnalyzer:
             - Results are both printed in a formatted table and returned
         """
         all_data = pd.concat(all_metrics.values())
-        
+
         # Calculate basic statistics
-        stats = pd.DataFrame({
-            'Minimum': all_data.min(),
-            'Median': all_data.median(),
-            'Mean': all_data.mean(),
-            'SD': all_data.std(),
-            'Maximum': all_data.max(),
-            'Count': all_data.count(),
-            'Missing': all_data.isnull().sum()
-        })
-        
+        stats = pd.DataFrame(
+            {
+                "Minimum": all_data.min(),
+                "Median": all_data.median(),
+                "Mean": all_data.mean(),
+                "SD": all_data.std(),
+                "Maximum": all_data.max(),
+                "Count": all_data.count(),
+                "Missing": all_data.isnull().sum(),
+            }
+        )
+
         # Calculate CV with handling for division by zero
         means = all_data.mean()
         stds = all_data.std()
         cvs = pd.Series(index=means.index, dtype=float)
-        
+
         for col in means.index:
             mean = means[col]
             std = stds[col]
             if mean == 0 or pd.isna(mean) or pd.isna(std):
-                cvs[col] = float('inf')
+                cvs[col] = float("inf")
             else:
                 cvs[col] = std / abs(mean)  # Use absolute mean for CV
-        
-        stats['CV'] = cvs
+
+        stats["CV"] = cvs
         stats = stats.round(2)
-        
+
         # Print formatted statistics table
         print("=== Descriptive statistics for GCA measures ===")
         print("-" * 80)
         print(
             "Measure".ljust(20),
-            "Minimum  Median  Mean    SD     Maximum  Count  Missing  CV"
+            "Minimum  Median  Mean    SD     Maximum  Count  Missing  CV",
         )
         print("-" * 80)
-        
+
         for measure in stats.index:
             row = stats.loc[measure]
-            cv_value = f"{row['CV']:.2f}" if row['CV'] < 10 else 'inf'
+            cv_value = f"{row['CV']:.2f}" if row["CV"] < 10 else "inf"
             print(
                 f"{measure.replace('_', ' ').title().ljust(20)}"
                 f"{row['Minimum']:7.2f}  "
@@ -836,12 +836,12 @@ class GCAAnalyzer:
                 f"{cv_value:>5}"
             )
         print("-" * 80)
-        
+
         # Save statistics to file if output directory provided
         if output_dir:  # pragma: no cover
             os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, 'descriptive_statistics_gca.csv')
+            output_file = os.path.join(output_dir, "descriptive_statistics_gca.csv")
             stats.to_csv(output_file)
             print(f"=== Saved descriptive statistics to: {output_file} ===")
-        
+
         return stats

@@ -7,6 +7,7 @@
 result.json
 
 venv3.11
+venv3.13
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
