@@ -202,6 +202,7 @@ def cosine_similarity_matrix(
 
     return cosine_matrix
 
+
 def calculate_huffman_length(text: str) -> float:
     """Calculate the length of text using Huffman encoding.
 
