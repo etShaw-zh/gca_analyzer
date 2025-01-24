@@ -102,6 +102,27 @@ class LoggerConfig:
 
 
 @dataclass
+class UMAPConfig:
+    """Configuration for UMAP dimensionality reduction.
+
+    Attributes:
+        n_neighbors (int): Number of neighbors to consider for manifold approximation.
+            Defaults to 15.
+        min_dist (float): Minimum distance between points in the embedding.
+            Defaults to 0.1.
+        n_components (int): Number of dimensions in the output embedding.
+            Defaults to 2.
+        random_state (int): Random seed for reproducibility.
+            Defaults to 42.
+    """
+
+    n_neighbors: int = 15
+    min_dist: float = 0.1
+    n_components: int = 2
+    random_state: int = 42
+
+
+@dataclass
 class Config:
     """Main configuration class for GCA analyzer.
 
@@ -113,12 +134,14 @@ class Config:
         model (ModelConfig): Configuration for language model.
         visualization (VisualizationConfig): Configuration for visualization.
         logger (LoggerConfig): Configuration for logging.
+        umap (UMAPConfig): Configuration for UMAP dimensionality reduction.
     """
 
     window: WindowConfig = field(default_factory=WindowConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     visualization: VisualizationConfig = field(default_factory=VisualizationConfig)
     logger: LoggerConfig = field(default_factory=LoggerConfig)
+    umap: UMAPConfig = field(default_factory=UMAPConfig)
 
 
 # Default configuration instance
