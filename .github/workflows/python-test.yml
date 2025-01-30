@@ -35,7 +35,7 @@ jobs:
     - name: Run tests
       id: test
       run: |
-        pytest tests/ --junitxml=pytest.xml -v > pytest-output.txt
+        pytest tests/ --junitxml=pytest.xml -v > pytest-output-${{ matrix.python-version }}.txt
         pytest --cov=gca_analyzer --cov-branch --cov-report=xml:coverage.xml tests/
           
     - name: Upload coverage reports to Codecov
@@ -43,18 +43,3 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: etShaw-zh/gca_analyzer
-
-    - name: Comment PR with Test Results
-      if: always() && github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const testOutput = fs.readFileSync('pytest-output.txt', 'utf8');
-          const body = `### Test Results \n\n\`\`\`\n${testOutput}\n\`\`\``;
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: body
-          });
