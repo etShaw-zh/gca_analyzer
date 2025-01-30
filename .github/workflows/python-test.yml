@@ -35,7 +35,7 @@ jobs:
     - name: Run tests
       id: test
       run: |
-        pytest tests/ --junitxml=pytest.xml -v > pytest-output.txt
+        pytest tests/ --junitxml=pytest.xml -v > pytest-output-${{ matrix.python-version }}.txt
         pytest --cov=gca_analyzer --cov-branch --cov-report=xml:coverage.xml tests/
           
     - name: Upload coverage reports to Codecov
@@ -44,17 +44,43 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: etShaw-zh/gca_analyzer
 
-    - name: Comment PR with Test Results
-      if: always() && github.event_name == 'pull_request'
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: pytest-output-${{ matrix.python-version }}.txt
+
+  post-comment:
+    needs: test
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v3
+
+    - name: Combine and post test results
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const testOutput = fs.readFileSync('pytest-output.txt', 'utf8');
-          const body = `### Test Results \n\n\`\`\`\n${testOutput}\n\`\`\``;
-          github.rest.issues.createComment({
+          const path = require('path');
+          
+          let combinedOutput = '### Test Results Summary\n\n';
+          const versions = ["3.9", "3.10", "3.11", "3.12", "3.13"];
+          
+          for (const version of versions) {
+            const filePath = path.join(`test-results-${version}`, `pytest-output-${version}.txt`);
+            try {
+              const output = fs.readFileSync(filePath, 'utf8');
+              combinedOutput += `#### Python ${version}\n\`\`\`\n${output}\n\`\`\`\n\n`;
+            } catch (error) {
+              combinedOutput += `#### Python ${version}\nTest results not available\n\n`;
+            }
+          }
+          
+          await github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: body
+            body: combinedOutput
           });
