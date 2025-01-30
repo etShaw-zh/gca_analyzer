@@ -8,6 +8,9 @@ on:
       - '**.rst'
       - '**.txt'
 
+permissions:
+  contents: read
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
