@@ -8,6 +8,7 @@
 [![flake8](https://github.com/etShaw-zh/gca_analyzer/workflows/lint/badge.svg)](https://github.com/etShaw-zh/gca_analyzer/actions?query=workflow%3ALint)
 ![Tests](https://github.com/etShaw-zh/gca_analyzer/actions/workflows/python-test.yml/badge.svg)
 [![Coverage Status](https://codecov.io/gh/etShaw-zh/gca_analyzer/branch/main/graph/badge.svg?token=GLAVYYCD9L)](https://codecov.io/gh/etShaw-zh/gca_analyzer)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/581d2fea968f4b0ab821c8b3d94eaac0)](https://app.codacy.com/gh/etShaw-zh/gca_analyzer/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Documentation Status](https://readthedocs.org/projects/gca-analyzer/badge/?version=latest)](https://gca-analyzer.readthedocs.io/en/latest/?badge=latest)
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer)](https://pepy.tech/projects/gca-analyzer)
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer/month)](https://pepy.tech/projects/gca-analyzer)

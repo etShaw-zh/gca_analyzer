@@ -30,6 +30,10 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
    :target: https://codecov.io/gh/etShaw-zh/gca_analyzer
    :alt: Coverage Status
 
+.. image:: https://app.codacy.com/project/badge/Grade/581d2fea968f4b0ab821c8b3d94eaac0
+   :target: https://app.codacy.com/gh/etShaw-zh/gca_analyzer/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+   :alt: Codacy Badge
+
 .. image:: https://readthedocs.org/projects/gca-analyzer/badge/?version=latest
    :target: https://gca-analyzer.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
