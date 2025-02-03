@@ -1,6 +1,7 @@
 English | [简体中文](README_zh.md)
 # GCA Analyzer
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/08d2285e66f0479ba1c49fa9665f6ba3)](https://app.codacy.com/gh/etShaw-zh/gca_analyzer?utm_source=github.com&utm_medium=referral&utm_content=etShaw-zh/gca_analyzer&utm_campaign=Badge_Grade)
 [![PyPI version](https://badge.fury.io/py/gca-analyzer.svg)](https://pypi.org/project/gca-analyzer)
 [![support-version](https://img.shields.io/pypi/pyversions/gca-analyzer)](https://img.shields.io/pypi/pyversions/gca-analyzer)
 [![license](https://img.shields.io/github/license/etShaw-zh/gca_analyzer)](https://github.com/etShaw-zh/gca_analyzer/blob/master/LICENSE)
