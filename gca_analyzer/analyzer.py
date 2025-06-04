@@ -1,6 +1,6 @@
-"""Group Conversation Analysis (GCA) Analyzer.
+"""Group Communication Analysis (GCA) Analyzer.
 
-This module provides functionality for analyzing group conversations using the
+This module provides functionality for analyzing group communications using the
 GCA framework. It includes components for:
 - Participant interaction analysis
 - Metrics calculation (participation, responsivity, cohesion)
@@ -29,10 +29,10 @@ from .utils import cosine_similarity_matrix, measure_time
 
 
 class GCAAnalyzer:
-    """Main analyzer class for group conversation analysis.
+    """Main analyzer class for group communication analysis.
 
     This class integrates text processing, metrics calculation, and visualization
-    components to provide comprehensive analysis of group conversations.
+    components to provide comprehensive analysis of group communications.
     It supports multiple languages through advanced LLM-based text processing
     and implements various metrics from the GCA framework.
 
