@@ -41,7 +41,7 @@ setup(
     author="Jianjun Xiao",
     author_email="et_shaw@126.com",
     description=(
-        "A package for Group Conversation Analysis with improved text "
+        "A package for Group Communication Analysis with improved text "
         "processing and visualization"
     ),
     long_description=open('README.md').read(),

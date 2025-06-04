@@ -10,7 +10,7 @@ Before installing GCA Analyzer, ensure you have:
 
 * Python 3.9 or higher
 * pip package manager
-* Basic understanding of conversation analysis concepts
+* Basic understanding of communication analysis concepts
 
 Installation
 ------------
@@ -24,7 +24,7 @@ Install GCA Analyzer using pip:
 Quick Start
 ------------
 
-Here's a simple example to analyze a group conversation:
+Here's a simple example to analyze a group communication:
 
 .. code-block:: python
 

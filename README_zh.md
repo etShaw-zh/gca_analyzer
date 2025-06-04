@@ -27,13 +27,13 @@
 - **易于集成**：支持命令行界面和 Python API
 
 > [!tip]  
+> 📝 如果您有任何问题或建议，请[提交 issue](https://github.com/etShaw-zh/gca_analyzer/issues) 或联系 [etShaw-zh](https://github.com/etShaw-zh)。  
+> 📝 您可以在[文档](https://gca-analyzer.readthedocs.io/en/latest/)中找到更多关于 GCA Analyzer 的信息。  
+
+> [!note]  
 > 👁 关注此仓库以获取最新的修复和更新通知。  
 > 📰 2025-01-22 GCA Analyzer v0.4.4 (beta) 已发布！  
 > 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) 已发布！  
-
-> [!note]  
-> 📝 如果您有任何问题或建议，请[提交 issue](https://github.com/etShaw-zh/gca_analyzer/issues) 或联系 [etShaw-zh](https://github.com/etShaw-zh)。  
-> 📝 您可以在[文档](https://gca-analyzer.readthedocs.io/en/latest/)中找到更多关于 GCA Analyzer 的信息。  
 
 ## 快速开始
 
@@ -109,7 +109,7 @@ python -m gca_analyzer --data your_data.csv
 
 ```bibtex
 @software{gca_analyzer,
-  title = {GCA Analyzer: Group Conversation Analysis Tool},
+  title = {GCA Analyzer: Group Communication Analysis Tool},
   author = {Xiao, Jianjun},
   year = {2025},
   url = {https://github.com/etShaw-zh/gca_analyzer}

@@ -1,7 +1,7 @@
 """
 GCA Visualizer Module
 
-This module provides visualization functionality for group conversation analysis,
+This module provides visualization functionality for group communication analysis,
 including heatmaps, network graphs, and various metrics visualizations.
 
 Author: Jianjun Xiao

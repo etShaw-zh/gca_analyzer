@@ -6,10 +6,10 @@ This section explains the mathematical principles behind GCA Analyzer's metrics.
 Core Metrics
 ---------------
 
-The GCA Analyzer implements three categories of metrics to provide comprehensive analysis of group conversation dynamics:
+The GCA Analyzer implements three categories of metrics to provide comprehensive analysis of group communication dynamics:
 
 1. **Participation Metrics**
-   Measures the relative contribution frequency of each participant in the conversation.  
+   Measures the relative contribution frequency of each participant in the communication.  
    These metrics help identify participation patterns and balance within the group:  
    
    - Negative values indicate below-average participation  
@@ -52,7 +52,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 
    - **Responsivity**: Measures how well participants respond to others' contributions  
    - **Internal Cohesion**: Evaluates the consistency and coherence of individual contributions  
-   - **Social Impact**: Quantifies each participant's influence on the group discussion  
+   - **Social Impact**: Quantifies each participant's influence on the group communication  
 
    The interaction metrics are based on cross-cohesion analysis:
 
@@ -88,7 +88,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 3. **Content Analysis Metrics**
    Evaluates the semantic aspects of contributions using advanced NLP techniques:
 
-   - **Content Newness**: Measures the introduction of novel content to the discussion  
+   - **Content Newness**: Measures the introduction of novel content to the communication  
    - **Communication Density**: Assesses the information density of contributions  
 
    Content analysis is performed using LSA (Latent Semantic Analysis). For any given contribution, 

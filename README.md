@@ -16,7 +16,7 @@ English | [简体中文](README_zh.md)
 
 ## Introduction
 
-GCA Analyzer is a Python package for analyzing group conversation dynamics using NLP techniques and quantitative metrics. It provides comprehensive tools for understanding **participation patterns**, **interaction dynamics**, **content novelty**, and **communication density** in group conversations.
+GCA Analyzer is a Python package for analyzing group communication dynamics using NLP techniques and quantitative metrics. It provides comprehensive tools for understanding **participation patterns**, **interaction dynamics**, **content newness**, and **communication density** in group communications.
 
 ## Features
 
@@ -27,13 +27,13 @@ GCA Analyzer is a Python package for analyzing group conversation dynamics using
 - **Easy Integration**: Command-line interface and Python API support
 
 > [!tip]  
+> 📝 If you have any questions or suggestions, please [open an issue](https://github.com/etShaw-zh/gca_analyzer/issues) or contact [etShaw-zh](https://github.com/etShaw-zh).  
+> 📝 You can find more information about GCA Analyzer in our [documentation](https://gca-analyzer.readthedocs.io/en/latest/).  
+
+> [!note]  
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.  
 > 📰 2025-01-22 GCA Analyzer v0.4.4 (beta) has been released!  
 > 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) has been released!
-
-> [!note]  
-> 📝 If you have any questions or suggestions, please [open an issue](https://github.com/etShaw-zh/gca_analyzer/issues) or contact [etShaw-zh](https://github.com/etShaw-zh).  
-> 📝 You can find more information about GCA Analyzer in our [documentation](https://gca-analyzer.readthedocs.io/en/latest/).  
 
 ## Quick Start
 
@@ -51,7 +51,7 @@ pip install -e .
 
 ### Basic Usage
 
-1. Prepare your conversation data in CSV format with required columns:
+1. Prepare your communication data in CSV format with required columns:
 ```
 conversation_id,person_id,time,text
 1A,student1,0:08,Hello teacher!
@@ -113,7 +113,7 @@ If you use this tool in your research, please cite:
 
 ```bibtex
 @software{gca_analyzer,
-  title = {GCA Analyzer: Group Conversation Analysis Tool},
+  title = {GCA Analyzer: Group Communication Analysis Tool},
   author = {Xiao, Jianjun},
   year = {2025},
   url = {https://github.com/etShaw-zh/gca_analyzer}
