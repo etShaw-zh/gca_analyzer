@@ -1,3 +1,6 @@
+# not commit *.pdf such as paper.pdf to avoid conflict
+/paper/*.pdf
+
 TODO.md
 /tests/.DS_Store
 /.DS_Store
