@@ -1,14 +1,38 @@
+# Project specific
 TODO.md
-/tests/.DS_Store
-/.DS_Store
-/docs/.DS_Store
-/example
-/example/.DS_Store
 /analysis_results
 result.json
+/Software Impacts
+/example
 
-venv3.11
-venv3.13
+# Virtual environments (all patterns)
+venv/
+venv*/
+.venv/
+env/
+env*/
+ENV/
+.env
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
