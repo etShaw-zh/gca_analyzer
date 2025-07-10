@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependency
-        run: pip install flake8 mypy
+        run: pip install -r requirements-dev.txt
       - name: Run flake8
         run: flake8 gca_analyzer/ --exclude "gca_analyzer/tests/*" --count --ignore=E203,W503 --max-line-length=127 --statistics
       - name: Run mypy 

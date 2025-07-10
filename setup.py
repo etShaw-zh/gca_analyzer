@@ -37,6 +37,8 @@ setup(
         'transformers>=4.30.0',
         'sentence-transformers>=2.2.0',
         'typing-extensions>=4.0.0',  # For Python 3.9 compatibility
+        'umap-learn>=0.5.7',
+        'hdbscan>=0.8.40',
     ],
     author="Jianjun Xiao",
     author_email="et_shaw@126.com",
