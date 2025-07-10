@@ -18,12 +18,13 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
         
     - name: Install dependencies
       run: |
@@ -38,7 +39,7 @@ jobs:
         pytest --cov=gca_analyzer --cov-branch --cov-report=xml:coverage.xml tests/
           
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@968872560f81e7bdde9272853e65f2507c0eca7c # v5
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: etShaw-zh/gca_analyzer
