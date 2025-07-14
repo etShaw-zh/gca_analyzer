@@ -84,7 +84,7 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
     )
 
     if not os.path.exists(data_path):
-        show_error(f"File not found: {data_path}")
+        show_error(f"Input file not found: {data_path}")
         return None
 
     # Output directory
