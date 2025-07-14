@@ -46,7 +46,7 @@ def get_sample_data_path() -> str:
         return pkg_resources.resource_filename(
             "gca_analyzer", "data/sample_conversation.csv"
         )
-    except Exception as e:
+    except (pkg_resources.DistributionNotFound, pkg_resources.ResourceNotFound) as e:
         # Fallback to relative path
         show_error(f"Error reading sample data: {str(e)}")
         current_dir = os.path.dirname(os.path.abspath(__file__))
