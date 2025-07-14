@@ -26,7 +26,8 @@ def normalize_metrics(
     Args:
         data (pd.DataFrame): Input DataFrame containing metrics.
         metrics (Union[str, List[str]]): Column name(s) of metrics to normalize.
-        inplace (bool, optional): Whether to modify the input DataFrame or return a new one. Defaults to False.
+        inplace (bool, optional): Whether to modify the input DataFrame or return a new one.
+            Defaults to False.
 
     Returns:
         pd.DataFrame: DataFrame with normalized metrics.
@@ -123,18 +124,29 @@ def cosine_similarity_matrix(
     vectors: Union[List[np.ndarray], pd.DataFrame],
     seq_list: List[int],
     current_data: pd.DataFrame,
+    batch_size: int = 1000,
+    show_progress: bool = True,
 ) -> pd.DataFrame:
     """
-    Calculate cosine similarity matrix for a list of vectors.
+    Calculate cosine similarity matrix for a list of vectors using optimized vectorized
+    operations.
+
+    This function now uses sklearn's optimized cosine similarity calculation with batch
+    processing for large datasets and optional progress tracking.
 
     Args:
         vectors: List of vectors as numpy arrays or DataFrame with vector components
         seq_list: List of sequential message numbers
         current_data: DataFrame containing the messages
+        batch_size: Size of batches for processing large datasets (default: 1000)
+        show_progress: Whether to show progress bar for large operations (default: True)
 
     Returns:
         pd.DataFrame: Cosine similarity matrix
     """
+    from sklearn.metrics.pairwise import cosine_similarity as sklearn_cosine_similarity
+    from tqdm import tqdm
+
     # Input validation
     if len(seq_list) == 0 or current_data.empty:
         logger.warning("Empty input provided to cosine_similarity_matrix")
@@ -156,13 +168,15 @@ def cosine_similarity_matrix(
         logger.error("Not enough vectors for all sequences")
         return pd.DataFrame()
 
-    # Initialize similarity matrix with zeros
-    cosine_matrix = pd.DataFrame(0.0, index=seq_list, columns=seq_list, dtype=float)
-
     try:
         # Create mapping from sequence numbers to vector indices
         seq_to_idx = {}
-        for seq in seq_list:
+        seq_iter = (
+            tqdm(seq_list, desc="Mapping sequences", disable=not show_progress)
+            if show_progress
+            else seq_list
+        )
+        for seq in seq_iter:
             matches = current_data[current_data.seq_num == seq]
             if not matches.empty:  # pragma: no cover
                 idx = matches.index[0]
@@ -176,23 +190,53 @@ def cosine_similarity_matrix(
             return pd.DataFrame()  # pragma: no cover
 
         valid_vectors = [vectors[seq_to_idx[seq]] for seq in valid_seqs]
+        num_vectors = len(valid_vectors)
 
-        # Calculate similarities for valid vectors
-        for i, seq_i in enumerate(valid_seqs):
-            for j, seq_j in enumerate(valid_seqs):
-                if i <= j:  # Calculate upper triangle and diagonal
-                    try:
-                        similarity = cosine_similarity(
-                            valid_vectors[i], valid_vectors[j]
-                        )
-                        cosine_matrix.loc[seq_i, seq_j] = similarity
-                        if i != j:  # Mirror for lower triangle
-                            cosine_matrix.loc[seq_j, seq_i] = similarity
-                    except Exception as e:  # pragma: no cover
-                        logger.error(
-                            f"Error calculating similarity for vectors {i} and {j}: {str(e)}"
-                        )  # pragma: no cover
-                        return pd.DataFrame()  # pragma: no cover
+        # Convert to numpy array for vectorized operations
+        vectors_array = np.array(valid_vectors)
+
+        # Handle potential shape inconsistencies
+        if vectors_array.ndim > 2:
+            vectors_array = vectors_array.reshape(num_vectors, -1)
+
+        # For large datasets, use batch processing to manage memory
+        if num_vectors > batch_size:
+            logger.info(f"Processing {num_vectors} vectors in batches of {batch_size}")
+
+            # Initialize similarity matrix
+            similarity_matrix = np.zeros((num_vectors, num_vectors))
+
+            # Process in batches
+            batch_iter = range(0, num_vectors, batch_size)
+            if show_progress:  # pragma: no cover
+                batch_iter = tqdm(batch_iter, desc="Processing batches", leave=False)
+
+            for i in batch_iter:
+                end_i = min(i + batch_size, num_vectors)
+                batch_vectors = vectors_array[i:end_i]
+
+                # Calculate similarity for this batch against all vectors
+                batch_similarities = sklearn_cosine_similarity(
+                    batch_vectors, vectors_array
+                )
+                similarity_matrix[i:end_i] = batch_similarities
+        else:
+            # For smaller datasets, process all at once
+            if show_progress and num_vectors > 100:  # pragma: no cover
+                logger.info("Calculating cosine similarity matrix...")
+            similarity_matrix = sklearn_cosine_similarity(vectors_array)
+
+        # Create DataFrame with proper sequence number indexing
+        cosine_matrix = pd.DataFrame(
+            similarity_matrix, index=valid_seqs, columns=valid_seqs, dtype=float
+        )
+
+        # Fill in missing sequences with zeros if needed
+        if len(valid_seqs) < len(seq_list):
+            # Reorder to match original seq_list order and fill missing with zeros
+            cosine_matrix = cosine_matrix.reindex(
+                index=seq_list, columns=seq_list, fill_value=0.0
+            )
 
     except Exception as e:  # pragma: no cover
         logger.error(
