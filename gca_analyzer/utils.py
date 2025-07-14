@@ -208,7 +208,7 @@ def cosine_similarity_matrix(
 
             # Process in batches
             batch_iter = range(0, num_vectors, batch_size)
-            if show_progress:
+            if show_progress:  # pragma: no cover
                 batch_iter = tqdm(batch_iter, desc="Processing batches", leave=False)
 
             for i in batch_iter:
@@ -222,7 +222,7 @@ def cosine_similarity_matrix(
                 similarity_matrix[i:end_i] = batch_similarities
         else:
             # For smaller datasets, process all at once
-            if show_progress and num_vectors > 100:
+            if show_progress and num_vectors > 100:  # pragma: no cover
                 logger.info("Calculating cosine similarity matrix...")
             similarity_matrix = sklearn_cosine_similarity(vectors_array)
 
