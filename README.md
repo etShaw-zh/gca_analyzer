@@ -26,15 +26,6 @@ GCA Analyzer is a Python package for analyzing group communication dynamics usin
 - **Flexible Configuration**: Customizable parameters for different analysis needs
 - **Easy Integration**: Command-line interface and Python API support
 
-> [!tip]  
-> 📝 If you have any questions or suggestions, please [open an issue](https://github.com/etShaw-zh/gca_analyzer/issues) or contact [etShaw-zh](https://github.com/etShaw-zh).  
-> 📝 You can find more information about GCA Analyzer in our [documentation](https://gca-analyzer.readthedocs.io/en/latest/).  
-
-> [!note]  
-> 👁 Watch this repo so that you can be notified whenever there are fixes & updates.  
-> 📰 2025-01-22 GCA Analyzer v0.4.4 (beta) has been released!  
-> 📰 2025-01-14 GCA Analyzer v0.4.3 (beta) has been released!
-
 ## Quick Start
 
 ### Installation
@@ -59,9 +50,23 @@ conversation_id,person_id,time,text
 ```
 
 2. Run analysis:
-```bash
-python -m gca_analyzer --data your_data.csv
-```
+
+   **Quick Start (Interactive Mode):**
+   ```bash
+   python -m gca_analyzer --interactive
+   # or
+   python -m gca_analyzer -i
+   ```
+   
+   **Command Line Mode:**
+   ```bash
+   python -m gca_analyzer --data your_data.csv
+   ```
+   
+   **Advanced Options:**
+   ```bash
+   python -m gca_analyzer --data your_data.csv --output results/ --model-name your-model --console-level INFO
+   ```
 
 3. Descriptive statistics for GCA measures:
 
@@ -84,7 +89,7 @@ python -m gca_analyzer --data your_data.csv
 
    - **Social Impact**
       - Measures influence on group discussion
-      - Higher values indicate stronger impact on others
+      - Higher values indicate a stronger impact on others
 
    - **Newness**
       - Measures introduction of new content
