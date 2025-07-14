@@ -7,7 +7,7 @@ _gca_analyzer_completion() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     
-    opts="--help --interactive -i --data --output --best-window-indices --act-participant-indices --min-window-size --max-window-size --model-name --model-mirror --default-figsize --heatmap-figsize --log-file --console-level --file-level --log-rotation --log-compression"
+    opts="--help -h --interactive -i --data --output --best-window-indices --act-participant-indices --min-window-size --max-window-size --model-name --model-mirror --default-figsize --heatmap-figsize --log-file --console-level --file-level --log-rotation --log-compression"
     
     case ${prev} in
         --data)
