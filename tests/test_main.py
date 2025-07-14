@@ -221,10 +221,9 @@ def test_main_interactive_advanced_settings(sample_csv, output_dir, mock_llm, ca
 
 def test_main_no_data_arg_non_interactive(capsys):
     """Test main function with no data argument in non-interactive mode."""
-    with patch('sys.argv', ['gca_analyzer']):
-        # Patch sys.argv to simulate no interactive flag
-        with patch('sys.argv', ['gca_analyzer', '--output', 'test']):
-            main_cli()
+    # Patch sys.argv to simulate no interactive flag
+    with patch('sys.argv', ['gca_analyzer', '--output', 'test']):
+        main_cli()
     
     captured = capsys.readouterr()
     assert "--data argument is required in non-interactive mode" in captured.out
