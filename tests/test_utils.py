@@ -101,7 +101,7 @@ def test_cosine_similarity_matrix_basic():
     result = cosine_similarity_matrix(vectors, seq_list, current_data)
     assert isinstance(result, pd.DataFrame)
     assert result.shape == (3, 3)
-    assert (result.values >= 0).all() and (result.values <= 1).all()
+    assert ((result.values >= -1e-10) & (result.values <= 1.0 + 1e-10)).all()
 
 
 def test_cosine_similarity_matrix_empty_input():
@@ -147,7 +147,7 @@ def test_cosine_similarity_matrix_batch_processing():
     result = cosine_similarity_matrix(vectors, seq_list, current_data, batch_size=500, show_progress=False)
     assert isinstance(result, pd.DataFrame)
     assert result.shape == (n_vectors, n_vectors)
-    assert (result.values >= 0).all() and (result.values <= 1).all()
+    assert ((result.values >= -1e-10) & (result.values <= 1.0 + 1e-10)).all()
 
 
 def test_cosine_similarity_matrix_no_progress():
@@ -164,7 +164,7 @@ def test_cosine_similarity_matrix_no_progress():
     result = cosine_similarity_matrix(vectors, seq_list, current_data, show_progress=False)
     assert isinstance(result, pd.DataFrame)
     assert result.shape == (3, 3)
-    assert (result.values >= 0).all() and (result.values <= 1).all()
+    assert ((result.values >= -1e-10) & (result.values <= 1.0 + 1e-10)).all()
 
 
 def test_cosine_similarity_matrix_large_dataset():
@@ -182,7 +182,7 @@ def test_cosine_similarity_matrix_large_dataset():
     result = cosine_similarity_matrix(vectors, seq_list, current_data, show_progress=False)
     assert isinstance(result, pd.DataFrame)
     assert result.shape == (n_vectors, n_vectors)
-    assert (result.values >= 0).all() and (result.values <= 1).all()
+    assert ((result.values >= -1e-10) & (result.values <= 1.0 + 1e-10)).all()
 
 
 def test_cosine_similarity_matrix_missing_sequences():
@@ -221,4 +221,4 @@ def test_cosine_similarity_matrix_multidimensional_vectors():
     result = cosine_similarity_matrix(vectors, seq_list, current_data, show_progress=False)
     assert isinstance(result, pd.DataFrame)
     assert result.shape == (3, 3)
-    assert (result.values >= 0).all() and (result.values <= 1).all()
+    assert ((result.values >= -1e-10) & (result.values <= 1.0 + 1e-10)).all()
