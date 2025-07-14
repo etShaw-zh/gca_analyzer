@@ -420,12 +420,12 @@ def test_show_sample_data_preview_read_error(capsys):
     assert "Error reading sample data" in captured.out
 
 
-def test_validate_inputs_with_none_data():
+def test_validate_inputs_with_none_data(tmp_path):
     """Test validate_inputs when args.data is None."""
     import argparse
     args = argparse.Namespace()
     args.data = None
-    args.output = 'test_output'
+    args.output = str(tmp_path)
     
     # Should pass validation when data is None (like when using sample data)
     result = validate_inputs(args)
