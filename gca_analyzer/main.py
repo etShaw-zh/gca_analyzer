@@ -43,36 +43,41 @@ def get_sample_data_path() -> str:
     """Get the path to the built-in sample data file."""
     try:
         # Try using pkg_resources first
-        return pkg_resources.resource_filename('gca_analyzer', 'data/sample_conversation.csv')
-    except:
+        return pkg_resources.resource_filename(
+            "gca_analyzer", "data/sample_conversation.csv"
+        )
+    except Exception as e:
         # Fallback to relative path
+        show_error(f"Error reading sample data: {str(e)}")
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(current_dir, 'data', 'sample_conversation.csv')
+        return os.path.join(current_dir, "data", "sample_conversation.csv")
 
 
 def show_sample_data_preview():
     """Display a preview of the sample data."""
     sample_path = get_sample_data_path()
-    
+
     if not os.path.exists(sample_path):
         show_error("Sample data file not found")
         return
-    
+
     try:
         df = pd.read_csv(sample_path)
-        
+
         # Show sample data info
-        console.print(Panel(
-            f"[bold cyan]📊 Sample Data Preview[/bold cyan]\n\n"
-            f"[green]✅ File:[/green] {sample_path}\n"
-            f"[green]✅ Records:[/green] {len(df)}\n"
-            f"[green]✅ Conversations:[/green] {len(df['conversation_id'].unique())}\n"
-            f"[green]✅ Participants:[/green] {len(df['person_id'].unique())}\n\n"
-            f"[dim]Conversation Types:[/dim] {', '.join(df['conversation_id'].unique())}",
-            title="Sample Data",
-            border_style="cyan"
-        ))
-        
+        console.print(
+            Panel(
+                f"[bold cyan]📊 Sample Data Preview[/bold cyan]\n\n"
+                f"[green]✅ File:[/green] {sample_path}\n"
+                f"[green]✅ Records:[/green] {len(df)}\n"
+                f"[green]✅ Conversations:[/green] {len(df['conversation_id'].unique())}\n"
+                f"[green]✅ Participants:[/green] {len(df['person_id'].unique())}\n\n"
+                f"[dim]Conversation Types:[/dim] {', '.join(df['conversation_id'].unique())}",
+                title="Sample Data",
+                border_style="cyan",
+            )
+        )
+
         # Show first few rows
         console.print("\n[bold]First 5 rows:[/bold]")
         preview_table = Table(show_header=True, border_style="blue")
@@ -80,17 +85,17 @@ def show_sample_data_preview():
         preview_table.add_column("Person ID", style="yellow")
         preview_table.add_column("Text", style="white", max_width=50)
         preview_table.add_column("Time", style="green")
-        
+
         for _, row in df.head(5).iterrows():
             preview_table.add_row(
-                row['conversation_id'],
-                row['person_id'],
-                row['text'][:50] + "..." if len(row['text']) > 50 else row['text'],
-                row['time']
+                row["conversation_id"],
+                row["person_id"],
+                row["text"][:50] + "..." if len(row["text"]) > 50 else row["text"],
+                row["time"],
             )
-        
+
         console.print(preview_table)
-        
+
     except Exception as e:
         show_error(f"Error reading sample data: {str(e)}")
 
@@ -136,23 +141,24 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
 
     # Ask if user wants to use sample data
     use_sample = Confirm.ask(
-        "[bold]🎯 Would you like to use the built-in sample data?[/bold]",
-        default=True
+        "[bold]🎯 Would you like to use the built-in sample data?[/bold]", default=True
     )
-    
+
     if use_sample:
         sample_path = get_sample_data_path()
         if not os.path.exists(sample_path):
             show_error("Sample data file not found")
             return None
-        
+
         # Show sample data preview
         show_sample_data_preview()
-        
+
         # Ask for confirmation
-        if not Confirm.ask("\n[bold]Continue with this sample data?[/bold]", default=True):
+        if not Confirm.ask(
+            "\n[bold]Continue with this sample data?[/bold]", default=True
+        ):
             return None
-            
+
         data_path = sample_path
     else:
         # Data file path
@@ -646,8 +652,14 @@ def main_cli(args=None):
                 return
 
         # Validate required arguments for non-interactive mode
-        if not getattr(args, "interactive", False) and not args.data and not args.sample_data:
-            show_error("--data argument is required in non-interactive mode (or use --sample-data)")
+        if (
+            not getattr(args, "interactive", False)
+            and not args.data
+            and not args.sample_data
+        ):
+            show_error(
+                "--data argument is required in non-interactive mode (or use --sample-data)"
+            )
             return
 
     # Validate inputs using rich formatting
