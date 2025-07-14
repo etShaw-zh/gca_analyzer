@@ -64,6 +64,13 @@ def show_sample_data_preview():
     try:
         df = pd.read_csv(sample_path)
 
+        # Verify required columns exist
+        required_columns = {'conversation_id', 'person_id', 'text', 'time'}
+        missing_columns = required_columns - set(df.columns)
+        if missing_columns:
+            raise ValueError(
+                f"Missing required columns in the sample data: {', '.join(missing_columns)}"
+            )
         # Show sample data info
         console.print(
             Panel(
