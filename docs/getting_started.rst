@@ -24,7 +24,26 @@ Install GCA Analyzer using pip:
 Quick Start
 ------------
 
-Here's a simple example to analyze a group communication:
+The fastest way to get started is using the built-in sample data:
+
+.. code-block:: bash
+
+   # Use built-in sample data
+   python -m gca_analyzer --sample-data
+
+   # Preview the sample data first
+   python -m gca_analyzer --sample-data --preview
+
+   # Interactive mode (recommended for beginners)
+   python -m gca_analyzer --interactive
+
+If you have your own data, you can use it instead:
+
+.. code-block:: bash
+
+   python -m gca_analyzer --data your_data.csv
+
+Python API Usage:
 
 .. code-block:: python
 
@@ -37,11 +56,23 @@ Here's a simple example to analyze a group communication:
    metrics = analyzer.analyze_conversation('conversation_1', data)
    print(metrics)
 
-2. Command Line Usage:
+Sample Data
+-----------
+
+GCA Analyzer includes built-in sample data to help you get started quickly. The sample data contains:
+
+* **3 different conversations**: team_meeting, design_review, brainstorm
+* **61 realistic conversation messages**
+* **10 different participants** (Alice, Bob, Charlie, Diana, Emma, Kate, Lisa, Mike, Sarah, Tom)
+* **Diverse conversation patterns** showing different communication dynamics
+
+To preview the sample data:
 
 .. code-block:: bash
 
-   python -m gca_analyzer --data your_data.csv
+   python -m gca_analyzer --sample-data --preview
+
+This will show you a summary of the data including the number of conversations, participants, and a preview of the first few rows.
 
 Input Data Format
 ------------------

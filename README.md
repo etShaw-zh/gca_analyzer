@@ -21,6 +21,7 @@ GCA Analyzer is a Python package for analyzing group communication dynamics usin
 ## Features
 
 - **Multi-language Support**: Built-in support for Chinese and other languages through LLM models
+- **Built-in Sample Data**: Includes ready-to-use sample conversations for immediate testing
 - **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
 - **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 - **Flexible Configuration**: Customizable parameters for different analysis needs
@@ -42,6 +43,29 @@ pip install -e .
 
 ### Basic Usage
 
+#### Option 1: Use Built-in Sample Data (Recommended for First-time Users)
+
+Start immediately with built-in sample data:
+
+```bash
+# Use built-in sample data
+python -m gca_analyzer --sample-data
+
+# Preview the sample data first
+python -m gca_analyzer --sample-data --preview
+
+# Interactive mode with sample data (recommended)
+python -m gca_analyzer --interactive
+```
+
+**Sample Data Contents:**
+- 3 different conversation types: team_meeting, design_review, brainstorm
+- 61 realistic conversation messages
+- 10 different participants
+- Diverse communication patterns
+
+#### Option 2: Use Your Own Data
+
 1. Prepare your communication data in CSV format with required columns:
 ```
 conversation_id,person_id,time,text
@@ -51,7 +75,7 @@ conversation_id,person_id,time,text
 
 2. Run analysis:
 
-   **Quick Start (Interactive Mode):**
+   **Interactive Mode:**
    ```bash
    python -m gca_analyzer --interactive
    # or
@@ -68,49 +92,49 @@ conversation_id,person_id,time,text
    python -m gca_analyzer --data your_data.csv --output results/ --model-name your-model --console-level INFO
    ```
 
-3. Descriptive statistics for GCA measures:
+#### Analysis Results
 
-   The analyzer generates comprehensive statistics for the following measures:
+The analyzer generates comprehensive statistics for GCA measures:
 
-   ![Descriptive Statistics](/docs/_static/gca_results.jpg)
+![Descriptive Statistics](/docs/_static/gca_results.jpg)
 
-   - **Participation**
-      - Measures relative contribution frequency
-      - Negative values indicate below-average participation
-      - Positive values indicate above-average participation
+- **Participation**
+  - Measures relative contribution frequency
+  - Negative values indicate below-average participation
+  - Positive values indicate above-average participation
 
-   - **Responsivity**
-      - Measures how well participants respond to others
-      - Higher values indicate better response behavior
+- **Responsivity**
+  - Measures how well participants respond to others
+  - Higher values indicate better response behavior
 
-   - **Internal Cohesion**
-      - Measures consistency in individual contributions
-      - Higher values indicate more coherent messaging
+- **Internal Cohesion**
+  - Measures consistency in individual contributions
+  - Higher values indicate more coherent messaging
 
-   - **Social Impact**
-      - Measures influence on group discussion
-      - Higher values indicate a stronger impact on others
+- **Social Impact**
+  - Measures influence on group discussion
+  - Higher values indicate a stronger impact on others
 
-   - **Newness**
-      - Measures introduction of new content
-      - Higher values indicate more novel contributions
+- **Newness**
+  - Measures introduction of new content
+  - Higher values indicate more novel contributions
 
-   - **Communication Density**
-      - Measures information content per message
-      - Higher values indicate more information-rich messages
+- **Communication Density**
+  - Measures information content per message
+  - Higher values indicate more information-rich messages
 
-   Results are saved as CSV files in the specified output directory.
+Results are saved as CSV files in the specified output directory.
 
-4. Visualizations for GCA measures:
+#### Visualizations
 
-   The analyzer provides interactive and informative visualizations for the following measures:
+The analyzer provides interactive and informative visualizations:
 
-   ![GCA Analysis Results](/docs/_static/vizs.png)
+![GCA Analysis Results](/docs/_static/vizs.png)
 
-   - **Radar Plots**: Compare measures across participants
-   - **Distribution Plots**: Visualize measure distributions
+- **Radar Plots**: Compare measures across participants
+- **Distribution Plots**: Visualize measure distributions
 
-   Results are saved as interactive HTML files in the specified output directory.
+Results are saved as interactive HTML files in the specified output directory.
 
 ## Citation
 

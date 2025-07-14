@@ -14,6 +14,7 @@ import os
 import sys
 from io import StringIO
 from typing import Optional, Union
+import pkg_resources
 
 import pandas as pd
 from rich.console import Console
@@ -36,6 +37,62 @@ from gca_analyzer import (
 
 # Initialize rich console
 console = Console()
+
+
+def get_sample_data_path() -> str:
+    """Get the path to the built-in sample data file."""
+    try:
+        # Try using pkg_resources first
+        return pkg_resources.resource_filename('gca_analyzer', 'data/sample_conversation.csv')
+    except:
+        # Fallback to relative path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(current_dir, 'data', 'sample_conversation.csv')
+
+
+def show_sample_data_preview():
+    """Display a preview of the sample data."""
+    sample_path = get_sample_data_path()
+    
+    if not os.path.exists(sample_path):
+        show_error("Sample data file not found")
+        return
+    
+    try:
+        df = pd.read_csv(sample_path)
+        
+        # Show sample data info
+        console.print(Panel(
+            f"[bold cyan]📊 Sample Data Preview[/bold cyan]\n\n"
+            f"[green]✅ File:[/green] {sample_path}\n"
+            f"[green]✅ Records:[/green] {len(df)}\n"
+            f"[green]✅ Conversations:[/green] {len(df['conversation_id'].unique())}\n"
+            f"[green]✅ Participants:[/green] {len(df['person_id'].unique())}\n\n"
+            f"[dim]Conversation Types:[/dim] {', '.join(df['conversation_id'].unique())}",
+            title="Sample Data",
+            border_style="cyan"
+        ))
+        
+        # Show first few rows
+        console.print("\n[bold]First 5 rows:[/bold]")
+        preview_table = Table(show_header=True, border_style="blue")
+        preview_table.add_column("Conversation ID", style="cyan")
+        preview_table.add_column("Person ID", style="yellow")
+        preview_table.add_column("Text", style="white", max_width=50)
+        preview_table.add_column("Time", style="green")
+        
+        for _, row in df.head(5).iterrows():
+            preview_table.add_row(
+                row['conversation_id'],
+                row['person_id'],
+                row['text'][:50] + "..." if len(row['text']) > 50 else row['text'],
+                row['time']
+            )
+        
+        console.print(preview_table)
+        
+    except Exception as e:
+        show_error(f"Error reading sample data: {str(e)}")
 
 
 def show_welcome():
@@ -77,15 +134,36 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
     console.print("\n[bold cyan]🧙 Interactive Configuration Wizard[/bold cyan]")
     console.print("Let's set up your GCA analysis step by step!\n")
 
-    # Data file path
-    data_path = Prompt.ask(
-        "[bold]📁 Enter the path to your CSV data file[/bold]",
-        default="example/data/test_data.csv",
+    # Ask if user wants to use sample data
+    use_sample = Confirm.ask(
+        "[bold]🎯 Would you like to use the built-in sample data?[/bold]",
+        default=True
     )
+    
+    if use_sample:
+        sample_path = get_sample_data_path()
+        if not os.path.exists(sample_path):
+            show_error("Sample data file not found")
+            return None
+        
+        # Show sample data preview
+        show_sample_data_preview()
+        
+        # Ask for confirmation
+        if not Confirm.ask("\n[bold]Continue with this sample data?[/bold]", default=True):
+            return None
+            
+        data_path = sample_path
+    else:
+        # Data file path
+        data_path = Prompt.ask(
+            "[bold]📁 Enter the path to your CSV data file[/bold]",
+            default="example/data/test_data.csv",
+        )
 
-    if not os.path.exists(data_path):
-        show_error(f"Input file not found: {data_path}")
-        return None
+        if not os.path.exists(data_path):
+            show_error(f"Input file not found: {data_path}")
+            return None
 
     # Output directory
     output_dir = Prompt.ask(
@@ -102,6 +180,7 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
     args.data = data_path
     args.output = output_dir
     args.interactive = True
+    args.sample_data = use_sample
 
     if use_advanced:
         # Window configuration
@@ -170,7 +249,7 @@ def validate_inputs(args) -> bool:
     """Validate input arguments with rich error reporting."""
     errors = []
 
-    if not os.path.exists(args.data):
+    if args.data and not os.path.exists(args.data):
         errors.append(f"Input file not found: {args.data}")
 
     output_parent = os.path.dirname(args.output)
@@ -197,9 +276,11 @@ def create_argument_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  python -m gca_analyzer --sample-data --output results/  # Use built-in sample data
   python -m gca_analyzer --data data.csv --output results/
   python -m gca_analyzer --interactive  # Interactive mode
   python -m gca_analyzer -i            # Interactive mode (short)
+  python -m gca_analyzer --sample-data --preview  # Preview sample data
                 """,
     )
 
@@ -216,6 +297,16 @@ Examples:
         "--data",
         type=str,
         help="Path to the CSV file containing interaction data",
+    )
+    parser.add_argument(
+        "--sample-data",
+        action="store_true",
+        help="Use built-in sample data instead of providing a data file",
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Show preview of sample data and exit (use with --sample-data)",
     )
     parser.add_argument(
         "--output",
@@ -533,6 +624,20 @@ def main_cli(args=None):
         parser = create_argument_parser()
         args = parser.parse_args()
 
+        # Handle sample data preview
+        if args.sample_data and args.preview:
+            show_sample_data_preview()
+            return
+
+        # Handle sample data usage
+        if args.sample_data:
+            sample_path = get_sample_data_path()
+            if not os.path.exists(sample_path):
+                show_error("Sample data file not found")
+                return
+            args.data = sample_path
+            show_info(f"Using built-in sample data: {sample_path}")
+
         # Check if user wants interactive mode
         if len(sys.argv) == 1 or args.interactive:
             args = interactive_config_wizard()
@@ -541,8 +646,8 @@ def main_cli(args=None):
                 return
 
         # Validate required arguments for non-interactive mode
-        if not getattr(args, "interactive", False) and not args.data:
-            show_error("--data argument is required in non-interactive mode")
+        if not getattr(args, "interactive", False) and not args.data and not args.sample_data:
+            show_error("--data argument is required in non-interactive mode (or use --sample-data)")
             return
 
     # Validate inputs using rich formatting
