@@ -13,7 +13,7 @@ import argparse
 import os
 import sys
 from io import StringIO
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from rich.console import Console
@@ -257,7 +257,8 @@ Examples:
         "--model-name",
         type=str,
         default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        help="Name of the model to use (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)",
+        help="Name of the model to use "
+        "(default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)",
     )
     parser.add_argument(
         "--model-mirror",
@@ -330,7 +331,9 @@ def load_data(data_path: str) -> pd.DataFrame:
         return None
 
 
-def initialize_components(config: Config) -> tuple[GCAAnalyzer, GCAVisualizer]:
+def initialize_components(
+    config: Config,
+) -> Union[tuple[GCAAnalyzer, GCAVisualizer], tuple[None, None]]:
     """Initialize analyzer and visualizer components."""
     try:
         # Suppress stdout temporarily during model loading
