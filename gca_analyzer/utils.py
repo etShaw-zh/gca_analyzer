@@ -233,12 +233,7 @@ def cosine_similarity_matrix(
 
         # Fill in missing sequences with zeros if needed
         if len(valid_seqs) < len(seq_list):
-            missing_seqs = [seq for seq in seq_list if seq not in valid_seqs]
-            for seq in missing_seqs:
-                cosine_matrix.loc[seq] = 0.0
-                cosine_matrix[seq] = 0.0
-
-            # Reorder to match original seq_list order
+            # Reorder to match original seq_list order and fill missing with zeros
             cosine_matrix = cosine_matrix.reindex(
                 index=seq_list, columns=seq_list, fill_value=0.0
             )
