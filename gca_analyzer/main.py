@@ -23,9 +23,16 @@ from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from rich.text import Text
 
-from gca_analyzer import (Config, GCAAnalyzer, GCAVisualizer, LoggerConfig,
-                          ModelConfig, VisualizationConfig, WindowConfig,
-                          normalize_metrics)
+from gca_analyzer import (
+    Config,
+    GCAAnalyzer,
+    GCAVisualizer,
+    LoggerConfig,
+    ModelConfig,
+    VisualizationConfig,
+    WindowConfig,
+    normalize_metrics,
+)
 
 # Initialize rich console
 console = Console()
@@ -36,12 +43,9 @@ def show_welcome():
     welcome_text = Text()
     welcome_text.append("GCA Analyzer", style="bold blue")
     welcome_text.append(" - Group Communication Analysis Tool", style="dim")
-    
+
     welcome_panel = Panel(
-        welcome_text,
-        title="🔍 Welcome",
-        border_style="blue",
-        padding=(1, 2)
+        welcome_text, title="🔍 Welcome", border_style="blue", padding=(1, 2)
     )
     console.print(welcome_panel)
     console.print()
@@ -50,9 +54,7 @@ def show_welcome():
 def show_error(message: str):
     """Display error message with rich formatting."""
     error_panel = Panel(
-        f"[red]❌ Error:[/red] {message}",
-        border_style="red",
-        title="Error"
+        f"[red]❌ Error:[/red] {message}", border_style="red", title="Error"
     )
     console.print(error_panel)
 
@@ -60,9 +62,7 @@ def show_error(message: str):
 def show_success(message: str):
     """Display success message with rich formatting."""
     success_panel = Panel(
-        f"[green]✅ Success:[/green] {message}",
-        border_style="green",
-        title="Success"
+        f"[green]✅ Success:[/green] {message}", border_style="green", title="Success"
     )
     console.print(success_panel)
 
@@ -76,73 +76,68 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
     """Interactive configuration wizard for new users."""
     console.print("\n[bold cyan]🧙 Interactive Configuration Wizard[/bold cyan]")
     console.print("Let's set up your GCA analysis step by step!\n")
-    
+
     # Data file path
     data_path = Prompt.ask(
         "[bold]📁 Enter the path to your CSV data file[/bold]",
-        default="example/data/test_data.csv"
+        default="example/data/test_data.csv",
     )
-    
+
     if not os.path.exists(data_path):
         show_error(f"File not found: {data_path}")
         return None
-    
+
     # Output directory
     output_dir = Prompt.ask(
-        "[bold]📂 Enter the output directory[/bold]",
-        default="gca_results"
+        "[bold]📂 Enter the output directory[/bold]", default="gca_results"
     )
-    
+
     # Advanced configuration
     use_advanced = Confirm.ask(
-        "[bold]⚙️  Configure advanced settings?[/bold]",
-        default=False
+        "[bold]⚙️  Configure advanced settings?[/bold]", default=False
     )
-    
+
     # Create args namespace
     args = argparse.Namespace()
     args.data = data_path
     args.output = output_dir
     args.interactive = True
-    
+
     if use_advanced:
         # Window configuration
         console.print("\n[bold yellow]🪟 Window Configuration[/bold yellow]")
-        args.best_window_indices = float(Prompt.ask(
-            "Best window indices proportion", default="0.3"
-        ))
-        args.act_participant_indices = int(Prompt.ask(
-            "Active participant indices", default="2"
-        ))
-        args.min_window_size = int(Prompt.ask(
-            "Minimum window size", default="2"
-        ))
+        args.best_window_indices = float(
+            Prompt.ask("Best window indices proportion", default="0.3")
+        )
+        args.act_participant_indices = int(
+            Prompt.ask("Active participant indices", default="2")
+        )
+        args.min_window_size = int(Prompt.ask("Minimum window size", default="2"))
         max_window = Prompt.ask(
             "Maximum window size (press Enter for auto)", default=""
         )
         args.max_window_size = int(max_window) if max_window else None
-        
+
         # Model configuration
         console.print("\n[bold yellow]🤖 Model Configuration[/bold yellow]")
         args.model_name = Prompt.ask(
             "Model name",
-            default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+            default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         )
         args.model_mirror = Prompt.ask(
-            "Model mirror URL",
-            default="https://modelscope.cn/models"
+            "Model mirror URL", default="https://modelscope.cn/models"
         )
-        
+
         # Logging configuration
         console.print("\n[bold yellow]📝 Logging Configuration[/bold yellow]")
         args.console_level = Prompt.ask(
             "Console log level",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            default="INFO"
+            default="INFO",
         )
-        args.log_file = Prompt.ask(
-            "Log file path (press Enter to skip)", default=""
-        ) or None
+        args.log_file = (
+            Prompt.ask("Log file path (press Enter to skip)", default="") or None
+        )
         args.file_level = "DEBUG"
         args.log_rotation = "10 MB"
         args.log_compression = "zip"
@@ -161,37 +156,37 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
         args.file_level = "DEBUG"
         args.log_rotation = "10 MB"
         args.log_compression = "zip"
-    
+
     # Set visualization defaults if not set
-    if not hasattr(args, 'default_figsize'):
+    if not hasattr(args, "default_figsize"):
         args.default_figsize = [10, 8]
-    if not hasattr(args, 'heatmap_figsize'):
+    if not hasattr(args, "heatmap_figsize"):
         args.heatmap_figsize = [10, 6]
-    
+
     return args
 
 
 def validate_inputs(args) -> bool:
     """Validate input arguments with rich error reporting."""
     errors = []
-    
+
     if not os.path.exists(args.data):
         errors.append(f"Input file not found: {args.data}")
-    
+
     output_parent = os.path.dirname(args.output)
     if output_parent and not os.path.exists(output_parent):
         errors.append(f"Parent directory does not exist: {output_parent}")
-    
+
     try:
         os.makedirs(args.output, exist_ok=True)
-    except OSError as e: # pragma: no cover
+    except OSError as e:  # pragma: no cover
         errors.append(f"Failed to create output directory {args.output}: {str(e)}")
-    
+
     if errors:
         for error in errors:
             show_error(error)
         return False
-    
+
     return True
 
 
@@ -205,16 +200,17 @@ Examples:
   python -m gca_analyzer --data data.csv --output results/
   python -m gca_analyzer --interactive  # Interactive mode
   python -m gca_analyzer -i            # Interactive mode (short)
-                """
+                """,
     )
-    
+
     # Interactive mode arguments
     parser.add_argument(
-        "--interactive", "-i",
+        "--interactive",
+        "-i",
         action="store_true",
-        help="Run in interactive configuration mode"
+        help="Run in interactive configuration mode",
     )
-    
+
     # Data arguments
     parser.add_argument(
         "--data",
@@ -240,8 +236,8 @@ Examples:
         type=int,
         default=2,
         help="Number of contributions from each participant in a window that "
-             "is greater than or equal to the active participants threshold "
-             "(e.g., at least two contributions). Defaults to 2.",
+        "is greater than or equal to the active participants threshold "
+        "(e.g., at least two contributions). Defaults to 2.",
     )
     parser.add_argument(
         "--min-window-size",
@@ -267,8 +263,7 @@ Examples:
         "--model-mirror",
         type=str,
         default="https://modelscope.cn/models",
-        help="Mirror URL for model download "
-        "(default: https://modelscope.cn/models)",
+        help="Mirror URL for model download " "(default: https://modelscope.cn/models)",
     )
 
     # Visualization configuration
@@ -330,7 +325,7 @@ def load_data(data_path: str) -> pd.DataFrame:
         df = pd.read_csv(data_path)
         show_success(f"Successfully loaded {len(df)} records")
         return df
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         show_error(f"Failed to load data: {str(e)}")
         return None
 
@@ -341,17 +336,17 @@ def initialize_components(config: Config) -> tuple[GCAAnalyzer, GCAVisualizer]:
         # Suppress stdout temporarily during model loading
         old_stdout = sys.stdout
         sys.stdout = StringIO()
-        
+
         analyzer = GCAAnalyzer(config=config)
         visualizer = GCAVisualizer(config=config)
-        
+
         # Restore stdout
         sys.stdout = old_stdout
         show_success("Analyzer and visualizer initialized successfully!")
-        
+
         return analyzer, visualizer
-        
-    except Exception as e: # pragma: no cover
+
+    except Exception as e:  # pragma: no cover
         # Restore stdout in case of error
         sys.stdout = old_stdout
         show_error(f"Failed to initialize analyzer: {str(e)}")
@@ -363,13 +358,15 @@ def show_configuration_summary(args):
     config_table = Table(title="🔧 Configuration Summary", border_style="blue")
     config_table.add_column("Setting", style="cyan")
     config_table.add_column("Value", style="green")
-    
+
     config_table.add_row("Data File", args.data)
     config_table.add_row("Output Directory", args.output)
     config_table.add_row("Model", args.model_name)
-    config_table.add_row("Window Size", f"{args.min_window_size} - {args.max_window_size or 'auto'}")
+    config_table.add_row(
+        "Window Size", f"{args.min_window_size} - {args.max_window_size or 'auto'}"
+    )
     config_table.add_row("Log Level", args.console_level)
-    
+
     console.print(config_table)
     console.print()
 
@@ -411,9 +408,9 @@ def analyze_conversations(analyzer, visualizer, df, args):
 
     conversation_ids = df["conversation_id"].unique()
     show_info(f"Found {len(conversation_ids)} conversations to analyze")
-    
+
     all_metrics = {}
-    
+
     # Create progress bar for conversation analysis
     with Progress(
         TextColumn("[progress.description]{task.description}"),
@@ -421,46 +418,50 @@ def analyze_conversations(analyzer, visualizer, df, args):
         "[progress.percentage]{task.percentage:>3.0f}%",
         TimeElapsedColumn(),
         console=console,
-        refresh_per_second=4
+        refresh_per_second=4,
     ) as progress:
-        
+
         analysis_task = progress.add_task(
-            "[cyan]Analyzing conversations...", 
-            total=len(conversation_ids)
+            "[cyan]Analyzing conversations...", total=len(conversation_ids)
         )
-        
+
         for conversation_id in conversation_ids:
-            progress.update(analysis_task, description=f"[cyan]Analyzing conversation {conversation_id}...")
-            
+            progress.update(
+                analysis_task,
+                description=f"[cyan]Analyzing conversation {conversation_id}...",
+            )
+
             try:
                 # Suppress stdout during analysis to avoid mixed output
                 old_stdout = sys.stdout
                 sys.stdout = StringIO()
-                
+
                 # Analyze conversation
                 metrics_df = analyzer.analyze_conversation(conversation_id, df)
                 metrics_df = metrics_df[metrics]
                 all_metrics[conversation_id] = metrics_df
-                
+
                 # Generate visualizations
                 plot_metrics_distribution = visualizer.plot_metrics_distribution(
                     normalize_metrics(metrics_df, metrics, inplace=False),
                     metrics=metrics,
                     title="Distribution of Normalized Interaction Metrics",
                 )
-                
+
                 plot_metrics_radar = visualizer.plot_metrics_radar(
                     normalize_metrics(metrics_df, metrics, inplace=False),
                     metrics=metrics,
                     title="Metrics Radar Chart",
                 )
-                
+
                 # Restore stdout
                 sys.stdout = old_stdout
-                
+
                 # Save files
                 plot_metrics_distribution.write_html(
-                    os.path.join(args.output, f"metrics_distribution_{conversation_id}.html")
+                    os.path.join(
+                        args.output, f"metrics_distribution_{conversation_id}.html"
+                    )
                 )
                 plot_metrics_radar.write_html(
                     os.path.join(args.output, f"metrics_radar_{conversation_id}.html")
@@ -468,7 +469,7 @@ def analyze_conversations(analyzer, visualizer, df, args):
                 metrics_df.to_csv(
                     os.path.join(args.output, f"metrics_{conversation_id}.csv")
                 )
-                
+
             except Exception as e:
                 # Restore stdout in case of error
                 sys.stdout = old_stdout
@@ -476,9 +477,9 @@ def analyze_conversations(analyzer, visualizer, df, args):
                 show_error(f"Error processing conversation {conversation_id}: {str(e)}")
                 progress.start()
                 continue
-            
+
             progress.advance(analysis_task)
-    
+
     return all_metrics
 
 
@@ -489,29 +490,31 @@ def generate_statistics(analyzer, all_metrics, output_dir):
         # Suppress stdout during statistics generation
         old_stdout = sys.stdout
         sys.stdout = StringIO()
-        
+
         analyzer.calculate_descriptive_statistics(all_metrics, output_dir)
-        
+
         # Restore stdout
         sys.stdout = old_stdout
-        
+
         show_success(f"Analysis completed! Results saved to {output_dir}")
-        
+
         # Show summary table
         summary_table = Table(title="📊 Analysis Summary", border_style="green")
         summary_table.add_column("Metric", style="cyan")
         summary_table.add_column("Value", style="green")
-        
+
         summary_table.add_row("Conversations Analyzed", str(len(all_metrics)))
         summary_table.add_row("Output Directory", output_dir)
         summary_table.add_row("Files Generated", f"{len(all_metrics) * 3 + 1} files")
-        
+
         console.print(summary_table)
-        
+
         # Show final completion message
         console.print("\n[bold green]🎉 GCA Analysis Complete![/bold green]")
-        console.print(f"[dim]Check the '{output_dir}' directory for all generated files.[/dim]")
-        
+        console.print(
+            f"[dim]Check the '{output_dir}' directory for all generated files.[/dim]"
+        )
+
     except Exception as e:
         # Restore stdout in case of error
         sys.stdout = old_stdout
@@ -522,20 +525,20 @@ def main_cli(args=None):
     """Main CLI function."""
     # Show welcome message
     show_welcome()
-    
+
     if args is None:  # pragma: no cover
         parser = create_argument_parser()
         args = parser.parse_args()
-        
+
         # Check if user wants interactive mode
         if len(sys.argv) == 1 or args.interactive:
             args = interactive_config_wizard()
             if args is None:
                 console.print("[red]❌ Configuration cancelled.[/red]")
                 return
-        
+
         # Validate required arguments for non-interactive mode
-        if not getattr(args, 'interactive', False) and not args.data:
+        if not getattr(args, "interactive", False) and not args.data:
             show_error("--data argument is required in non-interactive mode")
             return
 
@@ -546,7 +549,7 @@ def main_cli(args=None):
     # Load data
     df = load_data(args.data)
     if df is None:
-        return # pragma: no cover
+        return  # pragma: no cover
 
     # Show configuration summary
     show_configuration_summary(args)
@@ -556,13 +559,14 @@ def main_cli(args=None):
     config = create_config(args)
 
     from .logger import setup_logger
+
     setup_logger(config)
 
     # Initialize components
     show_info("Initializing analyzer and visualizer...")
     analyzer, visualizer = initialize_components(config)
     if analyzer is None or visualizer is None:
-        return # pragma: no cover
+        return  # pragma: no cover
 
     # Analyze conversations
     all_metrics = analyze_conversations(analyzer, visualizer, df, args)
