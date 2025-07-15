@@ -31,6 +31,15 @@ GCA Analyzer is a Python package for analyzing group communication dynamics usin
 - **Easy Integration**: Command-line interface and Python API support
 
 ## Quick Start
+### 🚀 Latest Update: Colab Support
+
+#### Experience Google Colab Online
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing)
+
+No installation required. Click the Colab badge above to run GCA Analyzer directly in your browser and get started quickly.
+
+-------
 
 ### Installation
 
@@ -45,12 +54,6 @@ pip install -e .
 ```
 
 ### Basic Usage
-
-#### Try it Online with Google Colab
-
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing)
-
-For immediate hands-on experience, click the Colab badge above to run GCA Analyzer directly in your browser without any installation.
 
 #### Option 1: Use Built-in Sample Data (Recommended for First-time Users)
 

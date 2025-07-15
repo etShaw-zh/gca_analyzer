@@ -31,6 +31,15 @@ GCA Analyzer 是一个使用 NLP 技术和定量指标分析群体对话动态�
 - **易于集成**：支持命令行界面和 Python API
 
 ## 快速开始
+### 🚀 魔塔社区一键体验
+
+#### 在线运行 GCA Analyzer
+
+[![在魔塔社区运行](https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor&style=for-the-badge)](https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb)
+
+> **点击上方按钮，免安装、免配置，立即在魔塔社区体验 GCA Analyzer 全部功能！**
+
+---
 
 ### 安装
 
@@ -45,12 +54,6 @@ pip install -e .
 ```
 
 ### 基本使用
-
-#### 在线体验 - 魔塔社区
-
-[![在魔塔社区运行](https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor)](https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb)
-
-点击上方链接可以在魔塔社区直接运行 GCA Analyzer，无需安装即可体验完整功能。
 
 #### 方式一：使用内置样本数据（推荐首次使用）
 
