@@ -69,6 +69,6 @@ setup(
     },
     include_package_data=True,
     package_data={
-        'gca_analyzer': ['data/*.txt'],
+        'gca_analyzer': ['data/*.txt', 'data/*.csv'],
     },
 )

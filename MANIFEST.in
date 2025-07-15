@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include AUTHORS.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+recursive-include gca_analyzer/data *.csv
+recursive-include gca_analyzer/data *.txt

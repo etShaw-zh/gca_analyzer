@@ -144,7 +144,8 @@ def cosine_similarity_matrix(
     Returns:
         pd.DataFrame: Cosine similarity matrix
     """
-    from sklearn.metrics.pairwise import cosine_similarity as sklearn_cosine_similarity
+    from sklearn.metrics.pairwise import \
+        cosine_similarity as sklearn_cosine_similarity
     from tqdm import tqdm
 
     # Input validation

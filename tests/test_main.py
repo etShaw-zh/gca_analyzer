@@ -15,6 +15,9 @@ from gca_analyzer.main import (
     show_error,
     show_success,
     show_info,
+    get_sample_data_path,
+    show_sample_data_preview,
+    validate_inputs,
     Prompt,
     Confirm
 )
@@ -148,8 +151,8 @@ def test_main_interactive_mode(sample_csv, output_dir, mock_llm, capsys):
          patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
 
         # Set up mock responses
+        mock_confirm.side_effect = [False, False]  # Don't use sample data, no advanced settings
         mock_prompt.side_effect = [sample_csv, output_dir]
-        mock_confirm.return_value = False  # no advanced settings
         
         with patch('sys.argv', ['gca_analyzer', '--interactive']):
             main_cli()
@@ -166,8 +169,8 @@ def test_main_no_args_interactive(sample_csv, output_dir, mock_llm, capsys):
          patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
 
         # Set up mock responses
+        mock_confirm.side_effect = [False, False]  # Don't use sample data, no advanced settings
         mock_prompt.side_effect = [sample_csv, output_dir]
-        mock_confirm.return_value = False  # no advanced settings
         
         with patch('sys.argv', ['gca_analyzer']):
             main_cli()
@@ -179,7 +182,10 @@ def test_main_no_args_interactive(sample_csv, output_dir, mock_llm, capsys):
 def test_main_interactive_cancelled(capsys):
     """Test main function with interactive mode cancelled."""
     # Mock rich Prompt with invalid file path
-    with patch('gca_analyzer.main.Prompt.ask') as mock_prompt:
+    with patch('gca_analyzer.main.Prompt.ask') as mock_prompt, \
+         patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
+        
+        mock_confirm.return_value = False  # Don't use sample data
         mock_prompt.return_value = 'nonexistent.csv'  # invalid data file path
         
         with patch('sys.argv', ['gca_analyzer', '--interactive']):
@@ -203,12 +209,12 @@ def test_main_interactive_advanced_settings(sample_csv, output_dir, mock_llm, ca
             '3',  # active participant indices
             '3',  # min window size
             '',  # max window size (auto)
-            '',  # model name (default)
-            '',  # model mirror (default)
+            'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',  # model name (default)
+            'https://modelscope.cn/models',  # model mirror (default)
             'DEBUG',  # console level
             ''  # log file (skip)
         ]
-        mock_confirm.return_value = True  # yes to advanced settings
+        mock_confirm.side_effect = [False, True]  # Don't use sample data, yes to advanced settings
         
         with patch('sys.argv', ['gca_analyzer', '--interactive']):
             main_cli()
@@ -227,6 +233,7 @@ def test_main_no_data_arg_non_interactive(capsys):
     
     captured = capsys.readouterr()
     assert "--data argument is required in non-interactive mode" in captured.out
+    assert "--sample-data" in captured.out
 
 
 def test_cli_helper_functions(capsys):
@@ -247,4 +254,205 @@ def test_main_entry_point(sample_csv, output_dir, mock_llm):
     from gca_analyzer.__main__ import main_cli
     with patch('sys.argv', ['gca_analyzer', '--data', sample_csv, '--output', output_dir]):
         main_cli()
+    assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+
+
+def test_get_sample_data_path():
+    """Test get_sample_data_path function."""
+    path = get_sample_data_path()
+    assert 'sample_conversation.csv' in path
+    assert os.path.exists(path)
+
+
+def test_show_sample_data_preview(capsys):
+    """Test show_sample_data_preview function."""
+    show_sample_data_preview()
+    captured = capsys.readouterr()
+    assert "Sample Data Preview" in captured.out
+    assert "Records:" in captured.out
+    assert "Conversations:" in captured.out
+
+
+def test_show_sample_data_preview_missing_file(capsys):
+    """Test show_sample_data_preview when file is missing."""
+    with patch('gca_analyzer.main.get_sample_data_path') as mock_path:
+        mock_path.return_value = 'nonexistent.csv'
+        show_sample_data_preview()
+    captured = capsys.readouterr()
+    assert "Sample data file not found" in captured.out
+
+
+def test_main_with_sample_data_flag(output_dir, capsys):
+    """Test main function with --sample-data flag."""
+    # Create more appropriate mock data for the sample conversations
+    import pandas as pd
+    import numpy as np
+    
+    # Read the actual sample data to get the right size
+    sample_path = get_sample_data_path()
+    df = pd.read_csv(sample_path)
+    
+    with patch('gca_analyzer.analyzer.LLMTextProcessor') as mock_llm_class:
+        processor = mock_llm_class.return_value
+        # Create vectors that match the actual data size
+        vectors = pd.DataFrame(np.random.random((len(df), 2)), columns=['dim1', 'dim2'])
+        processor.doc2vector.return_value = vectors
+        
+        with patch('sys.argv', ['gca_analyzer', '--sample-data', '--output', output_dir]):
+            main_cli()
+    
+    # Check that it completed without fatal errors (might have processing errors but should finish)
+    captured = capsys.readouterr()
+    assert "Using built-in sample data" in captured.out
+
+
+def test_main_with_sample_data_preview_flag(capsys):
+    """Test main function with --sample-data --preview flags."""
+    with patch('sys.argv', ['gca_analyzer', '--sample-data', '--preview']):
+        main_cli()
+    captured = capsys.readouterr()
+    assert "Sample Data Preview" in captured.out
+
+
+def test_main_interactive_with_sample_data(output_dir, capsys):
+    """Test interactive mode choosing to use sample data."""
+    import pandas as pd
+    import numpy as np
+    
+    # Read the actual sample data to get the right size
+    sample_path = get_sample_data_path()
+    df = pd.read_csv(sample_path)
+    
+    with patch('gca_analyzer.analyzer.LLMTextProcessor') as mock_llm_class:
+        processor = mock_llm_class.return_value
+        # Create vectors that match the actual data size
+        vectors = pd.DataFrame(np.random.random((len(df), 2)), columns=['dim1', 'dim2'])
+        processor.doc2vector.return_value = vectors
+        
+        with patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
+            mock_confirm.side_effect = [True, True, False]  # Use sample data, continue with sample data, no advanced settings
+            
+            with patch('sys.argv', ['gca_analyzer', '--interactive']):
+                with patch('gca_analyzer.main.Prompt.ask') as mock_prompt:
+                    mock_prompt.return_value = output_dir  # output directory
+                    main_cli()
+    
+    captured = capsys.readouterr()
+    assert "Sample Data Preview" in captured.out
+
+
+def test_main_interactive_sample_data_cancelled(capsys):
+    """Test interactive mode with sample data but user cancels after preview."""
+    with patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
+        mock_confirm.side_effect = [True, False]  # Use sample data, but don't continue after preview
+        
+        with patch('sys.argv', ['gca_analyzer', '--interactive']):
+            main_cli()
+    
+    captured = capsys.readouterr()
+    assert "Sample Data Preview" in captured.out
+    assert "Configuration cancelled" in captured.out
+
+
+def test_main_with_sample_data_missing_file(capsys):
+    """Test main function with --sample-data when sample file is missing."""
+    with patch('gca_analyzer.main.get_sample_data_path') as mock_path:
+        mock_path.return_value = 'nonexistent.csv'
+        with patch('sys.argv', ['gca_analyzer', '--sample-data']):
+            main_cli()
+    captured = capsys.readouterr()
+    assert "Sample data file not found" in captured.out
+
+
+def test_main_with_sample_data_preview_missing_file(capsys):
+    """Test main function with --sample-data --preview when sample file is missing."""
+    with patch('gca_analyzer.main.get_sample_data_path') as mock_path:
+        mock_path.return_value = 'nonexistent.csv'
+        with patch('sys.argv', ['gca_analyzer', '--sample-data', '--preview']):
+            main_cli()
+    captured = capsys.readouterr()
+    assert "Sample data file not found" in captured.out
+
+
+def test_interactive_config_wizard_sample_data_missing(capsys):
+    """Test interactive config wizard when sample data file is missing."""
+    with patch('gca_analyzer.main.Confirm.ask') as mock_confirm:
+        mock_confirm.return_value = True  # Choose to use sample data
+        
+        with patch('gca_analyzer.main.get_sample_data_path') as mock_path:
+            mock_path.return_value = 'nonexistent.csv'
+            
+            with patch('sys.argv', ['gca_analyzer', '--interactive']):
+                main_cli()
+    
+    captured = capsys.readouterr()
+    assert "Sample data file not found" in captured.out
+    assert "Configuration cancelled" in captured.out
+
+
+def test_get_sample_data_path_fallback():
+    """Test get_sample_data_path fallback when importlib.resources fails."""
+    with patch('gca_analyzer.main.files') as mock_files:
+        mock_files.side_effect = Exception("importlib.resources failed")
+        path = get_sample_data_path()
+        assert 'sample_conversation.csv' in path
+        # Should still work via fallback
+
+
+def test_show_sample_data_preview_read_error(capsys):
+    """Test show_sample_data_preview when CSV reading fails."""
+    with patch('gca_analyzer.main.get_sample_data_path') as mock_path:
+        # Create a temp file that exists but isn't valid CSV
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            f.write("invalid,csv,content\n")
+            f.write("missing,columns\n")  # Wrong number of columns
+            temp_path = f.name
+        
+        mock_path.return_value = temp_path
+        
+        try:
+            show_sample_data_preview()
+        finally:
+            os.unlink(temp_path)  # Clean up
+    
+    captured = capsys.readouterr()
+    assert "Error reading sample data" in captured.out
+
+
+def test_validate_inputs_with_none_data(tmp_path):
+    """Test validate_inputs when args.data is None."""
+    import argparse
+    args = argparse.Namespace()
+    args.data = None
+    args.output = str(tmp_path)
+    
+    # Should pass validation when data is None (like when using sample data)
+    result = validate_inputs(args)
+    assert result is True
+
+
+def test_main_cli_with_args_parameter(sample_csv, output_dir, mock_llm):
+    """Test main_cli when called with args parameter directly."""
+    import argparse
+    args = argparse.Namespace()
+    args.data = sample_csv
+    args.output = output_dir
+    args.interactive = False
+    args.sample_data = False
+    args.best_window_indices = 0.3
+    args.act_participant_indices = 2
+    args.min_window_size = 2
+    args.max_window_size = None
+    args.model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    args.model_mirror = "https://modelscope.cn/models"
+    args.default_figsize = [10, 8]
+    args.heatmap_figsize = [10, 6]
+    args.console_level = "INFO"
+    args.log_file = None
+    args.file_level = "DEBUG"
+    args.log_rotation = "10 MB"
+    args.log_compression = "zip"
+    
+    main_cli(args)
     assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
