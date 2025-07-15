@@ -12,17 +12,11 @@ License: Apache 2.0
 import argparse
 import os
 import sys
+from importlib.resources import files
 from io import StringIO
 from typing import Optional, Union
 
 import pandas as pd
-
-try:
-    from importlib.resources import files
-except ImportError:
-    # Fallback for Python < 3.9
-    from importlib_resources import files
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
