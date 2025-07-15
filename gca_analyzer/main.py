@@ -14,13 +14,17 @@ import os
 import sys
 from io import StringIO
 from typing import Optional, Union
-import pkg_resources
 
 import pandas as pd
+try:
+    from importlib.resources import files
+except ImportError:
+    # Fallback for Python < 3.9
+    from importlib_resources import files
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress, TextColumn, BarColumn, TimeElapsedColumn
-from rich.prompt import Prompt, Confirm
+from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
 from rich.text import Text
 
@@ -42,11 +46,11 @@ console = Console()
 def get_sample_data_path() -> str:
     """Get the path to the built-in sample data file."""
     try:
-        # Try using pkg_resources first
-        return pkg_resources.resource_filename(
-            "gca_analyzer", "data/sample_conversation.csv"
-        )
-    except (pkg_resources.DistributionNotFound, pkg_resources.ResourceNotFound) as e:
+        # Try using importlib.resources first (modern approach)
+        package_files = files("gca_analyzer")
+        data_file = package_files / "data" / "sample_conversation.csv"
+        return str(data_file)
+    except Exception as e:
         # Fallback to relative path
         show_error(f"Error reading sample data: {str(e)}")
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -69,7 +73,8 @@ def show_sample_data_preview():
         missing_columns = required_columns - set(df.columns)
         if missing_columns:
             raise ValueError(
-                f"Missing required columns in the sample data: {', '.join(missing_columns)}"
+                f"Missing required columns in the sample data: "
+                f"{', '.join(missing_columns)}"
             )
         # Show sample data info
         console.print(
@@ -77,9 +82,12 @@ def show_sample_data_preview():
                 f"[bold cyan]📊 Sample Data Preview[/bold cyan]\n\n"
                 f"[green]✅ File:[/green] {sample_path}\n"
                 f"[green]✅ Records:[/green] {len(df)}\n"
-                f"[green]✅ Conversations:[/green] {len(df['conversation_id'].unique())}\n"
-                f"[green]✅ Participants:[/green] {len(df['person_id'].unique())}\n\n"
-                f"[dim]Conversation Types:[/dim] {', '.join(df['conversation_id'].unique())}",
+                f"[green]✅ Conversations:[/green] "
+                f"{len(df['conversation_id'].unique())}\n"
+                f"[green]✅ Participants:[/green] "
+                f"{len(df['person_id'].unique())}\n\n"
+                f"[dim]Conversation Types:[/dim] "
+                f"{', '.join(df['conversation_id'].unique())}",
                 title="Sample Data",
                 border_style="cyan",
             )

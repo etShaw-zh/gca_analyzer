@@ -391,9 +391,9 @@ def test_interactive_config_wizard_sample_data_missing(capsys):
 
 
 def test_get_sample_data_path_fallback():
-    """Test get_sample_data_path fallback when pkg_resources fails."""
-    with patch('gca_analyzer.main.pkg_resources.resource_filename') as mock_pkg:
-        mock_pkg.side_effect = Exception("pkg_resources failed")
+    """Test get_sample_data_path fallback when importlib.resources fails."""
+    with patch('gca_analyzer.main.files') as mock_files:
+        mock_files.side_effect = Exception("importlib.resources failed")
         path = get_sample_data_path()
         assert 'sample_conversation.csv' in path
         # Should still work via fallback
