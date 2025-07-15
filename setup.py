@@ -64,7 +64,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'gca_analyzer = gca_analyzer.__main__:main',
+            'gca_analyzer = gca_analyzer.__main__:main_cli',
         ],
     },
     include_package_data=True,

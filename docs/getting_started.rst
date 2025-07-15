@@ -21,41 +21,6 @@ Install GCA Analyzer using pip:
 
    pip install gca-analyzer
 
-Quick Start
-------------
-
-The fastest way to get started is using the built-in sample data:
-
-.. code-block:: bash
-
-   # Use built-in sample data
-   python -m gca_analyzer --sample-data
-
-   # Preview the sample data first
-   python -m gca_analyzer --sample-data --preview
-
-   # Interactive mode (recommended for beginners)
-   python -m gca_analyzer --interactive
-
-If you have your own data, you can use it instead:
-
-.. code-block:: bash
-
-   python -m gca_analyzer --data your_data.csv
-
-Python API Usage:
-
-.. code-block:: python
-
-   from gca_analyzer import GCAAnalyzer
-   
-   # Initialize the analyzer
-   analyzer = GCAAnalyzer()
-   
-   # Load and analyze data
-   metrics = analyzer.analyze_conversation('conversation_1', data)
-   print(metrics)
-
 Sample Data
 -----------
 
@@ -84,11 +49,54 @@ The input data should be a CSV file with the following columns:
 - ``text``: The actual message content
 - ``time``: Timestamp of the message
 
+Quick Start
+------------
+
+The fastest way to get started is using the built-in sample data:
+
+.. code-block:: bash
+
+   # Use built-in sample data
+   python -m gca_analyzer --sample-data
+
+   # Preview the sample data first
+   python -m gca_analyzer --sample-data --preview
+
+   # Interactive mode (recommended for beginners)
+   python -m gca_analyzer --interactive
+
+If you have your own data, you can use it instead:
+
+.. code-block:: bash
+
+   python -m gca_analyzer --data your_data.csv
+
+Python API Usage:
+
+.. code-block:: python
+
+   import pandas as pd
+   from gca_analyzer import GCAAnalyzer
+   
+   # Initialize the analyzer
+   analyzer = GCAAnalyzer()
+   
+   # Load and analyze data
+   data = pd.read_csv('your_data.csv')
+   # Analyze a specific conversation
+   for conversation_id in data['conversation_id'].unique():
+       metrics = analyzer.analyze_conversation(conversation_id, data)
+       print(f"Metrics for {conversation_id}: {metrics}")
+
 Configuration Options
 ----------------------
 
 Command line arguments:
 
+- ``--help``: Show help message and exit
+- ``--sample-data``: Use built-in sample data for quick testing
+- ``--preview``: Preview the sample data before analysis
+- ``--interactive``: Start interactive mode for guided analysis
 - ``--data``: Path to input data file (required)
 - ``--output``: Output directory for results (default: ``gca_results``)
 - ``--best-window-indices``: Window size optimization threshold (default: 0.3)
@@ -102,7 +110,7 @@ Command line arguments:
 Example Results
 ----------------
 
-After running the analysis, you'll get metrics including:
+After the analysis is complete, you will receive each person's values and descriptive statistics for the following metrics:
 
 - Participation patterns
 - Internal cohesion

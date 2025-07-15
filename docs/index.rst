@@ -54,6 +54,7 @@ Key Features
 -------------
 
 * **Multi-language Support**: Built-in support for multiple languages through LLM models
+* **Built-in Sample Data**: Includes ready-to-use sample conversations for immediate testing
 * **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
 * **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 * **Flexible Configuration**: Customizable parameters for different analysis needs

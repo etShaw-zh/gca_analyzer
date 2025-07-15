@@ -27,19 +27,19 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 
    From this matrix, we derive several participation metrics:
 
-   1. Raw Participation Rate (||Pa||):
+   1. Raw Participation Rate (||Pa||), formula 4:
 
    .. math::
 
       ||Pa|| = \sum_{t=1}^{n} M_{a,t}
 
-   2. Average Participation Rate (p̄a):
+   2. Average Participation Rate (p̄a), formula 5:
 
    .. math::
 
       \bar{p}_a = \frac{1}{n}||Pa||
 
-   3. Adjusted Participation Rate (P̂a):
+   3. Adjusted Participation Rate (P̂a), formula 9:
 
    .. math::
 
@@ -56,7 +56,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
 
    The interaction metrics are based on cross-cohesion analysis:
 
-   1. Cross-Cohesion Matrix (Ξ):
+   1. Cross-Cohesion Matrix (Ξ), formula 17:
 
    .. math::
 
@@ -67,19 +67,19 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
    - w is the optimal window size
    - S_{t-τ,t} is the semantic similarity between contributions at t-τ and t
 
-   2. Internal Cohesion (Ca):
+   2. Internal Cohesion (Ca), formula 18:
 
    .. math::
 
       C_a = \Xi_{aa}
 
-   3. Overall Responsivity (Ra):
+   3. Overall Responsivity (Ra), formula 19:
 
    .. math::
 
       R_a = \frac{1}{k-1}\sum_{b \neq a}\Xi_{ab}
 
-   4. Social Impact (Ia):
+   4. Social Impact (Ia), formula 20:
 
    .. math::
 
@@ -95,7 +95,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
    its semantic content can be decomposed into two parts: information that is already given in 
    previous discourse and new information being introduced.
 
-   1. Content Newness (n(ci)):
+   1. Content Newness (n(ci)), formula 25:
    
    First, we define the given subspace Gi for contribution i as the span of all previous document vectors:
 
@@ -147,7 +147,7 @@ The GCA Analyzer implements three categories of metrics to provide comprehensive
    
    where Pa is the set of all contributions by participant a.
 
-   2. Communication Density (Di):
+   2. Communication Density (Di), formula 27:
 
    .. math::
 

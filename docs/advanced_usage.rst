@@ -6,22 +6,47 @@ This guide covers advanced features and configurations of GCA Analyzer.
 Configuration Options
 -----------------------
 
-Window Size Optimization
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Language Model Configuration
+-----------------------------
 
-The analyzer automatically finds the optimal window size for analysis:
+.. note::
+   Ensure you have the appropriate language model credentials configured before using these features.
+
+1. Using Custom LLM Models:
 
 .. code-block:: python
 
-   analyzer = GCAAnalyzer()
+   from gca_analyzer import LLMTextProcessor
    
-   # Custom window parameters
-   window_size = analyzer.find_best_window_size(
-       data,
-       best_window_indices=0.3,
-       min_num=2,
-       max_num=10
+   processor = LLMTextProcessor(
+       model_name='your-model-name',
+       mirror_url='your-model-mirror'
    )
+   analyzer = GCAAnalyzer(llm_processor=processor)
+
+2. Configuring Analysis Parameters:
+
+.. code-block:: python
+
+   from gca_analyzer import Config, WindowConfig, ModelConfig, LoggerConfig
+   
+   config = Config(
+         window=WindowConfig(
+            best_window_indices = 0.3 # Percentage of participants to consider for best window
+            act_participant_indices = 2 # Number of contributions from participants considered as active participants
+            min_window_size = 2
+            max_window_size = None
+         ),
+         model=ModelConfig(
+              model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+              mirror_url="https://modelscope.cn/models"
+         ),
+         logger=LoggerConfig(
+              console_level='DEBUG',
+              log_file='gca_analyzer.log'
+         )
+   )
+   analyzer = GCAAnalyzer(config=config)
 
 Advanced Analysis Features
 ---------------------------
@@ -29,12 +54,7 @@ Advanced Analysis Features
 Participation Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Understanding participation values:
-
-- Values are adjusted based on group size
-- Negative values: contributions below equal-participation amount
-- Positive values: contributions above equal-participation amount
-- Zero: perfectly equal participation
+Analyze participation patterns:
 
 .. code-block:: python
 
@@ -66,43 +86,6 @@ Analyze content patterns:
    # Get content metrics
    content_metrics = metrics[['newness', 'comm_density']]
 
-Language Model Configuration
------------------------------
-
-.. note::
-   Ensure you have the appropriate language model credentials configured before using these features.
-
-1. Using Custom LLM Models:
-
-.. code-block:: python
-
-   from gca_analyzer import LLMTextProcessor
-   
-   processor = LLMTextProcessor(
-       model_name='your-model-name',
-       mirror_url='your-model-mirror'
-   )
-   analyzer = GCAAnalyzer(llm_processor=processor)
-
-2. Configuring Analysis Parameters:
-
-.. code-block:: python
-
-   from gca_analyzer import Config
-   
-   config = Config(
-       best_window_indices=0.2,
-       min_window_size=2,
-       max_window_size=8
-   )
-   analyzer = GCAAnalyzer(config=config)
-
-Performance Considerations
---------------------------
-
-* For large conversations (>1000 messages), consider batch processing
-* Memory usage scales with conversation size and window parameters
-* Use appropriate window sizes for optimal performance
 
 Visualization
 --------------
