@@ -1,5 +1,6 @@
 from .__version__ import __version__
 from .analyzer import GCAAnalyzer
+from .main import get_sample_data_path
 from .config import (Config, LoggerConfig, ModelConfig, VisualizationConfig,
                      WindowConfig, default_config)
 from .llm_processor import LLMTextProcessor
@@ -18,6 +19,7 @@ __all__ = [
     "LoggerConfig",
     "default_config",
     "normalize_metrics",
+    "get_sample_data_path",
     "logger",
     "__version__",
 ]

@@ -541,7 +541,8 @@ def analyze_conversations(analyzer, visualizer, df, args):
                 sys.stdout = StringIO()
 
                 # Analyze conversation
-                metrics_df = analyzer.analyze_conversation(conversation_id, df)
+                conv_df = df[df["conversation_id"] == conversation_id]
+                metrics_df = analyzer.analyze_conversation(conversation_id, conv_df)
                 metrics_df = metrics_df[metrics]
                 all_metrics[conversation_id] = metrics_df
 

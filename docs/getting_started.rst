@@ -3,6 +3,19 @@ Getting Started
 
 This guide will help you get started with GCA Analyzer quickly.
 
+New! Try it Online with Google Colab or ModelScope
+-----------------------------------------------------
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+   :target: https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing
+   :alt: Open in Colab
+
+.. image:: https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor
+   :target: https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb
+   :alt: Open in ModelScope
+For immediate hands-on experience, click the Colab or ModelScope badge above to run GCA Analyzer directly in your browser without any installation.
+
+--------------
+
 Prerequisites
 --------------
 

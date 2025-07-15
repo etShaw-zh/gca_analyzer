@@ -32,10 +32,10 @@ Language Model Configuration
    
    config = Config(
          window=WindowConfig(
-            best_window_indices = 0.3 # Percentage of participants to consider for best window
-            act_participant_indices = 2 # Number of contributions from participants considered as active participants
-            min_window_size = 2
-            max_window_size = None
+            best_window_indices = 0.3, # Percentage of participants to consider for best window
+            act_participant_indices = 2, # Number of contributions from participants considered as active participants
+            min_window_size = 2,
+            max_window_size = None,
          ),
          model=ModelConfig(
               model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",

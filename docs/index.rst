@@ -50,11 +50,20 @@ GCA Analyzer is a Python package for analyzing group communication dynamics usin
    :target: https://doi.org/10.5281/zenodo.14647250
    :alt: DOI
 
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+   :target: https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing
+   :alt: Open in Colab
+
+.. image:: https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor
+   :target: https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb
+   :alt: Open in ModelScope
+
 Key Features
 -------------
 
 * **Multi-language Support**: Built-in support for multiple languages through LLM models
 * **Built-in Sample Data**: Includes ready-to-use sample conversations for immediate testing
+* **Notebook Integration**: Jupyter examples for quick runs in Colab or ModelScope
 * **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
 * **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 * **Flexible Configuration**: Customizable parameters for different analysis needs
