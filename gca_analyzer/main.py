@@ -16,11 +16,13 @@ from io import StringIO
 from typing import Optional, Union
 
 import pandas as pd
+
 try:
     from importlib.resources import files
 except ImportError:
     # Fallback for Python < 3.9
     from importlib_resources import files
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
@@ -28,16 +30,9 @@ from rich.prompt import Confirm, Prompt
 from rich.table import Table
 from rich.text import Text
 
-from gca_analyzer import (
-    Config,
-    GCAAnalyzer,
-    GCAVisualizer,
-    LoggerConfig,
-    ModelConfig,
-    VisualizationConfig,
-    WindowConfig,
-    normalize_metrics,
-)
+from gca_analyzer import (Config, GCAAnalyzer, GCAVisualizer, LoggerConfig,
+                          ModelConfig, VisualizationConfig, WindowConfig,
+                          normalize_metrics)
 
 # Initialize rich console
 console = Console()
