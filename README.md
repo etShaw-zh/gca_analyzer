@@ -13,6 +13,8 @@ English | [简体中文](README_zh.md)
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer)](https://pepy.tech/projects/gca-analyzer)
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer/month)](https://pepy.tech/projects/gca-analyzer)
 [![DOI](https://zenodo.org/badge/915395583.svg)](https://doi.org/10.5281/zenodo.14647250)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing)
+[![Open in ModelScope](https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor)](https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb)
 
 ## Introduction
 
@@ -22,6 +24,7 @@ GCA Analyzer is a Python package for analyzing group communication dynamics usin
 
 - **Multi-language Support**: Built-in support for Chinese and other languages through LLM models
 - **Built-in Sample Data**: Includes ready-to-use sample conversations for immediate testing
+- **Notebook Integration**: Jupyter examples for quick runs in Google Colab
 - **Comprehensive Metrics**: Analyzes group interactions through multiple dimensions
 - **Automated Analysis**: Finds optimal analysis windows and generates detailed statistics
 - **Flexible Configuration**: Customizable parameters for different analysis needs
@@ -42,6 +45,12 @@ pip install -e .
 ```
 
 ### Basic Usage
+
+#### Try it Online with Google Colab
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing)
+
+For immediate hands-on experience, click the Colab badge above to run GCA Analyzer directly in your browser without any installation.
 
 #### Option 1: Use Built-in Sample Data (Recommended for First-time Users)
 
@@ -137,13 +146,16 @@ The analyzer provides interactive and informative visualizations:
 Results are saved as interactive HTML files in the specified output directory.
 
 ## Citation
+[![DOI](https://zenodo.org/badge/915395583.svg)](https://doi.org/10.5281/zenodo.14647250)
 
-If you use this tool in your research, please cite:
+If you use **GCA Analyzer** in your research, please cite it as follows:
 
 ```bibtex
-@software{gca_analyzer,
-  title = {GCA Analyzer: Group Communication Analysis Tool},
-  author = {Xiao, Jianjun},
-  year = {2025},
-  url = {https://github.com/etShaw-zh/gca_analyzer}
+@software{xiao2025gca,
+  author       = {Xiao, J.},
+  title        = {etShaw-zh/gca_analyzer: GCA analyzer: A python package for group communication analysis},
+  version      = {v0.4.5},
+  year         = {2025},
+  url          = {https://doi.org/10.5281/zenodo.15906956},
+  note         = {Computer software},
 }

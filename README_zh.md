@@ -13,6 +13,8 @@
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer)](https://pepy.tech/projects/gca-analyzer)
 [![PyPI Downloads](https://static.pepy.tech/badge/gca-analyzer/month)](https://pepy.tech/projects/gca-analyzer)
 [![DOI](https://zenodo.org/badge/915395583.svg)](https://doi.org/10.5281/zenodo.14647250)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11TC3wzCmP0r2axRUc1FuyWOBiZS1j-Qg?usp=sharing)
+[![在魔塔社区运行](https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor)](https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb)
 
 ## 介绍
 
@@ -21,7 +23,8 @@ GCA Analyzer 是一个使用 NLP 技术和定量指标分析群体对话动态�
 ## 特性
 
 - **多语言支持**：通过 LLM 模型内置支持中文和其他语言
-- **内置样本数据**：包含即用型样本对话，可立即体验分析功能
+- **内置样本数据**：包含即用型样本对话可立即体验分析功能
+- **笔记本集成**：提供 Jupyter 示例可在魔塔社区快速运行
 - **全面的指标**：通过多个维度分析群组互动
 - **自动化分析**：自动寻找最优分析窗口并生成详细统计
 - **灵活配置**：可根据不同分析需求自定义参数
@@ -42,6 +45,12 @@ pip install -e .
 ```
 
 ### 基本使用
+
+#### 在线体验 - 魔塔社区
+
+[![在魔塔社区运行](https://img.shields.io/badge/ModelScope-Run%20in%20Community-blue?logo=appveyor)](https://modelscope.cn/notebook/share/ipynb/9d562da5/base_usage.ipynb.ipynb)
+
+点击上方链接可以在魔塔社区直接运行 GCA Analyzer，无需安装即可体验完整功能。
 
 #### 方式一：使用内置样本数据（推荐首次使用）
 
@@ -137,14 +146,17 @@ GCA Analyzer 提供交互式和信息丰富的可视化：
 结果以交互式 HTML 文件的形式保存在指定的输出目录中。
 
 ## 引用
+[![DOI](https://zenodo.org/badge/915395583.svg)](https://doi.org/10.5281/zenodo.14647250)
 
 如果您在研究中使用了此工具，请引用：
 
 ```bibtex
-@software{gca_analyzer,
-  title = {GCA Analyzer: Group Communication Analysis Tool},
-  author = {Xiao, Jianjun},
-  year = {2025},
-  url = {https://github.com/etShaw-zh/gca_analyzer}
+@software{xiao2025gca,
+  author       = {Xiao, J.},
+  title        = {etShaw-zh/gca_analyzer: GCA analyzer: A python package for group communication analysis},
+  version      = {v0.4.5},
+  year         = {2025},
+  url          = {https://doi.org/10.5281/zenodo.15906956},
+  note         = {Computer software},
 }
 ```
