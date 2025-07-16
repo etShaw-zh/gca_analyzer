@@ -120,6 +120,6 @@ The standardized metrics provided by the package facilitate cross-study comparis
 
 # Acknowledgments
 
-The development of `GCA Analyzer` was supported by the Research Centre of Distance Education at Beijing Normal University. The package builds upon theoretical frameworks established by previous research in group communication analysis [@dowell2019group].
+The development of `GCA Analyzer` was supported by the Research Centre of Distance Education at Beijing Normal University and funded by the National Natural Science Foundation of China (NSFC) [Grant No. 71834002], as well as the Interdisciplinary Research Foundation for Doctoral Candidates of Beijing Normal University [Grant No. BNUXKJC2305]. The package builds upon theoretical frameworks established by previous research in group communication analysis [@dowell2019group]. 
 
 # References
