@@ -26,7 +26,7 @@ from rich.text import Text
 
 from gca_analyzer import (Config, GCAAnalyzer, GCAVisualizer, LoggerConfig,
                           ModelConfig, VisualizationConfig, WindowConfig,
-                          normalize_metrics)
+                          normalize_metrics, __version__)
 
 # Initialize rich console
 console = Console()
@@ -76,7 +76,10 @@ def show_sample_data_preview():
                 f"[green]✅ Participants:[/green] "
                 f"{len(df['person_id'].unique())}\n\n"
                 f"[dim]Conversation Types:[/dim] "
-                f"{', '.join(df['conversation_id'].unique())}",
+                f"{', '.join(df['conversation_id'].unique())}\n\n"
+                f"[yellow]⚠️ Data Source:[/yellow] Adapted from ENA Web Tool\n"
+                f"[yellow]📚 Citation Required:[/yellow] When using this data in research, please cite:\n"
+                f"[dim]Shaffer, D. W., Collier, W., & Ruis, A. R. (2016). A tutorial on epistemic network analysis. Journal of Learning Analytics, 3(3), 9-45.[/dim]",
                 title="Sample Data",
                 border_style="cyan",
             )
@@ -109,6 +112,9 @@ def show_welcome():
     welcome_text = Text()
     welcome_text.append("GCA Analyzer", style="bold blue")
     welcome_text.append(" - Group Communication Analysis Tool", style="dim")
+    # add version information
+    welcome_text.append(f" - Version: {__version__}", style="italic green")
+    welcome_text.append(" by Jianjun Xiao <et_shaw@126.com>", style="italic cyan")
 
     welcome_panel = Panel(
         welcome_text, title="🔍 Welcome", border_style="blue", padding=(1, 2)

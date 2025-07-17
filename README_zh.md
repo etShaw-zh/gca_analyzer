@@ -71,10 +71,16 @@ python -m gca_analyzer --interactive
 ```
 
 **样本数据内容：**
-- 3种不同的对话类型：team_meeting（团队会议）、design_review（设计评审）、brainstorm（头脑风暴）
-- 61条真实的对话消息
-- 10个不同的参与者
-- 多样化的沟通模式
+- 42个不同的工程项目对话，涵盖多个团队
+- 2,727条真实的对话消息
+- 48个不同的参与者，来自协作工程会话
+- 原始数据已过滤，仅包含≥30条消息的对话以确保有意义的分析
+
+**数据来源与引用：**
+此样本数据改编自书信网络分析（ENA）Web工具的示例数据集。在研究或发表中使用此样本数据时，请引用：
+
+- Shaffer, D. W., Collier, W., & Ruis, A. R. (2016). A tutorial on epistemic network analysis: Analyzing the structure of connections in cognitive, social, and interaction data. *Journal of Learning Analytics*, 3(3), 9-45.
+- ENA Web工具：https://app.epistemicnetwork.org/
 
 #### 方式二：使用您自己的数据
 
