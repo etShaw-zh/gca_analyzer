@@ -589,7 +589,7 @@ def analyze_conversations(analyzer, visualizer, df, args):
             progress.advance(analysis_task)
 
         total_metrics_df.round(3).to_csv(
-            os.path.join(args.output, f"01_total_metrics.csv")
+            os.path.join(args.output, "01_total_metrics.csv")
         )
 
     return total_metrics_df
