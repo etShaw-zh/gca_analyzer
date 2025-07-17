@@ -59,6 +59,11 @@ class GCAAnalyzer:
             model_name=self._config.model.model_name,
             mirror_url=self._config.model.mirror_url,
         )
+
+        from .logger import setup_logger
+
+        setup_logger(self._config)
+
         logger.info("Initializing GCA Analyzer")
         logger.info("Using LLM-based text processor for multi-language support")
         logger.debug("Components initialized successfully")
@@ -699,6 +704,7 @@ class GCAAnalyzer:
 
         # Find optimal window size
         w = self.find_best_window_size(current_data)
+        print(f"=== Analyzing conversation: {conversation_id} ===")
         print(f"=== Found valid window size: {w} ===")
         print(
             f"=== (best window threshold: {self._config.window.best_window_indices}) ==="
@@ -840,7 +846,7 @@ class GCAAnalyzer:
         # Save statistics to file if output directory provided
         if output_dir:  # pragma: no cover
             os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, "descriptive_statistics_gca.csv")
+            output_file = os.path.join(output_dir, "02_descriptive_statistics_gca.csv")
             stats.to_csv(output_file)
             print(f"=== Saved descriptive statistics to: {output_file} ===")
 

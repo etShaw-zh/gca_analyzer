@@ -222,7 +222,7 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
         args.console_level = Prompt.ask(
             "Console log level",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            default="INFO",
+            default="ERROR",
         )
         args.log_file = (
             Prompt.ask("Log file path (press Enter to skip)", default="") or None
@@ -240,7 +240,7 @@ def interactive_config_wizard() -> Optional[argparse.Namespace]:
         args.model_mirror = "https://modelscope.cn/models"
         args.default_figsize = [10, 8]
         args.heatmap_figsize = [10, 6]
-        args.console_level = "INFO"
+        args.console_level = "ERROR"
         args.log_file = None
         args.file_level = "DEBUG"
         args.log_rotation = "10 MB"
@@ -268,6 +268,7 @@ def validate_inputs(args) -> bool:
 
     try:
         os.makedirs(args.output, exist_ok=True)
+        os.makedirs(os.path.join(args.output, "plots"), exist_ok=True)
     except OSError as e:  # pragma: no cover
         errors.append(f"Failed to create output directory {args.output}: {str(e)}")
 
@@ -393,9 +394,9 @@ Examples:
     parser.add_argument(
         "--console-level",
         type=str,
-        default="INFO",
+        default="ERROR",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging level for console output (default: INFO)",
+        help="Logging level for console output (default: ERROR)",
     )
     parser.add_argument(
         "--file-level",
@@ -501,7 +502,7 @@ def create_config(args) -> Config:
 
 def analyze_conversations(analyzer, visualizer, df, args):
     """Analyze all conversations and generate results."""
-    metrics = [
+    features = [
         "participation",
         "responsivity",
         "internal_cohesion",
@@ -513,7 +514,7 @@ def analyze_conversations(analyzer, visualizer, df, args):
     conversation_ids = df["conversation_id"].unique()
     show_info(f"Found {len(conversation_ids)} conversations to analyze")
 
-    all_metrics = {}
+    total_metrics_df = pd.DataFrame()
 
     # Create progress bar for conversation analysis
     with Progress(
@@ -543,19 +544,20 @@ def analyze_conversations(analyzer, visualizer, df, args):
                 # Analyze conversation
                 conv_df = df[df["conversation_id"] == conversation_id]
                 metrics_df = analyzer.analyze_conversation(conversation_id, conv_df)
-                metrics_df = metrics_df[metrics]
-                all_metrics[conversation_id] = metrics_df
+                total_metrics_df = pd.concat(
+                    [total_metrics_df, metrics_df], ignore_index=False
+                )
 
                 # Generate visualizations
                 plot_metrics_distribution = visualizer.plot_metrics_distribution(
-                    normalize_metrics(metrics_df, metrics, inplace=False),
-                    metrics=metrics,
+                    normalize_metrics(metrics_df, features, inplace=False),
+                    metrics=features,
                     title="Distribution of Normalized Interaction Metrics",
                 )
 
                 plot_metrics_radar = visualizer.plot_metrics_radar(
-                    normalize_metrics(metrics_df, metrics, inplace=False),
-                    metrics=metrics,
+                    normalize_metrics(metrics_df, features, inplace=False),
+                    metrics=features,
                     title="Metrics Radar Chart",
                 )
 
@@ -565,14 +567,15 @@ def analyze_conversations(analyzer, visualizer, df, args):
                 # Save files
                 plot_metrics_distribution.write_html(
                     os.path.join(
-                        args.output, f"metrics_distribution_{conversation_id}.html"
+                        args.output,
+                        "plots",
+                        f"metrics_distribution_{conversation_id}.html",
                     )
                 )
                 plot_metrics_radar.write_html(
-                    os.path.join(args.output, f"metrics_radar_{conversation_id}.html")
-                )
-                metrics_df.to_csv(
-                    os.path.join(args.output, f"metrics_{conversation_id}.csv")
+                    os.path.join(
+                        args.output, "plots", f"metrics_radar_{conversation_id}.html"
+                    )
                 )
 
             except Exception as e:
@@ -585,10 +588,14 @@ def analyze_conversations(analyzer, visualizer, df, args):
 
             progress.advance(analysis_task)
 
-    return all_metrics
+        total_metrics_df.round(3).to_csv(
+            os.path.join(args.output, "01_total_metrics.csv")
+        )
+
+    return total_metrics_df
 
 
-def generate_statistics(analyzer, all_metrics, output_dir):
+def generate_statistics(analyzer, total_metrics_df, output_dir):
     """Generate descriptive statistics."""
     show_info("Generating descriptive statistics...")
     try:
@@ -596,6 +603,20 @@ def generate_statistics(analyzer, all_metrics, output_dir):
         old_stdout = sys.stdout
         sys.stdout = StringIO()
 
+        all_metrics = {}
+        features = [
+            "participation",
+            "responsivity",
+            "internal_cohesion",
+            "social_impact",
+            "newness",
+            "comm_density",
+        ]
+
+        for conv_id in total_metrics_df.conversation_id.unique():
+            all_metrics[conv_id] = total_metrics_df[
+                total_metrics_df.conversation_id == conv_id
+            ][features].round(3)
         analyzer.calculate_descriptive_statistics(all_metrics, output_dir)
 
         # Restore stdout
@@ -610,7 +631,6 @@ def generate_statistics(analyzer, all_metrics, output_dir):
 
         summary_table.add_row("Conversations Analyzed", str(len(all_metrics)))
         summary_table.add_row("Output Directory", output_dir)
-        summary_table.add_row("Files Generated", f"{len(all_metrics) * 3 + 1} files")
 
         console.print(summary_table)
 

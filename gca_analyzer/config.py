@@ -75,7 +75,7 @@ class LoggerConfig:
     """Configuration for logging settings.
 
     Attributes:
-        console_level (str): Logging level for console output. Defaults to "INFO".
+        console_level (str): Logging level for console output. Defaults to "ERROR".
         file_level (str): Logging level for file output. Defaults to "DEBUG".
         log_file (str | None): Path to log file. If None, only console output is used.
             Defaults to None.
@@ -85,7 +85,7 @@ class LoggerConfig:
         file_format (str): Format string for file output.
     """
 
-    console_level: str = "INFO"
+    console_level: str = "ERROR"
     file_level: str = "DEBUG"
     log_file: Optional[str] = None
     rotation: str = "10 MB"

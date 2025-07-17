@@ -64,7 +64,7 @@ def test_main_with_minimal_args(sample_csv, output_dir, mock_llm):
         # Check if output directory exists
         assert os.path.exists(output_dir)
         # Check if results file was created
-        assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+        assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 def test_main_with_custom_window_config(sample_csv, output_dir, mock_llm):
     """Test main function with custom window configuration."""
@@ -76,7 +76,7 @@ def test_main_with_custom_window_config(sample_csv, output_dir, mock_llm):
                           '--max-window-size', '5']):
         main_cli()
         assert os.path.exists(output_dir)
-        assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+        assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 def test_main_with_custom_model_config(sample_csv, output_dir, mock_llm):
     """Test main function with custom model configuration."""
@@ -87,7 +87,7 @@ def test_main_with_custom_model_config(sample_csv, output_dir, mock_llm):
                           '--model-mirror', 'https://huggingface.co/models']):
         main_cli()
         assert os.path.exists(output_dir)
-        assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+        assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 def test_main_with_custom_visualization_config(sample_csv, output_dir, mock_llm):
     """Test main function with custom visualization configuration."""
@@ -98,7 +98,7 @@ def test_main_with_custom_visualization_config(sample_csv, output_dir, mock_llm)
                           '--heatmap-figsize', '8', '6']):
         main_cli()
         assert os.path.exists(output_dir)
-        assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+        assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 def test_main_with_logging_config(sample_csv, output_dir, tmp_path, mock_llm):
     """Test main function with custom logging configuration."""
@@ -110,7 +110,7 @@ def test_main_with_logging_config(sample_csv, output_dir, tmp_path, mock_llm):
                           '--console-level', 'DEBUG']):
         main_cli()
         assert os.path.exists(log_file)
-        assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+        assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 def test_main_with_invalid_data_path(output_dir, mock_llm, capsys):
     """Test main function with invalid data file path."""
@@ -254,7 +254,7 @@ def test_main_entry_point(sample_csv, output_dir, mock_llm):
     from gca_analyzer.__main__ import main_cli
     with patch('sys.argv', ['gca_analyzer', '--data', sample_csv, '--output', output_dir]):
         main_cli()
-    assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+    assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
 
 
 def test_get_sample_data_path():
@@ -455,4 +455,4 @@ def test_main_cli_with_args_parameter(sample_csv, output_dir, mock_llm):
     args.log_compression = "zip"
     
     main_cli(args)
-    assert os.path.exists(os.path.join(output_dir, 'descriptive_statistics_gca.csv'))
+    assert os.path.exists(os.path.join(output_dir, '02_descriptive_statistics_gca.csv'))
