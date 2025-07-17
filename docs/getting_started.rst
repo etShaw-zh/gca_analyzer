@@ -42,10 +42,18 @@ Sample Data
 
 GCA Analyzer includes built-in sample data to help you get started quickly. The sample data contains:
 
-* **3 different conversations**: team_meeting, design_review, brainstorm
-* **61 realistic conversation messages**
-* **10 different participants** (Alice, Bob, Charlie, Diana, Emma, Kate, Lisa, Mike, Sarah, Tom)
-* **Diverse conversation patterns** showing different communication dynamics
+* **42 different engineering project conversations** across multiple teams
+* **2,727 authentic conversation messages**
+* **48 different participants** from collaborative engineering sessions
+* **Original data filtered** to include only conversations with ≥30 messages for meaningful analysis
+
+**Data Source & Citation:**
+
+This sample data is adapted from the Epistemic Network Analysis (ENA) Web Tool example dataset. 
+When using this sample data in research or publications, please cite:
+
+* Shaffer, D. W., Collier, W., & Ruis, A. R. (2016). A tutorial on epistemic network analysis: Analyzing the structure of connections in cognitive, social, and interaction data. *Journal of Learning Analytics*, 3(3), 9-45.
+* ENA Web Tool: https://app.epistemicnetwork.org/
 
 To preview the sample data:
 

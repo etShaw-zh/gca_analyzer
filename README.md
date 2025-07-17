@@ -71,10 +71,16 @@ python -m gca_analyzer --interactive
 ```
 
 **Sample Data Contents:**
-- 3 different conversation types: team_meeting, design_review, brainstorm
-- 61 realistic conversation messages
-- 10 different participants
-- Diverse communication patterns
+- 42 different engineering project conversations across multiple teams
+- 2,727 authentic conversation messages  
+- 48 different participants from collaborative engineering sessions
+- Original data filtered to include only conversations with ≥30 messages for meaningful analysis
+
+**Data Source & Citation:**
+This sample data is adapted from the Epistemic Network Analysis (ENA) Web Tool example dataset. When using this sample data in research or publications, please cite:
+
+- Shaffer, D. W., Collier, W., & Ruis, A. R. (2016). A tutorial on epistemic network analysis: Analyzing the structure of connections in cognitive, social, and interaction data. *Journal of Learning Analytics*, 3(3), 9-45.
+- ENA Web Tool: https://app.epistemicnetwork.org/
 
 #### Option 2: Use Your Own Data
 

@@ -74,7 +74,7 @@ The package implements the six core GCA measures originally developed and valida
 
 These measures utilize advanced computational linguistic techniques, including semantic similarity analysis enhanced with transformer-based models, to automatically detect emergent social roles in collaborative discussions. The implementation has been validated across multiple contexts and successfully integrated with machine learning approaches for enhanced role recognition [@wang2025role].
 
-Additionally, the package includes built-in sample data for immediate testing, interactive Jupyter notebook examples, and comprehensive documentation with API references.
+Additionally, the package includes built-in sample data (adapted from Epistemic Network Analysis example datasets [@shaffer2016tutorial]) for immediate testing, interactive Jupyter notebook examples, and comprehensive documentation with API references.
 
 # Usage Example
 
